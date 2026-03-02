@@ -5,39 +5,100 @@
 
 // Dark Mode Toggle
 function toggleDarkMode() {
-    const body = document.body;
+    const html = document.documentElement;
     const icon = document.querySelector('#darkModeToggle i');
     
-    body.classList.toggle('dark-mode');
-    
-    if (body.classList.contains('dark-mode')) {
-        icon.classList.remove('bi-moon');
-        icon.classList.add('bi-sun');
-        localStorage.setItem('darkMode', 'enabled');
-    } else {
+    if (html.getAttribute('data-bs-theme') === 'dark') {
+        html.setAttribute('data-bs-theme', 'light');
         icon.classList.remove('bi-sun');
         icon.classList.add('bi-moon');
-        localStorage.setItem('darkMode', 'disabled');
+        localStorage.setItem('darkMode', 'light');
+    } else {
+        html.setAttribute('data-bs-theme', 'dark');
+        icon.classList.remove('bi-moon');
+        icon.classList.add('bi-sun');
+        localStorage.setItem('darkMode', 'dark');
     }
 }
 
-// Check for saved dark mode preference
+// Check for saved dark mode preference on load
 document.addEventListener('DOMContentLoaded', function() {
     const darkModeToggle = document.getElementById('darkModeToggle');
+    const savedTheme = localStorage.getItem('darkMode');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        if (darkModeToggle) {
+            const icon = darkModeToggle.querySelector('i');
+            if (savedTheme === 'dark') {
+                icon.classList.remove('bi-moon');
+                icon.classList.add('bi-sun');
+            }
+        }
+    }
     if (darkModeToggle) {
         darkModeToggle.addEventListener('click', toggleDarkMode);
     }
     
-    // Apply saved preference
-    if (localStorage.getItem('darkMode') === 'enabled') {
-        document.body.classList.add('dark-mode');
-        const icon = document.querySelector('#darkModeToggle i');
-        if (icon) {
-            icon.classList.remove('bi-moon');
-            icon.classList.add('bi-sun');
-        }
-    }
+    // Auto-hide alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }, 5000);
+    });
 });
+
+// URL Validation
+function validateURL(url) {
+    const pattern = new RegExp(
+        '^(https?:\\/\\/)?' + '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + '((\\d{1,3}\\.){3}\\d{1,3}))' + '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + '(\\?[;&a-z\\d%_.~+=-]*)?' + '(\\#[-a-z\\d_]*)?$', 'i'
+    );
+    return pattern.test(url);
+}
+
+// Copy to Clipboard
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-secondary');
+        setTimeout(function() {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Failed to copy: ', err);
+    });
+}
+
+// Form submission with loading state
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn && !submitBtn.disabled) {
+                submitBtn.disabled = true;
+                submitBtn.dataset.originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Loading...';
+            }
+        });
+    });
+});
+
+// Password strength checker
+function checkPasswordStrength(password) {
+    let strength = 0;
+    if (password.length >= 8) strength += 1;
+    if (password.match(/[a-z]+/)) strength += 1;
+    if (password.match(/[A-Z]+/)) strength += 1;
+    if (password.match(/[0-9]+/)) strength += 1;
+    if (password.match(/[$@#&!]+/)) strength += 1;
+    return strength;
+}
 
 // URL Validation
 function validateURL(url) {
