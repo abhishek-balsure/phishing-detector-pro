@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}About - ShieldGuard Pro{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-section" style="padding: 4rem 0;">
+    <div class="container position-relative text-center">
+        <span class="hero-badge mb-3"><span class="badge-glow"><i class="bi bi-info-circle"></i> About Us</span></span>
+        <h1 class="hero-title" style="font-size: 2.5rem;">About ShieldGuard Pro</h1>
+        <p class="hero-subtitle">An AI-powered phishing detection system built to keep the internet safer</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <!-- Mission -->
+    <div class="row g-5 mb-5 align-items-center">
+        <div class="col-lg-6 fade-in-up">
+            <span class="section-badge"><i class="bi bi-bullseye"></i> Our Mission</span>
+            <h2 class="display-6 fw-bold mt-3">Fighting Phishing with AI</h2>
+            <p class="lead text-muted">
+                Phishing attacks are the #1 cyber threat, responsible for over 90% of data breaches worldwide.
+                ShieldGuard Pro combines machine learning with real-time threat intelligence to provide
+                accessible, accurate phishing detection for everyone.
+            </p>
+            <div class="row g-3 mt-3">
+                <div class="col-6">
+                    <div class="about-stat-card">
+                        <div class="fw-bold fs-3 gradient-text">95%+</div>
+                        <small class="text-muted">Detection Accuracy</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="about-stat-card">
+                        <div class="fw-bold fs-3 gradient-text">25+</div>
+                        <small class="text-muted">URL Features Analyzed</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="about-stat-card">
+                        <div class="fw-bold fs-3 gradient-text">50K+</div>
+                        <small class="text-muted">Training URLs</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="about-stat-card">
+                        <div class="fw-bold fs-3 gradient-text">4</div>
+                        <small class="text-muted">Scanning Modes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 fade-in-up" style="animation-delay: 0.15s">
+            <div class="card p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-cpu text-primary"></i> How Our ML Model Works</h5>
+                <div class="about-pipeline">
+                    <div class="pipeline-step">
+                        <div class="ps-num">1</div>
+                        <div>
+                            <strong>Feature Extraction</strong>
+                            <p class="small text-muted mb-0">We extract 25+ features from the URL string including
+                                length, entropy, suspicious TLDs, brand impersonation, and more.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="ps-num">2</div>
+                        <div>
+                            <strong>Random Forest Classification</strong>
+                            <p class="small text-muted mb-0">A trained ensemble of 100 decision trees votes on whether
+                                the URL is phishing or legitimate.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="ps-num">3</div>
+                        <div>
+                            <strong>Threat Intelligence</strong>
+                            <p class="small text-muted mb-0">We cross-validate with URLhaus and PhishTank databases for
+                                additional confidence.</p>
+                        </div>
+                    </div>
+                    <div class="pipeline-step">
+                        <div class="ps-num">4</div>
+                        <div>
+                            <strong>Result & Score</strong>
+                            <p class="small text-muted mb-0">You get a result with confidence score, feature breakdown,
+                                and threat intelligence data.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="text-center mb-5">
+        <span class="section-badge"><i class="bi bi-tools"></i> Technology</span>
+        <h2 class="display-6 fw-bold mt-3 mb-4">Built With Modern Tech</h2>
+    </div>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4 col-6 fade-in-up">
+            <div class="tech-card text-center">
+                <i class="bi bi-filetype-py display-4 text-primary"></i>
+                <h6 class="fw-bold mt-2">Python</h6>
+                <small class="text-muted">Backend Language</small>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 fade-in-up" style="animation-delay: 0.05s">
+            <div class="tech-card text-center">
+                <i class="bi bi-box display-4 text-success"></i>
+                <h6 class="fw-bold mt-2">Flask</h6>
+                <small class="text-muted">Web Framework</small>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 fade-in-up" style="animation-delay: 0.1s">
+            <div class="tech-card text-center">
+                <i class="bi bi-cpu display-4 text-warning"></i>
+                <h6 class="fw-bold mt-2">scikit-learn</h6>
+                <small class="text-muted">Machine Learning</small>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 fade-in-up" style="animation-delay: 0.15s">
+            <div class="tech-card text-center">
+                <i class="bi bi-bootstrap display-4 text-info"></i>
+                <h6 class="fw-bold mt-2">Bootstrap 5</h6>
+                <small class="text-muted">UI Framework</small>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 fade-in-up" style="animation-delay: 0.2s">
+            <div class="tech-card text-center">
+                <i class="bi bi-database display-4 text-danger"></i>
+                <h6 class="fw-bold mt-2">SQLite</h6>
+                <small class="text-muted">Database</small>
+            </div>
+        </div>
+        <div class="col-md-4 col-6 fade-in-up" style="animation-delay: 0.25s">
+            <div class="tech-card text-center">
+                <i class="bi bi-bar-chart-line display-4" style="color: var(--secondary-color)"></i>
+                <h6 class="fw-bold mt-2">Chart.js</h6>
+                <small class="text-muted">Visualizations</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Features -->
+    <div class="text-center mb-4">
+        <span class="section-badge"><i class="bi bi-star"></i> Features</span>
+        <h2 class="display-6 fw-bold mt-3 mb-4">What Makes Us Different</h2>
+    </div>
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 fade-in-up">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold"><i class="bi bi-shield-check text-success"></i> Real ML Model</h5>
+                <p class="text-muted mb-0">Not just an API call — we built a complete ML pipeline from scratch: data
+                    collection → feature extraction → training → deployment.</p>
+            </div>
+        </div>
+        <div class="col-md-6 fade-in-up" style="animation-delay: 0.1s">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold"><i class="bi bi-collection text-primary"></i> Multi-Modal Scanning</h5>
+                <p class="text-muted mb-0">4 scanning modes — URL, Email, QR Code, and Batch. Most tools only support
+                    single URL checks.</p>
+            </div>
+        </div>
+        <div class="col-md-6 fade-in-up" style="animation-delay: 0.15s">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold"><i class="bi bi-globe text-warning"></i> Free Threat Intel</h5>
+                <p class="text-muted mb-0">Cross-validates with URLhaus and PhishTank databases — completely free, no
+                    API keys or payments required.</p>
+            </div>
+        </div>
+        <div class="col-md-6 fade-in-up" style="animation-delay: 0.2s">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold"><i class="bi bi-code-square text-info"></i> REST API</h5>
+                <p class="text-muted mb-0">Full API with rate limiting for programmatic access. Integrate phishing
+                    detection into your own tools.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

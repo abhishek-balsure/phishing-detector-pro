@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Help & FAQ - ShieldGuard Pro{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="hero-section" style="padding: 4rem 0;">
+    <div class="container position-relative text-center">
+        <span class="hero-badge mb-3"><span class="badge-glow"><i class="bi bi-question-circle"></i> Help
+                Center</span></span>
+        <h1 class="hero-title" style="font-size: 2.5rem;">Help & FAQ</h1>
+        <p class="hero-subtitle">Everything you need to know about using ShieldGuard Pro</p>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 90px;">
+                <div class="card-header fw-bold">
+                    <i class="bi bi-list-ul"></i> Quick Navigation
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="#getting-started" class="list-group-item list-group-item-action"><i
+                                class="bi bi-play-circle me-2"></i>Getting Started</a>
+                        <a href="#scanning" class="list-group-item list-group-item-action"><i
+                                class="bi bi-search me-2"></i>Scanning URLs</a>
+                        <a href="#email-qr" class="list-group-item list-group-item-action"><i
+                                class="bi bi-envelope me-2"></i>Email & QR Scanning</a>
+                        <a href="#results" class="list-group-item list-group-item-action"><i
+                                class="bi bi-bar-chart me-2"></i>Understanding Results</a>
+                        <a href="#api" class="list-group-item list-group-item-action"><i
+                                class="bi bi-code-square me-2"></i>Using the API</a>
+                        <a href="#faq" class="list-group-item list-group-item-action"><i
+                                class="bi bi-chat-dots me-2"></i>FAQ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="col-lg-8">
+            <!-- Getting Started -->
+            <section id="getting-started" class="mb-5 fade-in-up">
+                <h2 class="fw-bold mb-4"><i class="bi bi-play-circle text-primary"></i> Getting Started</h2>
+                <div class="card p-4 mb-3">
+                    <h5 class="fw-bold">1. Create an Account</h5>
+                    <p class="text-muted">Sign up for a free account to access all scanning features, save history, and
+                        export reports.</p>
+                </div>
+                <div class="card p-4 mb-3">
+                    <h5 class="fw-bold">2. Choose Your Scanning Method</h5>
+                    <p class="text-muted mb-2">We offer four ways to check for phishing:</p>
+                    <ul class="text-muted">
+                        <li><strong>URL Scanner</strong> — Paste a single URL for instant analysis</li>
+                        <li><strong>Email Scanner</strong> — Paste email content to extract and check all URLs</li>
+                        <li><strong>QR Scanner</strong> — Upload a QR code image to decode and verify the URL</li>
+                        <li><strong>Batch Check</strong> — Upload a CSV/TXT file with up to 100 URLs</li>
+                    </ul>
+                </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold">3. Review Results</h5>
+                    <p class="text-muted mb-0">Get an instant verdict with confidence score, feature analysis chart, and
+                        threat intelligence from multiple sources.</p>
+                </div>
+            </section>
+
+            <!-- Scanning -->
+            <section id="scanning" class="mb-5 fade-in-up">
+                <h2 class="fw-bold mb-4"><i class="bi bi-search text-primary"></i> Scanning URLs</h2>
+                <div class="card p-4">
+                    <h5 class="fw-bold">How to scan a URL:</h5>
+                    <ol class="text-muted">
+                        <li>Go to <strong>Scan Tools → Single URL</strong> in the navigation</li>
+                        <li>Paste the full URL (must start with <code>http://</code> or <code>https://</code>)</li>
+                        <li>Click <strong>"Analyze URL"</strong></li>
+                        <li>Review the results, including ML prediction and threat intelligence</li>
+                    </ol>
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="bi bi-lightbulb-fill me-1"></i>
+                        <strong>Tip:</strong> You can also use the Quick Check on the homepage without logging in!
+                    </div>
+                </div>
+            </section>
+
+            <!-- Email & QR -->
+            <section id="email-qr" class="mb-5 fade-in-up">
+                <h2 class="fw-bold mb-4"><i class="bi bi-envelope text-primary"></i> Email & QR Scanning</h2>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card p-4 h-100">
+                            <h5 class="fw-bold"><i class="bi bi-envelope-open text-warning"></i> Email Scanner</h5>
+                            <p class="text-muted small">Paste the full email content including headers, body, and any
+                                links. ShieldGuard Pro will automatically extract all URLs and check each one.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card p-4 h-100">
+                            <h5 class="fw-bold"><i class="bi bi-qr-code-scan text-info"></i> QR Scanner</h5>
+                            <p class="text-muted small">Upload an image containing a QR code. We'll decode it, extract
+                                the URL, and check if it's safe. Supports PNG, JPG, and GIF formats.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Understanding Results -->
+            <section id="results" class="mb-5 fade-in-up">
+                <h2 class="fw-bold mb-4"><i class="bi bi-bar-chart text-primary"></i> Understanding Results</h2>
+                <div class="card p-4">
+                    <h5 class="fw-bold">What do the results mean?</h5>
+                    <div class="table-responsive mt-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Indicator</th>
+                                    <th>Meaning</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge bg-success">Safe</span></td>
+                                    <td>URL appears legitimate based on ML analysis</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-danger">Phishing</span></td>
+                                    <td>URL shows phishing indicators — avoid entering personal info</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Confidence %</strong></td>
+                                    <td>How certain the ML model is about its prediction (higher = more certain)</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-success">Clean</span> (Threat Intel)</td>
+                                    <td>URL not found in known malware/phishing databases</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-danger">Found</span> (Threat Intel)</td>
+                                    <td>URL is listed in a known malware/phishing database</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API -->
+            <section id="api" class="mb-5 fade-in-up">
+                <h2 class="fw-bold mb-4"><i class="bi bi-code-square text-primary"></i> Using the API</h2>
+                <div class="card p-4">
+                    <p class="text-muted">ShieldGuard Pro provides a REST API for programmatic access. Check the <a
+                            href="{{ url_for('api_docs') }}">API Documentation</a> for details.</p>
+                    <pre class="bg-dark text-light p-3 rounded"><code>POST /api/check_url
+Content-Type: application/json
+
+{
+  "url": "https://example.com",
+  "api_key": "your-api-key"
+}</code></pre>
+                </div>
+            </section>
+
+            <!-- FAQ -->
+            <section id="faq" class="mb-5 fade-in-up">
+                <h2 class="fw-bold mb-4"><i class="bi bi-chat-dots text-primary"></i> Frequently Asked Questions</h2>
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq1">
+                                How accurate is ShieldGuard Pro?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Our Random Forest model achieves 95%+ accuracy on our test dataset with 5-fold
+                                cross-validation. We also cross-validate with URLhaus and PhishTank for additional
+                                confidence.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq2">
+                                Is it free to use?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Yes! ShieldGuard Pro is completely free. All features including URL scanning, email
+                                scanning, QR scanning, and batch checking are available at no cost.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq3">
+                                What features does the ML model analyze?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                We analyze 25+ URL-based features including URL length, domain entropy, HTTPS presence,
+                                IP address usage, suspicious TLDs, brand impersonation in subdomains, URL shortener
+                                detection, and more.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq4">
+                                Can it detect all phishing URLs?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                No system can detect 100% of phishing URLs. Our model works on URL structure features
+                                and is effective against common phishing patterns. Sophisticated attacks that closely
+                                mimic legitimate URLs may require additional verification.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#faq5">
+                                Is my data private?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-muted">
+                                Scanned URLs are stored in your scan history (visible only to you) for convenience. We
+                                use secure password hashing and session management. URLs are also checked against
+                                external threat databases (URLhaus, PhishTank) according to their privacy policies.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

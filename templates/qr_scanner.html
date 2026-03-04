@@ -4,59 +4,209 @@
 
 {% block extra_css %}
 <style>
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #00d4ff;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    outline: none;
+    color: white;
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
 .qr-upload-area {
-    border: 3px dashed #6c757d;
-    border-radius: 15px;
-    padding: 40px;
+    border: 3px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 50px;
     text-align: center;
-    background: #f8f9fa;
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
+
 .qr-upload-area:hover {
-    border-color: #0d6efd;
-    background: #e7f1ff;
+    border-color: #00d4ff;
+    background: rgba(0, 212, 255, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 212, 255, 0.2);
 }
+
 .qr-upload-area.dragover {
-    border-color: #0d6efd;
-    background: #e7f1ff;
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.1);
     transform: scale(1.02);
 }
-.qr-result-card {
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
+.qr-upload-area .icon-wrapper {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #00d4ff, #0099cc);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
 }
-.qr-data-box {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 15px;
-    word-break: break-all;
-    font-family: 'Courier New', monospace;
-    font-size: 0.9rem;
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+    50% { transform: scale(1.05); box-shadow: 0 0 50px rgba(0, 212, 255, 0.8); }
 }
-.status-badge {
+
+.scan-btn {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 15px 40px;
     font-size: 1.1rem;
-    padding: 10px 20px;
-    border-radius: 25px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4);
 }
+
+.scan-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 212, 255, 0.6);
+}
+
+.scan-btn:disabled {
+    background: linear-gradient(135deg, #666 0%, #444 100%);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .qr-preview-img {
     max-height: 250px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.result-phishing {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2) 0%, rgba(220, 53, 69, 0.1) 100%);
+    border: 2px solid rgba(220, 53, 69, 0.5);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.result-safe {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.2) 0%, rgba(25, 135, 84, 0.1) 100%);
+    border: 2px solid rgba(25, 135, 84, 0.5);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.qr-data-box {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    word-break: break-all;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    color: #00d4ff;
+}
+
+.floating-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(0, 212, 255, 0.5);
+    border-radius: 50%;
+    animation: float 15s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+}
+
+.glow-text {
+    background: linear-gradient(135deg, #00d4ff, #00ff88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.badge-custom {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 0.85rem;
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<!-- Floating Particles Background -->
+<div class="floating-particles">
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 25%; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 40%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 55%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 8s;"></div>
+    <div class="particle" style="left: 85%; animation-delay: 1s;"></div>
+</div>
+
+<div class="container py-5">
     <!-- Header Section -->
-    <div class="row mb-4">
+    <div class="row mb-5">
         <div class="col-12 text-center">
-            <h1 class="display-5 fw-bold text-info">
-                <i class="bi bi-qr-code-scan"></i> QR Code Scanner
+            <div class="glass-card d-inline-block p-3 mb-3">
+                <i class="bi bi-qr-code-scan display-4 glow-text"></i>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">
+                <span class="glow-text">QR Code Scanner</span>
             </h1>
-            <p class="lead text-muted">Decode QR codes and verify embedded URLs for safety</p>
+            <p class="lead text-white-50">Decode QR codes and verify embedded URLs for safety</p>
+            <div class="d-flex justify-content-center gap-3 mt-3">
+                <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> AI-Powered</span>
+                <span class="badge bg-info"><i class="bi bi-lightning me-1"></i> Instant</span>
+            </div>
         </div>
     </div>
 
@@ -64,57 +214,55 @@
         <div class="col-lg-8">
             <!-- Upload Section -->
             {% if not result %}
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient-info text-white py-3" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
-                    <h4 class="mb-0">
-                        <i class="bi bi-upload"></i> Upload QR Code
-                    </h4>
-                </div>
-                <div class="card-body p-4">
+            <div class="glass-card p-1">
+                <div class="glass-card p-4">
                     <form method="POST" action="{{ url_for('qr_scanner') }}" enctype="multipart/form-data" id="qrForm">
                         <div class="qr-upload-area mb-4" id="dropZone">
-                            <i class="bi bi-qr-code display-1 text-muted mb-3"></i>
-                            <h5>Drag & Drop QR Code Image</h5>
-                            <p class="text-muted mb-3">or click to browse</p>
+                            <div class="icon-wrapper">
+                                <i class="bi bi-qr-code display-4 text-white"></i>
+                            </div>
+                            <h4 class="text-white mb-2">Drag & Drop QR Code</h4>
+                            <p class="text-white-50 mb-3">or click to browse</p>
                             <input type="file" class="form-control d-none" id="qr_image" 
                                    name="qr_image" accept="image/*" required>
-                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('qr_image').click()">
-                                <i class="bi bi-folder-open"></i> Choose File
+                            <button type="button" class="scan-btn" onclick="document.getElementById('qr_image').click()">
+                                <i class="bi bi-folder-open me-2"></i>Choose File
                             </button>
                         </div>
                         
                         <!-- Image Preview -->
                         <div class="text-center mb-4" id="imagePreviewContainer" style="display: none;">
-                            <h6 class="text-muted mb-3">Preview:</h6>
                             <img id="imagePreview" src="" alt="QR Code Preview" class="qr-preview-img">
                         </div>
                         
-                        <button type="submit" class="btn btn-info btn-lg w-100" id="scanBtn" disabled>
-                            <i class="bi bi-qr-code-scan"></i> Scan QR Code
+                        <button type="submit" class="scan-btn w-100" id="scanBtn" disabled>
+                            <i class="bi bi-qr-code-scan me-2"></i>Scan QR Code
                         </button>
                     </form>
 
                     <!-- Security Notice -->
-                    <div class="alert alert-warning mt-4 border-0" style="background: #fff3cd;">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-shield-exclamation"></i> Security Notice
-                        </h6>
-                        <p class="mb-0 small">
-                            QR codes can contain malicious URLs. Always verify the destination before visiting. 
-                            Cybercriminals often use QR codes in phishing campaigns, parking payment scams, and fake login pages.
-                        </p>
+                    <div class="alert alert-warning mt-4 border-0" style="background: rgba(255, 193, 7, 0.2); backdrop-filter: blur(10px);">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-shield-exclamation text-warning display-6 me-3"></i>
+                            <div>
+                                <h6 class="text-white mb-1">Security Notice</h6>
+                                <p class="text-white-50 small mb-0">
+                                    QR codes can contain malicious URLs. Always verify before visiting.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Supported Formats -->
                     <div class="mt-4">
-                        <h6 class="text-muted mb-2"><i class="bi bi-info-circle"></i> Supported Formats</h6>
+                        <h6 class="text-white-50 mb-3"><i class="bi bi-info-circle me-2"></i>Supported Formats</h6>
                         <div class="d-flex gap-2 flex-wrap">
-                            <span class="badge bg-secondary">PNG</span>
-                            <span class="badge bg-secondary">JPG</span>
-                            <span class="badge bg-secondary">JPEG</span>
-                            <span class="badge bg-secondary">GIF</span>
-                            <span class="badge bg-secondary">BMP</span>
-                            <span class="badge bg-secondary">WEBP</span>
+                            <span class="badge-custom">PNG</span>
+                            <span class="badge-custom">JPG</span>
+                            <span class="badge-custom">JPEG</span>
+                            <span class="badge-custom">GIF</span>
+                            <span class="badge-custom">BMP</span>
+                            <span class="badge-custom">WEBP</span>
                         </div>
                     </div>
                 </div>

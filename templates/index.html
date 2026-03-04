@@ -1,117 +1,92 @@
 {% extends "base.html" %}
 
-{% block title %}ShieldGuard Pro - Premium Phishing Protection{% endblock %}
-
-{% block extra_css %}
-<style>
-.hero-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 80px 0;
-    margin-bottom: 0;
-}
-.hero-title {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 1.5rem;
-}
-.hero-subtitle {
-    font-size: 1.25rem;
-    opacity: 0.95;
-    margin-bottom: 2rem;
-}
-.quick-check-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-}
-.feature-icon {
-    font-size: 3rem;
-    color: #667eea;
-    margin-bottom: 1rem;
-}
-.feature-card {
-    border: none;
-    border-radius: 15px;
-    padding: 2rem;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-    height: 100%;
-}
-.feature-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-}
-.stat-number {
-    font-size: 3rem;
-    font-weight: 800;
-    color: #667eea;
-}
-.stat-label {
-    font-size: 1.1rem;
-    color: #6c757d;
-    font-weight: 500;
-}
-.cta-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-</style>
-{% endblock %}
+{% block title %}ShieldGuard Pro - AI-Powered Phishing Protection{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">
-    <div class="container">
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="container position-relative">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-5 mb-lg-0">
-                <h1 class="hero-title">Premium Phishing Protection</h1>
+                <div class="hero-badge mb-3">
+                    <span class="badge-glow"><i class="bi bi-cpu"></i> AI-Powered Protection</span>
+                </div>
+                <h1 class="hero-title">
+                    Stop Phishing<br>
+                    <span class="gradient-text">Before It Stops You</span>
+                </h1>
                 <p class="hero-subtitle">
-                    ShieldGuard Pro uses advanced AI and machine learning to detect phishing attacks. 
-                    Analyze URLs, scan emails, and decode QR codes instantly with 95%+ accuracy.
+                    ShieldGuard Pro uses advanced Machine Learning with 25+ detection features
+                    to identify phishing URLs, scan emails, and decode QR codes — all in real-time
+                    with <strong>95%+ accuracy</strong>.
                 </p>
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="{{ url_for('check_url') }}" class="btn btn-light btn-lg px-4">
+                <div class="d-flex gap-3 flex-wrap mb-4">
+                    <a href="{{ url_for('check_url') }}" class="btn btn-light btn-lg px-4 shadow-lg">
                         <i class="bi bi-shield-check"></i> Start Scanning
                     </a>
-                    <a href="{{ url_for('api_docs') }}" class="btn btn-outline-light btn-lg px-4">
-                        <i class="bi bi-code-square"></i> API Access
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-play-circle"></i> Learn More
                     </a>
                 </div>
-                
-                <!-- Stats -->
-                <div class="row mt-5 text-center">
-                    <div class="col-4">
-                        <div class="fs-2 fw-bold">{{ total_scans or 0 }}</div>
-                        <small class="opacity-75">Total Scans</small>
+
+                <!-- Live Stats -->
+                <div class="row mt-4">
+                    <div class="col-4 text-center">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-count="{{ total_scans or 0 }}">0</div>
+                            <small class="opacity-75">Scans Done</small>
+                        </div>
                     </div>
-                    <div class="col-4">
-                        <div class="fs-2 fw-bold">{{ total_users or 0 }}</div>
-                        <small class="opacity-75">Users</small>
+                    <div class="col-4 text-center">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number" data-count="{{ total_users or 0 }}">0</div>
+                            <small class="opacity-75">Active Users</small>
+                        </div>
                     </div>
-                    <div class="col-4">
-                        <div class="fs-2 fw-bold">95%+</div>
-                        <small class="opacity-75">Accuracy</small>
+                    <div class="col-4 text-center">
+                        <div class="hero-stat">
+                            <div class="hero-stat-number">95%+</div>
+                            <small class="opacity-75">Accuracy</small>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6">
                 <!-- Quick Check Form -->
                 <div class="quick-check-card">
-                    <h4 class="mb-3 text-dark">
-                        <i class="bi bi-search text-primary"></i> Quick URL Check
-                    </h4>
-                    <p class="text-muted small mb-3">Enter any URL below to instantly check if it's safe or a phishing attempt.</p>
-                    <form action="{{ url_for('quick_check') }}" method="POST">
-                        <div class="mb-3">
-                            <input type="url" name="url" class="form-control form-control-lg" 
-                                   placeholder="https://example.com" required>
+                    <div class="qc-header">
+                        <div class="qc-dot red"></div>
+                        <div class="qc-dot yellow"></div>
+                        <div class="qc-dot green"></div>
+                        <span class="qc-title">URL Scanner</span>
+                    </div>
+                    <div class="qc-body">
+                        <h4 class="mb-2 text-dark fw-bold">
+                            <i class="bi bi-search text-primary"></i> Quick URL Check
+                        </h4>
+                        <p class="text-muted small mb-3">Paste any URL below to instantly check if it's safe or a
+                            phishing attempt.</p>
+                        <form action="{{ url_for('quick_check') }}" method="POST">
+                            <div class="mb-3">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0"><i
+                                            class="bi bi-globe2 text-primary"></i></span>
+                                    <input type="url" name="url" class="form-control border-start-0"
+                                        placeholder="https://example.com" required id="quickUrlInput">
+                                </div>
+                                <div id="urlValidation" class="mt-1"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i class="bi bi-shield-check"></i> Analyze URL
+                            </button>
+                        </form>
+                        <div class="mt-3 d-flex justify-content-center gap-3">
+                            <small class="text-muted"><i class="bi bi-lock-fill text-success"></i> Secure</small>
+                            <small class="text-muted"><i class="bi bi-lightning-fill text-warning"></i> Instant</small>
+                            <small class="text-muted"><i class="bi bi-eye-slash-fill text-info"></i> Private</small>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-lg">
-                            <i class="bi bi-shield-check"></i> Check URL Now
-                        </button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -119,65 +94,66 @@
 </section>
 
 <!-- Features Section -->
-<section class="py-5 bg-light">
+<section class="py-5 bg-light" id="features">
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold mb-3">Powerful Detection Features</h2>
-            <p class="lead text-muted">Multiple tools to keep you safe from phishing attacks</p>
+            <span class="section-badge"><i class="bi bi-stars"></i> Features</span>
+            <h2 class="display-5 fw-bold mb-3">Multi-Layer Detection Suite</h2>
+            <p class="lead text-muted">Four powerful scanning modes to protect you from every angle</p>
         </div>
         <div class="row g-4">
-            <div class="col-md-3">
+            <div class="col-md-6 col-lg-3 fade-in-up">
                 <div class="feature-card text-center">
-                    <div class="feature-icon">
+                    <div class="feature-icon mx-auto">
                         <i class="bi bi-link-45deg"></i>
                     </div>
                     <h5 class="card-title fw-bold">URL Scanner</h5>
                     <p class="card-text text-muted">
                         Analyze individual URLs with 95%+ accuracy using 25+ ML detection features.
                     </p>
-                    <a href="{{ url_for('check_url') }}" class="btn btn-outline-primary btn-sm">
+                    <a href="{{ url_for('check_url') }}" class="btn btn-outline-primary btn-sm mt-2">
                         Try Now <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6 col-lg-3 fade-in-up" style="animation-delay: 0.1s">
                 <div class="feature-card text-center">
-                    <div class="feature-icon">
-                        <i class="bi bi-envelope"></i>
+                    <div class="feature-icon warning mx-auto">
+                        <i class="bi bi-envelope-open"></i>
                     </div>
                     <h5 class="card-title fw-bold">Email Scanner</h5>
                     <p class="card-text text-muted">
                         Extract and analyze all URLs from suspicious emails automatically.
                     </p>
-                    <a href="{{ url_for('email_scanner') }}" class="btn btn-outline-warning btn-sm">
+                    <a href="{{ url_for('email_scanner') }}" class="btn btn-outline-warning btn-sm mt-2">
                         Try Now <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6 col-lg-3 fade-in-up" style="animation-delay: 0.2s">
                 <div class="feature-card text-center">
-                    <div class="feature-icon">
-                        <i class="bi bi-qr-code"></i>
+                    <div class="feature-icon info mx-auto">
+                        <i class="bi bi-qr-code-scan"></i>
                     </div>
                     <h5 class="card-title fw-bold">QR Scanner</h5>
                     <p class="card-text text-muted">
                         Decode QR codes and verify embedded URLs for safety in seconds.
                     </p>
-                    <a href="{{ url_for('qr_scanner') }}" class="btn btn-outline-info btn-sm">
+                    <a href="{{ url_for('qr_scanner') }}" class="btn btn-outline-info btn-sm mt-2">
                         Try Now <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6 col-lg-3 fade-in-up" style="animation-delay: 0.3s">
                 <div class="feature-card text-center">
-                    <div class="feature-icon">
-                        <i class="bi bi-files"></i>
+                    <div class="feature-icon success mx-auto">
+                        <i class="bi bi-collection"></i>
                     </div>
                     <h5 class="card-title fw-bold">Batch Check</h5>
                     <p class="card-text text-muted">
                         Upload CSV or text files to scan up to 100 URLs at once.
                     </p>
-                    <a href="{{ url_for('batch_check') }}" class="btn btn-outline-success btn-sm">
+                    <a href="{{ url_for('batch_check') }}" class="btn btn-outline-success btn-sm mt-2">
                         Try Now <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
@@ -190,73 +166,125 @@
 <section class="py-5">
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold mb-3">How It Works</h2>
-            <p class="lead text-muted">Three simple steps to protect yourself</p>
+            <span class="section-badge"><i class="bi bi-gear-wide-connected"></i> How It Works</span>
+            <h2 class="display-5 fw-bold mb-3">Three Steps to Safety</h2>
+            <p class="lead text-muted">Our AI analyzes URLs in milliseconds</p>
         </div>
         <div class="row g-4">
-            <div class="col-md-4 text-center">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" 
-                     style="width: 80px; height: 80px;">
-                    <i class="bi bi-1-circle fs-1"></i>
+            <div class="col-md-4 text-center fade-in-up">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon"><i class="bi bi-clipboard-data"></i></div>
+                    <h4 class="fw-bold mt-3">Input URL</h4>
+                    <p class="text-muted">Paste a URL, upload a file, paste an email, or scan a QR code.</p>
                 </div>
-                <h4 class="fw-bold">Input URL</h4>
-                <p class="text-muted">Paste a URL, upload a file, or scan a QR code to get started.</p>
             </div>
-            <div class="col-md-4 text-center">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" 
-                     style="width: 80px; height: 80px;">
-                    <i class="bi bi-2-circle fs-1"></i>
+            <div class="col-md-4 text-center fade-in-up" style="animation-delay: 0.15s">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon"><i class="bi bi-cpu"></i></div>
+                    <h4 class="fw-bold mt-3">AI Analysis</h4>
+                    <p class="text-muted">Our Random Forest model analyzes 25+ URL features plus cross-validates with
+                        threat intelligence feeds.</p>
                 </div>
-                <h4 class="fw-bold">AI Analysis</h4>
-                <p class="text-muted">Our ML model analyzes 25+ features to detect phishing indicators.</p>
             </div>
-            <div class="col-md-4 text-center">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" 
-                     style="width: 80px; height: 80px;">
-                    <i class="bi bi-3-circle fs-1"></i>
+            <div class="col-md-4 text-center fade-in-up" style="animation-delay: 0.3s">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon"><i class="bi bi-shield-fill-check"></i></div>
+                    <h4 class="fw-bold mt-3">Get Results</h4>
+                    <p class="text-muted">Receive instant results with confidence scores, feature breakdown, and threat
+                        intelligence data.</p>
                 </div>
-                <h4 class="fw-bold">Get Results</h4>
-                <p class="text-muted">Receive instant results with confidence scores and detailed analysis.</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Statistics Section -->
+<!-- Stats Section -->
 <section class="py-5 bg-light">
     <div class="container py-5">
-        <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold mb-3">Why Choose Our System?</h2>
-            <p class="lead text-muted">Trusted by users worldwide</p>
-        </div>
         <div class="row text-center g-4">
-            <div class="col-md-3">
-                <div class="stat-number">95%+</div>
-                <div class="stat-label">Detection Accuracy</div>
+            <div class="col-md-3 col-6 fade-in-up">
+                <div class="stat-card-home">
+                    <div class="stat-icon-bg"><i class="bi bi-bullseye"></i></div>
+                    <div class="stat-number" data-count="95">0</div><span class="stat-suffix">%+</span>
+                    <div class="stat-label">Detection Accuracy</div>
+                </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-number">25+</div>
-                <div class="stat-label">Detection Features</div>
+            <div class="col-md-3 col-6 fade-in-up" style="animation-delay: 0.1s">
+                <div class="stat-card-home">
+                    <div class="stat-icon-bg"><i class="bi bi-diagram-3"></i></div>
+                    <div class="stat-number" data-count="25">0</div><span class="stat-suffix">+</span>
+                    <div class="stat-label">Detection Features</div>
+                </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-number">&lt;2s</div>
-                <div class="stat-label">Response Time</div>
+            <div class="col-md-3 col-6 fade-in-up" style="animation-delay: 0.2s">
+                <div class="stat-card-home">
+                    <div class="stat-icon-bg"><i class="bi bi-lightning-charge"></i></div>
+                    <div class="stat-number">&lt;2s</div>
+                    <div class="stat-label">Response Time</div>
+                </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Availability</div>
+            <div class="col-md-3 col-6 fade-in-up" style="animation-delay: 0.3s">
+                <div class="stat-card-home">
+                    <div class="stat-icon-bg"><i class="bi bi-database-check"></i></div>
+                    <div class="stat-number" data-count="2">0</div>
+                    <div class="stat-label">Threat Intel Feeds</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Threat Intelligence Section -->
+<section class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="section-badge"><i class="bi bi-shield-lock"></i> Threat Intelligence</span>
+            <h2 class="display-5 fw-bold mb-3">Multi-Source Validation</h2>
+            <p class="lead text-muted">We don't just rely on our ML model — we cross-validate with global threat
+                databases</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4 fade-in-up">
+                <div class="intel-card">
+                    <div class="intel-icon"><i class="bi bi-cpu"></i></div>
+                    <h5 class="fw-bold">ML Model</h5>
+                    <p class="text-muted small">Random Forest Classifier trained on 50,000+ URLs with 25+ feature
+                        analysis</p>
+                    <span class="badge bg-primary">Primary Engine</span>
+                </div>
+            </div>
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.1s">
+                <div class="intel-card">
+                    <div class="intel-icon warning"><i class="bi bi-globe"></i></div>
+                    <h5 class="fw-bold">URLhaus</h5>
+                    <p class="text-muted small">Real-time cross-validation with abuse.ch malware URL database</p>
+                    <span class="badge bg-warning text-dark">Free API</span>
+                </div>
+            </div>
+            <div class="col-md-4 fade-in-up" style="animation-delay: 0.2s">
+                <div class="intel-card">
+                    <div class="intel-icon info"><i class="bi bi-binoculars"></i></div>
+                    <h5 class="fw-bold">PhishTank</h5>
+                    <p class="text-muted small">Community-driven phishing verification database with verified reports
+                    </p>
+                    <span class="badge bg-info">Free API</span>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- CTA Section -->
-<section class="cta-section py-5 text-white">
-    <div class="container py-5 text-center">
-        <h2 class="display-5 fw-bold mb-4">Ready to Start Protecting Yourself?</h2>
-        <p class="lead mb-4">Create a free account to access all features and keep track of your scans.</p>
+<section class="cta-section text-white">
+    <div class="container py-5 text-center position-relative">
+        <h2 class="display-5 fw-bold mb-4">Ready to Protect Yourself?</h2>
+        <p class="lead mb-4 opacity-75">Create a free account to access all features, save scan history, and export
+            reports.</p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg px-5">
+            <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg px-5 shadow">
                 <i class="bi bi-person-plus"></i> Create Free Account
             </a>
             <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5">
@@ -265,4 +293,49 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animated counter
+    document.addEventListener('DOMContentLoaded', function () {
+        const counters = document.querySelectorAll('[data-count]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseInt(el.dataset.count);
+                    if (isNaN(target)) return;
+                    let current = 0;
+                    const increment = Math.max(1, Math.floor(target / 60));
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        el.textContent = current.toLocaleString();
+                    }, 30);
+                    observer.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+        counters.forEach(el => observer.observe(el));
+
+        // URL validation on quick check
+        const urlInput = document.getElementById('quickUrlInput');
+        const validation = document.getElementById('urlValidation');
+        if (urlInput && validation) {
+            urlInput.addEventListener('input', function () {
+                const url = this.value.trim();
+                if (url.length === 0) { validation.innerHTML = ''; return; }
+                if (!url.match(/^https?:\/\/.+/i)) {
+                    validation.innerHTML = '<small class="text-danger"><i class="bi bi-exclamation-circle"></i> Must start with http:// or https://</small>';
+                } else {
+                    validation.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Valid URL format</small>';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

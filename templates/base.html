@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ShieldGuard Pro - AI-powered phishing detection system with 95%+ accuracy. Scan URLs, emails, and QR codes instantly.">
     <title>{% block title %}ShieldGuard Pro - Premium Phishing Protection{% endblock %}</title>
     
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     
@@ -48,12 +55,18 @@
                     </li>
                     {% endif %}
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('about') }}"><i class="bi bi-info-circle"></i> About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('help_page') }}"><i class="bi bi-question-circle"></i> Help</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('api_docs') }}"><i class="bi bi-code-square"></i> API</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <button class="btn nav-link" id="darkModeToggle" title="Toggle dark mode"><i class="bi bi-moon"></i></button>
+                        <button class="btn nav-link" id="darkModeToggle" title="Toggle dark mode"><i class="bi bi-moon-stars-fill"></i></button>
                     </li>
                     {% if session.user_id %}
                     {% if session.is_admin %}
@@ -80,7 +93,7 @@
                         <a class="nav-link" href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right"></i> Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('signup') }}"><i class="bi bi-person-plus"></i> Sign Up</a>
+                        <a class="nav-link btn-nav-signup" href="{{ url_for('signup') }}"><i class="bi bi-person-plus"></i> Sign Up</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -94,6 +107,10 @@
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {% if category == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>
+                        {% elif category == 'danger' or category == 'error' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        {% elif category == 'warning' %}<i class="bi bi-exclamation-circle-fill me-2"></i>
+                        {% else %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -108,16 +125,54 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer mt-5 py-4">
+    <footer class="footer mt-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
+            <div class="row g-4">
+                <div class="col-lg-4">
                     <h5><i class="bi bi-shield-fill-check text-warning"></i> ShieldGuard Pro</h5>
-                    <p class="opacity-75 mb-0">Premium AI-powered phishing detection to keep you safe online.</p>
+                    <p class="opacity-75 mb-3">Premium AI-powered phishing detection to keep you safe online. Built with advanced machine learning.</p>
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> 95%+ Accuracy</span>
+                        <span class="badge bg-info"><i class="bi bi-cpu"></i> ML Powered</span>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <h6 class="text-white mb-3">Quick Links</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('index') }}"><i class="bi bi-chevron-right"></i> Home</a></li>
+                        <li><a href="{{ url_for('about') }}"><i class="bi bi-chevron-right"></i> About</a></li>
+                        <li><a href="{{ url_for('help_page') }}"><i class="bi bi-chevron-right"></i> Help</a></li>
+                        <li><a href="{{ url_for('api_docs') }}"><i class="bi bi-chevron-right"></i> API Docs</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="text-white mb-3">Scan Tools</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{{ url_for('check_url') }}"><i class="bi bi-chevron-right"></i> URL Scanner</a></li>
+                        <li><a href="{{ url_for('email_scanner') }}"><i class="bi bi-chevron-right"></i> Email Scanner</a></li>
+                        <li><a href="{{ url_for('qr_scanner') }}"><i class="bi bi-chevron-right"></i> QR Scanner</a></li>
+                        <li><a href="{{ url_for('batch_check') }}"><i class="bi bi-chevron-right"></i> Batch Check</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3">
+                    <h6 class="text-white mb-3">Technology</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-dark border border-secondary"><i class="bi bi-filetype-py"></i> Python</span>
+                        <span class="badge bg-dark border border-secondary"><i class="bi bi-box"></i> Flask</span>
+                        <span class="badge bg-dark border border-secondary"><i class="bi bi-cpu"></i> scikit-learn</span>
+                        <span class="badge bg-dark border border-secondary"><i class="bi bi-tree"></i> Random Forest</span>
+                        <span class="badge bg-dark border border-secondary"><i class="bi bi-database"></i> SQLite</span>
+                        <span class="badge bg-dark border border-secondary"><i class="bi bi-globe"></i> REST API</span>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-secondary my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <small class="opacity-75">&copy; 2025 ShieldGuard Pro. All rights reserved.</small>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0"><i class="bi bi-shield-check text-warning"></i> Powered by Advanced Machine Learning</p>
-                    <small class="opacity-75">Random Forest Classifier | 95%+ Accuracy</small>
+                    <small class="opacity-75"><i class="bi bi-shield-check text-warning"></i> Powered by Advanced Machine Learning | Random Forest Classifier</small>
                 </div>
             </div>
         </div>
@@ -125,6 +180,8 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     

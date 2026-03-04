@@ -14,11 +14,14 @@ import csv
 import json
 import logging
 import math
+import secrets
+import hashlib
 from datetime import datetime, timedelta
 from functools import wraps
 from urllib.parse import urlparse, urljoin
 from collections import Counter
 
+import requests as http_requests
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, g, session, send_file, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -52,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask application
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 app.config['DATABASE'] = os.path.join(os.path.dirname(__file__), 'phishing_detection.db')
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
@@ -266,117 +269,190 @@ def admin_required(f):
 def extract_features_for_model(url):
     """
     Extract features from URL and return as numpy array for model prediction.
+    Uses the shared feature_extraction module as single source of truth.
     """
     if not url:
-        return np.zeros(len(MODEL_FEATURES))
+        return np.zeros(len(MODEL_FEATURES)), {}
     
-    url = url.lower().strip()
-    parsed = urlparse(url)
-    hostname = parsed.netloc
-    path = parsed.path
+    # Use the shared feature extraction module (single source of truth)
+    features_dict = extract_features(url)
     
-    features = {}
+    # Convert to array in the order the model expects
+    feature_array = [features_dict.get(f, 0) for f in MODEL_FEATURES]
+    return np.array(feature_array), features_dict
+
+
+def check_urlhaus(url):
+    """
+    Cross-validate URL against URLhaus (abuse.ch) - completely free, no API key needed.
+    Returns threat intelligence data if the URL is found in their database.
+    """
+    try:
+        response = http_requests.post(
+            'https://urlhaus-api.abuse.ch/v1/url/',
+            data={'url': url},
+            timeout=5
+        )
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                'found': data.get('query_status') == 'listed',
+                'threat': data.get('threat', 'N/A'),
+                'status': data.get('url_status', 'N/A'),
+                'tags': data.get('tags', []),
+                'source': 'URLhaus (abuse.ch)'
+            }
+    except Exception as e:
+        logger.warning(f"URLhaus API check failed: {e}")
+    return {'found': False, 'threat': 'N/A', 'status': 'N/A', 'tags': [], 'source': 'URLhaus (abuse.ch)'}
+
+
+def check_phishtank(url):
+    """
+    Check URL against PhishTank database - free, no API key for basic lookups.
+    """
+    try:
+        url_encoded = base64.b64encode(url.encode()).decode()
+        response = http_requests.post(
+            'https://checkurl.phishtank.com/checkurl/',
+            data={'url': url, 'format': 'json'},
+            headers={'User-Agent': 'ShieldGuard Pro/1.0'},
+            timeout=5
+        )
+        if response.status_code == 200:
+            data = response.json()
+            results = data.get('results', {})
+            return {
+                'found': results.get('in_database', False),
+                'is_phishing': results.get('valid', False),
+                'verified': results.get('verified', False),
+                'source': 'PhishTank'
+            }
+    except Exception as e:
+        logger.warning(f"PhishTank check failed: {e}")
+    return {'found': False, 'is_phishing': False, 'verified': False, 'source': 'PhishTank'}
+
+
+def get_threat_intelligence(url):
+    """
+    Aggregate threat intelligence from free sources.
+    Runs alongside ML model - does NOT affect model predictions.
+    """
+    intel = {
+        'urlhaus': check_urlhaus(url),
+        'phishtank': check_phishtank(url),
+        'total_sources': 2,
+        'flagged_by': 0,
+        'threat_level': 'low'
+    }
     
-    # 1. URL length
-    features['url_length'] = len(url)
+    flagged = 0
+    if intel['urlhaus']['found']:
+        flagged += 1
+    if intel['phishtank']['found'] and intel['phishtank']['is_phishing']:
+        flagged += 1
     
-    # 2. Hostname length
-    features['hostname_length'] = len(hostname)
-    
-    # 3. Has HTTPS
-    features['has_https'] = 1 if parsed.scheme == 'https' else 0
-    
-    # 4. Has IP address
-    ip_pattern = r'^(\d{1,3}\.){3}\d{1,3}$|(\d{1,3}\.){3}\d{1,3}(/|:)'
-    features['has_ip'] = 1 if re.search(ip_pattern, hostname) else 0
-    
-    # 5. Number of dots
-    features['num_dots'] = url.count('.')
-    
-    # 6. Number of hyphens
-    features['num_hyphens'] = url.count('-')
-    
-    # 7. Number of underscores
-    features['num_underscores'] = url.count('_')
-    
-    # 8. Number of slashes
-    features['num_slashes'] = url.count('/')
-    
-    # 9. Number of question marks
-    features['num_questionmarks'] = url.count('?')
-    
-    # 10. Number of @ symbols
-    features['num_at'] = url.count('@')
-    
-    # 11. Number of digits
-    features['num_digits'] = sum(c.isdigit() for c in url)
-    
-    # 12. Number of subdomains
-    if hostname:
-        domain_parts = hostname.split('.')
-        if len(domain_parts) > 2:
-            features['num_subdomains'] = len(domain_parts) - 2
-        else:
-            features['num_subdomains'] = 0
+    intel['flagged_by'] = flagged
+    if flagged >= 2:
+        intel['threat_level'] = 'critical'
+    elif flagged == 1:
+        intel['threat_level'] = 'high'
     else:
-        features['num_subdomains'] = 0
+        intel['threat_level'] = 'low'
     
-    # 13. Has prefix-suffix (hyphen in domain)
-    features['has_prefix_suffix'] = 1 if '-' in hostname else 0
+    return intel
+
+
+FEATURE_DESCRIPTIONS = {
+    'url_length': 'URL is unusually long',
+    'hostname_length': 'Hostname is unusually long',
+    'has_https': 'Missing HTTPS encryption',
+    'has_ip': 'Contains IP address instead of domain',
+    'num_dots': 'Unusually high number of dots in URL',
+    'num_hyphens': 'Multiple hyphens in domain',
+    'num_underscores': 'Contains underscores',
+    'num_slashes': 'Unusually long path',
+    'num_questionmarks': 'Contains query parameters',
+    'num_at': 'Contains @ symbol (suspicious)',
+    'num_digits': 'High digit-to-letter ratio',
+    'num_subdomains': 'Excessive subdomains',
+    'has_prefix_suffix': 'Hyphen in domain name',
+    'suspicious_tld': 'Uses suspicious top-level domain (.tk, .xyz, etc.)',
+    'has_suspicious_keywords': 'Contains suspicious keywords (verify, login, bank, etc.)',
+    'is_shortened': 'Uses URL shortener service',
+    'url_entropy': 'High URL entropy (random-looking characters)',
+    'digit_ratio': 'High digit ratio',
+    'special_char_ratio': 'High special character ratio',
+    'path_length': 'Unusually long path',
+    'query_length': 'Long query string',
+    'num_equals': 'Contains many = signs (encoded data)',
+    'num_ampersands': 'Contains many & signs',
+    'has_port': 'Contains port number',
+    'brand_in_subdomain': 'Brand name in subdomain (potential impersonation)'
+}
+
+SUSPICIOUS_FEATURES = {
+    'has_ip': 'high',
+    'num_at': 'high',
+    'suspicious_tld': 'high',
+    'is_shortened': 'medium',
+    'brand_in_subdomain': 'high',
+    'has_prefix_suffix': 'medium',
+    'has_suspicious_keywords': 'medium'
+}
+
+
+def get_severity_level(confidence, suspicious_features):
+    """Determine severity level based on confidence and suspicious features."""
+    severity_score = confidence
     
-    # 14. Suspicious TLD
-    suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.top', '.xyz', '.buzz']
-    features['suspicious_tld'] = 1 if any(url.endswith(tld) for tld in suspicious_tlds) else 0
+    for feature, level in suspicious_features.items():
+        if level == 'high':
+            severity_score += 12
+        elif level == 'medium':
+            severity_score += 6
     
-    # 15. Has suspicious keywords
-    suspicious_keywords = ['verify', 'account', 'login', 'secure', 'update', 'confirm', 
-                          'banking', 'password', 'credential', 'wallet', 'payment']
-    features['has_suspicious_keywords'] = 1 if any(keyword in url for keyword in suspicious_keywords) else 0
-    
-    # 16. Is shortened URL
-    shorteners = ['bit.ly', 'tinyurl', 't.co', 'goo.gl', 'ow.ly', 'short.link', 
-                  'is.gd', 'buff.ly', 'adf.ly', 'bitly.com']
-    features['is_shortened'] = 1 if any(shortener in hostname for shortener in shorteners) else 0
-    
-    # 17. URL entropy (Shannon entropy)
-    if url:
-        prob = [float(url.count(c)) / len(url) for c in dict.fromkeys(list(url))]
-        entropy = -sum([p * math.log(p) / math.log(2.0) for p in prob])
-        features['url_entropy'] = entropy
+    if severity_score >= 80:
+        return 'high'
+    elif severity_score >= 50:
+        return 'medium'
     else:
-        features['url_entropy'] = 0.0
+        return 'low'
+
+
+def get_feature_importance(features_dict):
+    """Analyze which features contributed most to the prediction."""
+    importance = []
     
-    # 18. Digit ratio
-    features['digit_ratio'] = features['num_digits'] / len(url) if len(url) > 0 else 0
+    for feature, value in features_dict.items():
+        if feature in ['url_length', 'hostname_length', 'path_length', 'query_length']:
+            if value > 75:
+                importance.append({
+                    'feature': feature.replace('_', ' ').title(),
+                    'value': value,
+                    'severity': 'high',
+                    'description': FEATURE_DESCRIPTIONS.get(feature, feature)
+                })
+        elif feature in ['num_dots', 'num_hyphens', 'num_digits', 'num_slashes']:
+            if value > 5:
+                importance.append({
+                    'feature': feature.replace('_', ' ').title(),
+                    'value': value,
+                    'severity': 'medium',
+                    'description': FEATURE_DESCRIPTIONS.get(feature, feature)
+                })
+        elif value == 1:
+            severity = SUSPICIOUS_FEATURES.get(feature, 'low')
+            importance.append({
+                'feature': feature.replace('_', ' ').title(),
+                'value': value,
+                'severity': severity,
+                'description': FEATURE_DESCRIPTIONS.get(feature, feature)
+            })
     
-    # 19. Special character ratio
-    special_chars = sum(1 for c in url if not c.isalnum())
-    features['special_char_ratio'] = special_chars / len(url) if len(url) > 0 else 0
-    
-    # 20. Path length
-    features['path_length'] = len(path)
-    
-    # 21. Query length
-    features['query_length'] = len(parsed.query)
-    
-    # 22. Number of equals signs
-    features['num_equals'] = url.count('=')
-    
-    # 23. Number of ampersands
-    features['num_ampersands'] = url.count('&')
-    
-    # 24. Has port number
-    features['has_port'] = 1 if ':' in hostname and not hostname.endswith(':') else 0
-    
-    # 25. Brand name in subdomain (potential phishing)
-    brands = ['paypal', 'apple', 'microsoft', 'google', 'facebook', 'amazon', 'netflix',
-              'bank', 'chase', 'wellsfargo', 'citi', 'amex', 'visa', 'mastercard']
-    subdomain = '.'.join(hostname.split('.')[:-2]) if len(hostname.split('.')) > 2 else ""
-    features['brand_in_subdomain'] = 1 if any(brand in subdomain for brand in brands) else 0
-    
-    # Convert to array in correct order
-    feature_array = [features.get(f, 0) for f in MODEL_FEATURES]
-    return np.array(feature_array), features
+    severity_order = {'high': 0, 'medium': 1, 'low': 2}
+    importance.sort(key=lambda x: severity_order.get(x['severity'], 2))
+    return importance[:5]
 
 
 def predict_url(url):
@@ -426,6 +502,15 @@ def predict_url(url):
         # Map prediction to result (0 = legitimate, 1 = phishing)
         result = 'phishing' if prediction == 1 else 'legitimate'
         
+        # Get feature importance and severity for phishing detections
+        feature_importance = []
+        severity = 'none'
+        
+        if prediction == 1:
+            feature_importance = get_feature_importance(features_dict)
+            suspicious_features = {f['feature'].lower().replace(' ', '_'): f['severity'] for f in feature_importance}
+            severity = get_severity_level(confidence * 100, suspicious_features)
+        
         return {
             'result': result,
             'confidence': round(confidence * 100, 2),
@@ -433,7 +518,9 @@ def predict_url(url):
             'is_phishing': prediction == 1,
             'is_legitimate': prediction == 0,
             'probability_phishing': round(prob_phishing * 100, 2),
-            'probability_legitimate': round(prob_legitimate * 100, 2)
+            'probability_legitimate': round(prob_legitimate * 100, 2),
+            'severity': severity,
+            'feature_importance': feature_importance
         }
     except Exception as e:
         logger.error(f"Error predicting URL {url}: {e}")
@@ -445,7 +532,9 @@ def predict_url(url):
             'confidence': 0.0,
             'features': {},
             'is_phishing': False,
-            'is_legitimate': False
+            'is_legitimate': False,
+            'severity': 'unknown',
+            'feature_importance': []
         }
 
 
@@ -685,12 +774,46 @@ def dashboard():
         LIMIT 5
     ''', (session['user_id'],)).fetchall()
     
+    # Get activity data for last 7 days
+    from datetime import datetime, timedelta
+    today = datetime.now()
+    dates = [(today - timedelta(days=i)).strftime('%Y-%m-%d') for i in range(6, -1, -1)]
+    date_labels = [(today - timedelta(days=i)).strftime('%b %d') for i in range(6, -1, -1)]
+    
+    url_activity = []
+    email_activity = []
+    qr_activity = []
+    
+    for date in dates:
+        url_count = db.execute('''
+            SELECT COUNT(*) FROM scans 
+            WHERE user_id = ? AND scan_type = 'single' AND date(created_at) = ?
+        ''', (session['user_id'], date)).fetchone()[0] or 0
+        
+        email_count = db.execute('''
+            SELECT COUNT(*) FROM email_scans 
+            WHERE user_id = ? AND date(created_at) = ?
+        ''', (session['user_id'], date)).fetchone()[0] or 0
+        
+        qr_count = db.execute('''
+            SELECT COUNT(*) FROM qr_scans 
+            WHERE user_id = ? AND date(created_at) = ?
+        ''', (session['user_id'], date)).fetchone()[0] or 0
+        
+        url_activity.append(url_count)
+        email_activity.append(email_count)
+        qr_activity.append(qr_count)
+    
     return render_template(
         'dashboard.html',
         stats=stats,
         recent_scans=recent_scans,
         recent_bookmarks=recent_bookmarks,
-        username=session.get('username')
+        username=session.get('username'),
+        activity_labels=date_labels,
+        url_activity=url_activity,
+        email_activity=email_activity,
+        qr_activity=qr_activity
     )
 
 
@@ -700,6 +823,7 @@ def check_url():
     """URL checking page."""
     result = None
     url = ''
+    threat_intel = None
     
     if request.method == 'POST':
         url = request.form.get('url', '').strip()
@@ -710,9 +834,11 @@ def check_url():
             flash('Please enter a valid URL starting with http:// or https://', 'warning')
         else:
             result = predict_url(url)
+            # Cross-validate with free threat intelligence APIs
+            threat_intel = get_threat_intelligence(url)
             save_scan(session['user_id'], url, result, 'single')
     
-    return render_template('check_url.html', result=result, url=url)
+    return render_template('check_url.html', result=result, url=url, threat_intel=threat_intel)
 
 
 @app.route('/scanner')
@@ -1360,6 +1486,18 @@ def api_docs():
     return render_template('api_docs.html')
 
 
+@app.route('/about')
+def about():
+    """About page."""
+    return render_template('about.html')
+
+
+@app.route('/help')
+def help_page():
+    """Help and FAQ page."""
+    return render_template('help.html')
+
+
 # ============================================================================
 # API ROUTES
 # ============================================================================
@@ -1519,6 +1657,6 @@ if __name__ == '__main__':
     app.run(
         host='0.0.0.0',
         port=5000,
-        debug=True,
+        debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true',
         threaded=True
     )
