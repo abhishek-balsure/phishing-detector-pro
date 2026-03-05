@@ -1085,7 +1085,7 @@ def qr_scanner():
             decoded_objects = decode(image)
             
             if not decoded_objects:
-                flash('No QR code found in the image.', 'warning')
+                flash('No QR code found in the image. Please upload a QR code image (the square barcode pattern), not a regular screenshot or photo.', 'warning')
                 return render_template('qr_scanner.html')
             
             qr_data = decoded_objects[0].data.decode('utf-8')

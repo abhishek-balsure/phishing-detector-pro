@@ -315,6 +315,9 @@
                                 {{ "%.1f"|format(result.confidence) }}%
                             </div>
                         </div>
+                        <button class="btn btn-outline-primary mt-3" data-bs-toggle="modal" data-bs-target="#qrExplanationModal">
+                            <i class="bi bi-lightbulb me-2"></i>Learn Why This {{ 'is Phishing' if result.url_result == 'phishing' else 'is Safe' }}
+                        </button>
                     </div>
 
                     <!-- URL Display -->
@@ -496,4 +499,70 @@ function copyUrl() {
     });
 }
 </script>
+
+<!-- QR Explanation Modal -->
+{% if result and result.is_url %}
+<div class="modal fade" id="qrExplanationModal" tabindex="-1" aria-labelledby="qrExplanationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-{{ 'danger' if result.url_result == 'phishing' else 'success' }} text-white">
+                <h5 class="modal-title" id="qrExplanationModalLabel">
+                    <i class="bi {{ 'bi-exclamation-triangle' if result.url_result == 'phishing' else 'bi-check-circle' }} me-2"></i>
+                    {{ 'Why This QR Code is Dangerous' if result.url_result == 'phishing' else 'Why This QR Code is Safe' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if result.url_result == 'phishing' %}
+                <div class="alert alert-danger">
+                    <h6><i class="bi bi-exclamation-triangle-fill me-2"></i>This QR code contains a malicious phishing URL</h6>
+                </div>
+                
+                <h6 class="fw-bold mb-3">🔍 How We Analyzed:</h6>
+                <ol>
+                    <li class="mb-2"><strong>QR Decoding</strong> - Extracted the URL embedded in the QR code</li>
+                    <li class="mb-2"><strong>URL Analysis</strong> - Analyzed 25+ features of the URL</li>
+                    <li class="mb-2"><strong>ML Classification</strong> - Random Forest model classified it as phishing</li>
+                </ol>
+                
+                <h6 class="fw-bold mt-4 mb-3">⚠️ Why This is Dangerous:</h6>
+                <ul class="list-group">
+                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>URL appears to be a phishing site</li>
+                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Could steal your personal information</li>
+                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>May install malware on your device</li>
+                </ul>
+                
+                {% else %}
+                <div class="alert alert-success">
+                    <h6><i class="bi bi-shield-check me-2"></i>This QR code contains a legitimate URL</h6>
+                </div>
+                
+                <h6 class="fw-bold mb-3">🔍 How We Analyzed:</h6>
+                <ol>
+                    <li class="mb-2"><strong>QR Decoding</strong> - Extracted the URL from the QR code</li>
+                    <li class="mb-2"><strong>URL Analysis</strong> - Checked 25+ safety features</li>
+                    <li class="mb-2"><strong>ML Classification</strong> - Model classified it as legitimate</li>
+                </ol>
+                
+                <h6 class="fw-bold mt-4 mb-3">✅ Safety Checks:</h6>
+                <ul class="list-group">
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Valid URL structure</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>No suspicious patterns</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Standard domain format</li>
+                </ul>
+                {% endif %}
+                
+                <div class="alert alert-info mt-4">
+                    <i class="bi bi-lightbulb me-2"></i><strong>Tip:</strong> Always verify QR codes before scanning. Cybercriminals often use QR codes to redirect users to malicious websites.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{{ url_for('qr_scanner') }}" class="btn btn-primary">Scan Another QR</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

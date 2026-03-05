@@ -128,6 +128,10 @@
                                     {% endfor %}
                                 </div>
                             </div>
+                            <!-- Learn More Button -->
+                            <button class="btn btn-outline-primary mt-3" data-bs-toggle="modal" data-bs-target="#explanationModal">
+                                <i class="bi bi-lightbulb me-2"></i>Learn Why This {{ 'is Phishing' if result.is_phishing else 'is Safe' }}
+                            </button>
                         </div>
                         {% endif %}
 
@@ -395,4 +399,93 @@
         });
     }
 </script>
+
+<!-- Explanation Modal -->
+{% if result %}
+<div class="modal fade" id="explanationModal" tabindex="-1" aria-labelledby="explanationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-{{ 'danger' if result.is_phishing else 'success' }} text-white">
+                <h5 class="modal-title" id="explanationModalLabel">
+                    <i class="bi {{ 'bi-exclamation-triangle' if result.is_phishing else 'bi-check-circle' }} me-2"></i>
+                    {{ 'Why This is a Phishing URL' if result.is_phishing else 'Why This is a Safe URL' }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if result.is_phishing %}
+                <div class="alert alert-danger">
+                    <h6><i class="bi bi-exclamation-triangle-fill me-2"></i>Warning: This URL shows characteristics commonly found in phishing attacks</h6>
+                </div>
+                
+                <h6 class="fw-bold mb-3">🔍 How We Analyzed This URL:</h6>
+                <div class="alert alert-light">
+                    <ol class="mb-0">
+                        <li class="mb-2"><strong>URL Structure Analysis</strong> - We extracted 25+ features including length, special characters, and domain structure</li>
+                        <li class="mb-2"><strong>Domain Verification</strong> - Checked for suspicious TLDs, IP addresses, and brand impersonation</li>
+                        <li class="mb-2"><strong>Content Patterns</strong> - Looked for keywords commonly used in phishing (verify, login, bank, secure, etc.)</li>
+                        <li class="mb-2"><strong>ML Prediction</strong> - Our Random Forest model analyzed all features and classified this as phishing</li>
+                    </ol>
+                </div>
+                
+                <h6 class="fw-bold mb-3">⚠️ Red Flags Found:</h6>
+                <div class="row g-2">
+                    {% for feature in result.feature_importance[:5] %}
+                    <div class="col-12">
+                        <div class="d-flex align-items-center p-2 rounded" style="background: rgba(220,53,69,0.1);">
+                            <span class="badge bg-danger me-2">{{ feature.severity|upper }}</span>
+                            <div>
+                                <strong>{{ feature.feature }}</strong>
+                                <p class="mb-0 text-muted small">{{ feature.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <h6 class="fw-bold mt-4 mb-3">🛡️ How to Stay Safe:</h6>
+                <ul class="list-group">
+                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Don't click on this URL</li>
+                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Never enter personal information on this site</li>
+                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Report this URL to authorities</li>
+                    <li class="list-group-item"><i class="bi bi-check text-success me-2"></i>Go directly to the official website instead</li>
+                </ul>
+                
+                {% else %}
+                <div class="alert alert-success">
+                    <h6><i class="bi bi-shield-check me-2"></i>This URL appears legitimate based on our analysis</h6>
+                </div>
+                
+                <h6 class="fw-bold mb-3">🔍 How We Analyzed This URL:</h6>
+                <div class="alert alert-light">
+                    <ol class="mb-0">
+                        <li class="mb-2"><strong>URL Structure Analysis</strong> - We extracted 25+ features from this URL</li>
+                        <li class="mb-2"><strong>Domain Verification</strong> - Confirmed a valid domain structure</li>
+                        <li class="mb-2"><strong>Content Patterns</strong> - No suspicious keywords or patterns detected</li>
+                        <li class="mb-2"><strong>ML Prediction</strong> - Our model classified this as legitimate with {{ "%.1f"|format(result.confidence) }}% confidence</li>
+                    </ol>
+                </div>
+                
+                <h6 class="fw-bold mb-3">✅ Safety Checks Passed:</h6>
+                <ul class="list-group">
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Valid domain structure</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>No suspicious patterns detected</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Standard URL format</li>
+                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Confidence: {{ "%.1f"|format(result.confidence) }}%</li>
+                </ul>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle me-2"></i><strong>Still stay vigilant!</strong> Even safe URLs can become compromised. Always verify before entering sensitive information.
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{{ url_for('check_url') }}" class="btn btn-primary">Scan Another URL</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
