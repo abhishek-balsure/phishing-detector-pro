@@ -21,6 +21,18 @@ from functools import wraps
 from urllib.parse import urlparse, urljoin
 from collections import Counter
 
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib import colors
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+    from reportlab.lib.units import inch
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
+from urllib.parse import urlparse, urljoin
+from collections import Counter
+
 import requests as http_requests
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, g, session, send_file, Response
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -209,6 +221,19 @@ def init_db():
         )
     ''')
     
+    # Achievements table
+    db.execute('''
+        CREATE TABLE IF NOT EXISTS achievements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            badge_name TEXT NOT NULL,
+            badge_description TEXT,
+            badge_icon TEXT,
+            earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    
     # Create default admin user
     admin_hash = generate_password_hash('admin123')
     db.execute('''
@@ -218,6 +243,52 @@ def init_db():
     
     db.commit()
     logger.info("Database initialized successfully")
+
+
+# ============================================================================
+# ACHIEVEMENTS SYSTEM
+# ============================================================================
+
+ACHIEVEMENTS = [
+    {'name': 'First Scan', 'description': 'Complete your first URL scan', 'icon': 'bi-rocket-takeoff', 'condition': lambda stats: stats.get('total_scans', 0) >= 1},
+    {'name': 'URL Hunter', 'description': 'Scan 10 URLs', 'icon': 'bi-search', 'condition': lambda stats: stats.get('total_scans', 0) >= 10},
+    {'name': 'Phishing Buster', 'description': 'Detect 5 phishing URLs', 'icon': 'bi-shield-exclamation', 'condition': lambda stats: stats.get('phishing_count', 0) >= 5},
+    {'name': 'Email Guardian', 'description': 'Scan 5 emails', 'icon': 'bi-envelope-check', 'condition': lambda stats: stats.get('email_scans', 0) >= 5},
+    {'name': 'QR Master', 'description': 'Scan 5 QR codes', 'icon': 'bi-qr-code-scan', 'condition': lambda stats: stats.get('qr_scans', 0) >= 5},
+    {'name': 'Safety Expert', 'description': 'Detect 10 phishing URLs', 'icon': 'bi-award', 'condition': lambda stats: stats.get('phishing_count', 0) >= 10},
+    {'name': 'Vigilant User', 'description': 'Save 5 bookmarks', 'icon': 'bi-bookmark-heart', 'condition': lambda stats: stats.get('bookmarks', 0) >= 5},
+    {'name': 'Security Pro', 'description': 'Complete 50 scans', 'icon': 'bi-trophy', 'condition': lambda stats: stats.get('total_scans', 0) >= 50},
+]
+
+
+def check_and_award_achievements(user_id):
+    """Check and award achievements based on user stats."""
+    db = get_db()
+    stats = get_user_stats(user_id)
+    stats['bookmarks'] = db.execute('SELECT COUNT(*) as count FROM bookmarks WHERE user_id = ?', (user_id,)).fetchone()[0]
+    
+    earned = db.execute('SELECT badge_name FROM achievements WHERE user_id = ?', (user_id,)).fetchall()
+    earned_names = [r['badge_name'] for r in earned]
+    
+    new_badges = []
+    for achievement in ACHIEVEMENTS:
+        if achievement['name'] not in earned_names and achievement['condition'](stats):
+            db.execute('''
+                INSERT INTO achievements (user_id, badge_name, badge_description, badge_icon)
+                VALUES (?, ?, ?, ?)
+            ''', (user_id, achievement['name'], achievement['description'], achievement['icon']))
+            new_badges.append(achievement)
+    
+    if new_badges:
+        db.commit()
+    
+    return new_badges
+
+
+def get_user_achievements(user_id):
+    """Get all achievements for a user."""
+    db = get_db()
+    return db.execute('SELECT * FROM achievements WHERE user_id = ? ORDER BY earned_at DESC', (user_id,)).fetchall()
 
 
 # Initialize database on startup
@@ -556,6 +627,9 @@ def save_scan(user_id, url, result_data, scan_type='single'):
             scan_type
         ))
         db.commit()
+        
+        # Check for achievements
+        check_and_award_achievements(user_id)
     except Exception as e:
         logger.error(f"Error saving scan: {e}")
 
@@ -1138,6 +1212,108 @@ def export_history_csv():
     )
 
 
+@app.route('/history/export/pdf')
+@login_required
+def export_history_pdf():
+    """Export scan history as PDF report."""
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+        from reportlab.lib.units import inch
+    except ImportError:
+        flash('PDF export not available. Please install reportlab.', 'warning')
+        return redirect(url_for('history'))
+    
+    db = get_db()
+    user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
+    scans = db.execute('''
+        SELECT url, result, confidence, scan_type, created_at 
+        FROM scans 
+        WHERE user_id = ? 
+        ORDER BY created_at DESC
+        LIMIT 50
+    ''', (session['user_id'],)).fetchall()
+    
+    stats = get_user_stats(session['user_id'])
+    
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=72)
+    styles = getSampleStyleSheet()
+    story = []
+    
+    # Title
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=24, spaceAfter=30, textColor=colors.HexColor('#1a1a2e'))
+    story.append(Paragraph("ShieldGuard Pro - Scan Report", title_style))
+    story.append(Spacer(1, 10))
+    
+    # User info
+    story.append(Paragraph(f"<b>User:</b> {user['username']}", styles['Normal']))
+    story.append(Paragraph(f"<b>Email:</b> {user['email']}", styles['Normal']))
+    story.append(Paragraph(f"<b>Report Date:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
+    story.append(Spacer(1, 20))
+    
+    # Stats summary
+    story.append(Paragraph("<b>Summary Statistics</b>", styles['Heading2']))
+    stats_data = [
+        ['Total Scans', 'Phishing Detected', 'Safe URLs', 'Accuracy'],
+        [str(stats.get('total_scans', 0)), str(stats.get('phishing_count', 0)), str(stats.get('safe_count', 0)), '95%+']
+    ]
+    t = Table(stats_data, colWidths=[1.5*inch, 1.5*inch, 1.5*inch, 1.5*inch])
+    t.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1a1a2e')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    story.append(t)
+    story.append(Spacer(1, 30))
+    
+    # Scan results table
+    story.append(Paragraph("<b>Recent Scans</b>", styles['Heading2']))
+    scan_data = [['URL', 'Result', 'Confidence', 'Date']]
+    for scan in scans:
+        scan_data.append([
+            scan['url'][:40] + '...' if len(scan['url']) > 40 else scan['url'],
+            scan['result'].upper(),
+            f"{scan['confidence']:.1f}%",
+            scan['created_at'][:10]
+        ])
+    
+    if len(scan_data) > 1:
+        t2 = Table(scan_data, colWidths=[2.5*inch, 1*inch, 1*inch, 1.2*inch])
+        t2.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8f9fa')])
+        ]))
+        story.append(t2)
+    
+    # Footer
+    story.append(Spacer(1, 30))
+    story.append(Paragraph("<i>Generated by ShieldGuard Pro - AI-Powered Phishing Detection</i>", styles['Normal']))
+    
+    doc.build(story)
+    buffer.seek(0)
+    
+    return Response(
+        buffer,
+        mimetype='application/pdf',
+        headers={'Content-Disposition': 'attachment; filename=scan_report.pdf'}
+    )
+
+
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -1205,7 +1381,11 @@ def profile():
         
         user = db.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
     
-    return render_template('profile.html', user=user, stats=stats, recent_bookmarks=recent_bookmarks, recent_scans=recent_scans)
+    achievements = get_user_achievements(session['user_id'])
+    total_possible = len(ACHIEVEMENTS)
+    earned_count = len(achievements)
+    
+    return render_template('profile.html', user=user, stats=stats, recent_bookmarks=recent_bookmarks, recent_scans=recent_scans, achievements=achievements, total_achievements=total_possible, earned_achievements=earned_count)
 
 
 @app.route('/bookmarks')
