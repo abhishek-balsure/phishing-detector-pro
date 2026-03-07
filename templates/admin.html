@@ -4,6 +4,17 @@
 
 {% block extra_css %}
 <style>
+    /* Override base.html dark theme for admin */
+    body {
+        background: #f1f5f9 !important;
+    }
+    body::before, body::after, .bg-blob {
+        display: none !important;
+    }
+    .navbar {
+        background: #1e293b !important;
+    }
+    
     :root {
         --sidebar-dark: #1e293b;
         --sidebar-hover: #334155;
