@@ -5,28 +5,32 @@
 {% block extra_css %}
 <style>
     :root {
-        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        --dark-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        --glass-bg: rgba(255, 255, 255, 0.95);
+        --sidebar-dark: #1e293b;
+        --sidebar-hover: #334155;
+        --content-bg: #f1f5f9;
+        --card-bg: #ffffff;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
     }
     
     .admin-sidebar {
-        background: var(--dark-gradient);
+        background: var(--sidebar-dark);
         min-height: calc(100vh - 56px);
         padding: 20px 0;
     }
     .admin-sidebar .nav-link {
-        color: rgba(255,255,255,0.7);
-        padding: 14px 20px;
+        color: #94a3b8;
+        padding: 12px 20px;
         border-radius: 10px;
-        margin: 5px 15px;
-        transition: all 0.3s;
+        margin: 4px 12px;
+        transition: all 0.2s;
+        font-weight: 500;
     }
     .admin-sidebar .nav-link:hover,
     .admin-sidebar .nav-link.active {
-        background: rgba(255,255,255,0.15);
+        background: var(--sidebar-hover);
         color: white;
-        transform: translateX(5px);
     }
     .admin-sidebar .nav-link i {
         margin-right: 12px;
@@ -34,38 +38,38 @@
     }
     .stat-card {
         border: none;
-        border-radius: 20px;
+        border-radius: 16px;
         color: white;
-        padding: 25px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        transition: transform 0.3s;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
     }
     .stat-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
     .admin-content {
-        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+        background: var(--content-bg);
         min-height: calc(100vh - 56px);
         padding: 30px;
     }
     .glass-card {
-        background: var(--glass-bg);
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
-        border: none;
+        background: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid var(--border-color);
     }
     .glass-card .card-header {
         background: transparent;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-        padding: 20px 25px;
+        border-bottom: 1px solid var(--border-color);
+        padding: 20px 24px;
     }
     .user-row {
         cursor: pointer;
-        transition: all 0.3s;
+        transition: background 0.2s;
     }
     .user-row:hover {
-        background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-        transform: scale(1.01);
+        background: #f8fafc;
     }
     .user-row td {
         vertical-align: middle;
@@ -73,7 +77,7 @@
     .user-avatar {
         width: 40px;
         height: 40px;
-        border-radius: 12px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -81,132 +85,146 @@
         color: white;
     }
     .admin-badge {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     }
     .action-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s;
+        transition: all 0.2s;
+        border: none;
     }
     .action-btn:hover {
-        transform: scale(1.15);
+        transform: scale(1.1);
     }
     .page-header {
-        background: var(--dark-gradient);
-        padding: 30px;
-        border-radius: 20px;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        padding: 28px 32px;
+        border-radius: 16px;
         color: white;
-        margin-bottom: 30px;
+        margin-bottom: 24px;
     }
     .nav-tabs .nav-link {
         border: none;
-        padding: 12px 25px;
-        color: #6c757d;
+        padding: 12px 20px;
+        color: var(--text-muted);
         font-weight: 500;
         border-radius: 10px;
-        transition: all 0.3s;
+        transition: all 0.2s;
     }
     .nav-tabs .nav-link.active {
-        background: var(--primary-gradient);
+        background: #1e293b;
         color: white;
     }
     .nav-tabs .nav-link:hover:not(.active) {
-        background: rgba(102, 126, 234, 0.1);
+        background: #e2e8f0;
     }
     .scan-result-badge {
-        padding: 6px 14px;
+        padding: 5px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 600;
     }
     .phishing-badge {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
-        color: white;
+        background: #fee2e2;
+        color: #dc2626;
     }
     .safe-badge {
-        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
-        color: white;
+        background: #dcfce7;
+        color: #16a34a;
     }
     .progress-custom {
-        height: 8px;
-        border-radius: 4px;
-        background: #e9ecef;
+        height: 6px;
+        border-radius: 3px;
+        background: #e2e8f0;
         overflow: hidden;
     }
     .progress-bar-custom {
         height: 100%;
-        border-radius: 4px;
+        border-radius: 3px;
         transition: width 0.5s ease;
     }
     .empty-state {
         padding: 50px;
-        text-align: center;
+        text-center;
     }
     .empty-state i {
-        font-size: 4rem;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 3rem;
+        color: #cbd5e1;
     }
     .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 15px;
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
     .table thead th {
-        background: #f8f9fa;
+        background: #f8fafc;
         border: none;
         font-weight: 600;
-        color: #495057;
-        padding: 15px;
+        color: #475569;
+        padding: 14px 16px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .table td {
-        padding: 15px;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 14px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        color: var(--text-dark);
     }
     .user-link {
-        color: #495057;
+        color: var(--text-dark);
         text-decoration: none;
         font-weight: 500;
     }
     .user-link:hover {
-        color: #667eea;
+        color: #6366f1;
     }
     .search-box {
-        background: #f8f9fa;
-        border: 2px solid transparent;
-        border-radius: 12px;
-        padding: 12px 20px;
-        transition: all 0.3s;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px;
+        padding: 10px 16px;
+        color: white;
+        transition: all 0.2s;
+    }
+    .search-box::placeholder {
+        color: rgba(255,255,255,0.6);
     }
     .search-box:focus {
-        background: white;
-        border-color: #667eea;
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.3);
         outline: none;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
     }
     .view-details-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #1e293b;
         border: none;
         color: white;
-        padding: 8px 16px;
-        border-radius: 10px;
+        padding: 6px 14px;
+        border-radius: 8px;
         font-size: 0.8rem;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: all 0.2s;
     }
     .view-details-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        background: #334155;
+        color: white;
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none;
+        color: white;
+    }
+    .btn-gradient:hover {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
         color: white;
     }
 </style>
@@ -228,11 +246,11 @@
                 </a>
                 <a class="nav-link" href="#users" data-bs-toggle="tab">
                     <i class="bi bi-people-fill"></i> Users
-                    <span class="badge bg-primary float-end">{{ total_users }}</span>
+                    <span class="badge float-end" style="background: #475569; font-size: 0.75rem;">{{ total_users }}</span>
                 </a>
                 <a class="nav-link" href="#scans" data-bs-toggle="tab">
                     <i class="bi bi-search"></i> All Scans
-                    <span class="badge bg-info float-end">{{ total_scans }}</span>
+                    <span class="badge float-end" style="background: #475569; font-size: 0.75rem;">{{ total_scans }}</span>
                 </a>
                 <a class="nav-link" href="#statistics" data-bs-toggle="tab">
                     <i class="bi bi-graph-up-arrow"></i> Statistics
@@ -262,10 +280,9 @@
                     <div class="d-flex align-items-center gap-3">
                         <!-- Search Form -->
                         <form method="GET" class="d-flex">
-                            <input type="text" name="search" class="form-control" 
+                            <input type="text" name="search" class="form-control search-box" 
                                    placeholder="Search users..." 
-                                   value="{{ search if search else '' }}"
-                                   style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                                   value="{{ search if search else '' }}">
                         </form>
                         <span class="badge bg-white text-dark fs-6">
                             <i class="bi bi-calendar"></i> {{ now.strftime('%B %d, %Y') }}
@@ -280,11 +297,11 @@
                     <!-- Stats Row -->
                     <div class="row g-4 mb-5">
                         <div class="col-md-3">
-                            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="opacity-75 mb-1">Total Users</h6>
-                                        <div class="stat-number" style="font-size: 2.2rem;">{{ total_users }}</div>
+                                        <div class="stat-number" style="font-size: 2rem;">{{ total_users }}</div>
                                     </div>
                                     <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
                                         <i class="bi bi-people"></i>
@@ -293,11 +310,11 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="opacity-75 mb-1">Total Scans</h6>
-                                        <div class="stat-number" style="font-size: 2.2rem;">{{ total_scans }}</div>
+                                        <div class="stat-number" style="font-size: 2rem;">{{ total_scans }}</div>
                                     </div>
                                     <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
                                         <i class="bi bi-search"></i>
@@ -306,11 +323,11 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="opacity-75 mb-1">Phishing Found</h6>
-                                        <div class="stat-number" style="font-size: 2.2rem;">{{ total_phishing }}</div>
+                                        <div class="stat-number" style="font-size: 2rem;">{{ total_phishing }}</div>
                                     </div>
                                     <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
                                         <i class="bi bi-shield-exclamation"></i>
@@ -319,11 +336,11 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                            <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="opacity-75 mb-1">Safe URLs</h6>
-                                        <div class="stat-number" style="font-size: 2.2rem;">{{ total_legitimate }}</div>
+                                        <div class="stat-number" style="font-size: 2rem;">{{ total_legitimate }}</div>
                                     </div>
                                     <div class="stat-icon" style="background: rgba(255,255,255,0.2);">
                                         <i class="bi bi-shield-check"></i>
@@ -336,7 +353,7 @@
                     <!-- Today's Stats -->
                     <div class="row g-4 mb-5">
                         <div class="col-md-6">
-                            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                            <div class="glass-card">
                                 <div class="card-body">
                                     <h6 class="text-muted mb-3"><i class="bi bi-calendar-check me-2"></i>Today's Activity</h6>
                                     <div class="d-flex justify-content-between">
@@ -345,7 +362,7 @@
                                             <small class="text-muted">New Users</small>
                                         </div>
                                         <div class="text-center">
-                                            <div class="h3 text-success mb-0">{{ scans_today }}</div>
+                                            <div class="h3 text-info mb-0">{{ scans_today }}</div>
                                             <small class="text-muted">Scans Today</small>
                                         </div>
                                     </div>
@@ -353,15 +370,15 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                            <div class="glass-card">
                                 <div class="card-body">
                                     <h6 class="text-muted mb-3"><i class="bi bi-trophy me-2"></i>Top Users</h6>
                                     {% if top_users %}
                                     <div class="d-flex justify-content-between align-items-center">
                                         {% for user in top_users[:3] %}
                                         <div class="text-center">
-                                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" 
-                                                 style="width: 40px; height: 40px; font-weight: 600;">
+                                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                                 style="width: 40px; height: 40px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
                                                 {{ user.username[0]|upper }}
                                             </div>
                                             <div class="small mt-1">{{ user.username[:8] }}</div>
@@ -380,32 +397,32 @@
                     <!-- Quick Actions & Recent Activity -->
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="glass-card card">
+                            <div class="glass-card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="bi bi-lightning-charge text-warning"></i> Quick Actions</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <div class="col-6">
-                                            <a href="{{ url_for('check_url') }}" class="btn btn-outline-primary w-100 py-3">
+                                            <a href="{{ url_for('check_url') }}" class="btn btn-outline-dark w-100 py-3">
                                                 <i class="bi bi-link-45deg fs-4 d-block mb-2"></i>
                                                 <span>Check URL</span>
                                             </a>
                                         </div>
                                         <div class="col-6">
-                                            <a href="{{ url_for('batch_check') }}" class="btn btn-outline-success w-100 py-3">
+                                            <a href="{{ url_for('batch_check') }}" class="btn btn-outline-dark w-100 py-3">
                                                 <i class="bi bi-files fs-4 d-block mb-2"></i>
                                                 <span>Batch Check</span>
                                             </a>
                                         </div>
                                         <div class="col-6">
-                                            <a href="#users" data-bs-toggle="tab" class="btn btn-outline-warning w-100 py-3">
+                                            <a href="#users" data-bs-toggle="tab" class="btn btn-outline-dark w-100 py-3">
                                                 <i class="bi bi-people fs-4 d-block mb-2"></i>
                                                 <span>Manage Users</span>
                                             </a>
                                         </div>
                                         <div class="col-6">
-                                            <a href="{{ url_for('api_docs') }}" class="btn btn-outline-info w-100 py-3">
+                                            <a href="{{ url_for('api_docs') }}" class="btn btn-outline-dark w-100 py-3">
                                                 <i class="bi bi-code-square fs-4 d-block mb-2"></i>
                                                 <span>API Docs</span>
                                             </a>
@@ -415,7 +432,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="glass-card card">
+                            <div class="glass-card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="bi bi-clock-history text-info"></i> Recent Activity</h5>
                                 </div>
@@ -472,10 +489,10 @@
 
                 <!-- Users Tab -->
                 <div class="tab-pane fade" id="users">
-                    <div class="glass-card card">
+                    <div class="glass-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="mb-0"><i class="bi bi-people-fill text-primary"></i> User Management</h4>
-                            <span class="badge bg-primary fs-6">{{ users|length }} Users</span>
+                            <span class="badge" style="background: #1e293b;">{{ users|length }} Users</span>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -496,13 +513,13 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <div class="user-avatar me-3" 
-                                                         style="background: linear-gradient(135deg, #{{ '%06x'|format((user.id * 123456) % 0xFFFFFF) }} 0%, #{{ '%06x'|format((user.id * 987654) % 0xFFFFFF) }} 100%);">
+                                                         style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
                                                         {{ user.username[0]|upper }}
                                                     </div>
                                                     <div>
                                                         <span class="user-link">{{ user.username }}</span>
                                                         {% if user.id == session.user_id %}
-                                                        <span class="badge bg-primary ms-1" style="font-size: 0.65rem;">You</span>
+                                                        <span class="badge bg-secondary ms-1" style="font-size: 0.65rem;">You</span>
                                                         {% endif %}
                                                     </div>
                                                 </div>
@@ -516,7 +533,7 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <span class="badge bg-info">{{ user.scan_count or 0 }}</span>
+                                                <span class="badge" style="background: #e2e8f0; color: #1e293b;">{{ user.scan_count or 0 }}</span>
                                             </td>
                                             <td>{{ user.created_at[:10] }}</td>
                                             <td onclick="event.stopPropagation();">
@@ -526,14 +543,14 @@
                                                 </a>
                                                 {% if user.id != session.user_id %}
                                                 <form action="{{ url_for('admin_toggle_admin', user_id=user.id) }}" method="POST" class="d-inline">
-                                                    <button type="submit" class="action-btn btn btn-warning btn-sm" 
+                                                    <button type="submit" class="action-btn btn" style="background: #fbbf24; color: #1e293b;"
                                                             onclick="event.stopPropagation(); return confirm('Toggle admin status for {{ user.username }}?')"
                                                             title="Toggle Admin">
                                                         <i class="bi bi-shield{% if not user.is_admin %}-check{% endif %}"></i>
                                                     </button>
                                                 </form>
                                                 <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST" class="d-inline">
-                                                    <button type="submit" class="action-btn btn btn-danger btn-sm" 
+                                                    <button type="submit" class="action-btn btn" style="background: #ef4444; color: white;"
                                                             onclick="event.stopPropagation(); return confirm('DELETE user {{ user.username }}? This cannot be undone!')"
                                                             title="Delete User">
                                                         <i class="bi bi-trash"></i>
@@ -552,7 +569,7 @@
 
                 <!-- Scans Tab -->
                 <div class="tab-pane fade" id="scans">
-                    <div class="glass-card card">
+                    <div class="glass-card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4 class="mb-0"><i class="bi bi-search text-primary"></i> All Scans</h4>
                             <div>
@@ -613,7 +630,7 @@
                                                     </small>
                                                 </div>
                                             </td>
-                                            <td><span class="badge bg-light text-dark">{{ scan.scan_type or 'single' }}</span></td>
+                                            <td><span class="badge" style="background: #e2e8f0; color: #1e293b;">{{ scan.scan_type or 'single' }}</span></td>
                                             <td><small class="text-muted">{{ scan.created_at }}</small></td>
                                         </tr>
                                         {% endfor %}
@@ -637,7 +654,7 @@
                 <div class="tab-pane fade" id="statistics">
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <div class="glass-card card">
+                            <div class="glass-card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="bi bi-calendar-week"></i> Scans Per Day (Last 7 Days)</h5>
                                 </div>
@@ -648,11 +665,11 @@
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between mb-1">
                                             <span class="fw-medium">{{ day.date }}</span>
-                                            <span class="badge bg-primary">{{ day.count }} scans</span>
+                                            <span class="badge" style="background: #1e293b; color: white;">{{ day.count }} scans</span>
                                         </div>
-                                        <div class="progress" style="height: 35px; border-radius: 10px;">
+                                        <div class="progress" style="height: 30px; border-radius: 8px;">
                                             <div class="progress-bar" 
-                                                 style="width: {{ (day.count / max_scans * 100) if max_scans > 0 else 0 }}%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+                                                 style="width: {{ (day.count / max_scans * 100) if max_scans > 0 else 0 }}%; background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);">
                                                 <span class="d-flex align-items-center px-3">{{ day.count }}</span>
                                             </div>
                                         </div>
@@ -668,7 +685,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="glass-card card">
+                            <div class="glass-card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="bi bi-calendar-month"></i> Monthly Trends (6 Months)</h5>
                                 </div>
@@ -679,9 +696,9 @@
                                     <div class="mb-3">
                                         <div class="d-flex justify-content-between mb-1">
                                             <span class="fw-medium">{{ month.month }}</span>
-                                            <span class="badge bg-info">{{ month.count }} scans</span>
+                                            <span class="badge" style="background: #06b6d4; color: white;">{{ month.count }} scans</span>
                                         </div>
-                                        <div class="progress" style="height: 25px; border-radius: 10px;">
+                                        <div class="progress" style="height: 22px; border-radius: 8px;">
                                             <div class="progress-bar bg-info" 
                                                  style="width: {{ (month.count / max_monthly * 100) if max_monthly > 0 else 0 }}%;">
                                                 <span class="d-flex align-items-center px-3">{{ month.count }}</span>
@@ -701,7 +718,7 @@
                     </div>
                     <div class="row g-4">
                         <div class="col-md-4">
-                            <div class="glass-card card">
+                            <div class="glass-card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Detection Ratio</h5>
                                 </div>
@@ -717,7 +734,7 @@
                                             <span><i class="bi bi-shield-exclamation text-danger"></i> Phishing</span>
                                             <strong>{{ total_phishing }}</strong>
                                         </div>
-                                        <div class="progress" style="height: 10px; border-radius: 5px;">
+                                        <div class="progress" style="height: 8px; border-radius: 4px;">
                                             <div class="progress-bar bg-danger" style="width: {{ (total_phishing / total_scans) * 100 }}%"></div>
                                         </div>
                                     </div>
@@ -726,7 +743,7 @@
                                             <span><i class="bi bi-shield-check text-success"></i> Safe</span>
                                             <strong>{{ total_legitimate }}</strong>
                                         </div>
-                                        <div class="progress" style="height: 10px; border-radius: 5px;">
+                                        <div class="progress" style="height: 8px; border-radius: 4px;">
                                             <div class="progress-bar bg-success" style="width: {{ (total_legitimate / total_scans) * 100 }}%"></div>
                                         </div>
                                     </div>
