@@ -38,18 +38,55 @@
     .hero-input::placeholder {
         color: rgba(255,255,255,0.6);
     }
-    .btn-danger-custom {
-        background-color: #E63946;
+    .quick-scan-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    .quick-scan-header {
+        background: linear-gradient(135deg, #0A1628 0%, #1a3a5c 100%);
+        padding: 1.5rem;
+    }
+    .quick-url-input {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    .quick-url-input:focus {
         border-color: #E63946;
+        box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+        outline: none;
     }
-    .btn-danger-custom:hover {
-        background-color: #c1121f;
-        border-color: #c1121f;
+    .quick-scan-btn {
+        background: linear-gradient(135deg, #E63946 0%, #c1121f 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
-    .stats-card {
-        background: rgba(255,255,255,0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.1);
+    .quick-scan-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3);
+    }
+    .quick-badges {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    .quick-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    .quick-badge i {
+        font-size: 1rem;
     }
 </style>
 {% endblock %}
@@ -57,36 +94,49 @@
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-gradient py-5">
-    <div class="container position-relative py-5">
+    <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
+            <div class="col-lg-10 text-center">
                 <h1 class="display-4 fw-bold text-white mb-3">
                     <i class="bi bi-shield-fill-check text-danger me-2"></i>
                     Phishing Detector <span class="text-danger">Pro</span>
                 </h1>
-                <p class="lead text-white-50 mb-4">
+                <p class="lead text-white-50 mb-5">
                     Detect phishing URLs with 95%+ accuracy using Machine Learning
                 </p>
                 
-                <!-- Quick URL Input -->
-                <div class="card shadow-lg border-0" style="background: rgba(255,255,255,0.95); border-radius: 16px;">
+                <!-- Quick URL Input - Centered -->
+                <div class="quick-scan-card">
+                    <div class="quick-scan-header text-center">
+                        <h5 class="text-white mb-0 fw-bold">
+                            <i class="bi bi-lightning me-2"></i>Quick URL Check
+                        </h5>
+                    </div>
                     <div class="card-body p-4">
-                        <form action="{{ url_for('quick_check') }}" method="POST" class="row g-3 align-items-center">
-                            <div class="col-md-9">
-                                <input type="url" name="url" class="form-control form-control-lg hero-input" 
-                                       placeholder="Paste any URL to check..." required 
-                                       style="background: #f8f9fa; color: #333; border: 2px solid #dee2e6;">
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-danger-custom btn-lg w-100 text-white fw-bold">
-                                    <i class="bi bi-search me-2"></i>Scan URL
-                                </button>
+                        <form action="{{ url_for('quick_check') }}" method="POST">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-9">
+                                    <input type="url" name="url" class="form-control form-control-lg quick-url-input" 
+                                           placeholder="Paste any URL to check (e.g., https://example.com)" required>
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <button type="submit" class="btn quick-scan-btn w-100 text-white fw-bold">
+                                        <i class="bi bi-shield-check me-2"></i>Scan URL
+                                    </button>
+                                </div>
                             </div>
                         </form>
-                        <small class="text-muted d-block mt-2">
-                            <i class="bi bi-shield-check text-success me-1"></i>
-                            Free • Instant • Secure
-                        </small>
+                        <div class="quick-badges">
+                            <span class="quick-badge">
+                                <i class="bi bi-shield-check text-success"></i> Free
+                            </span>
+                            <span class="quick-badge">
+                                <i class="bi bi-lightning text-warning"></i> Instant
+                            </span>
+                            <span class="quick-badge">
+                                <i class="bi bi-lock text-primary"></i> Secure
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
