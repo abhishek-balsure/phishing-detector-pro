@@ -2,159 +2,53 @@
 
 {% block extra_css %}
 <style>
-    .scanner-card {
-        background: #ffffff;
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-    .scanner-header {
-        background: linear-gradient(135deg, #0A1628 0%, #1a3a5c 100%);
-        padding: 2rem;
-    }
     .url-input {
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
+        background: var(--bg-surface);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
         padding: 1rem 1.25rem;
         font-size: 1rem;
         transition: all 0.3s ease;
+        color: var(--text-primary);
     }
     .url-input:focus {
-        border-color: #E63946;
-        box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+        border-color: var(--accent-glow);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
         outline: none;
+        background: var(--bg-surface);
+        color: var(--text-primary);
     }
-    .scan-btn {
-        background: linear-gradient(135deg, #E63946 0%, #c1121f 100%);
-        border: none;
-        border-radius: 12px;
-        padding: 1rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
+    .url-input::placeholder {
+        color: var(--text-muted);
     }
-    .scan-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3);
-    }
-    .result-card {
-        border-radius: 20px;
-        padding: 2rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-    .result-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 6px;
-    }
-    .result-phishing {
-        background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
-        border: 2px solid #dc3545;
-    }
-    .result-phishing::before {
-        background: linear-gradient(90deg, #dc3545, #c82333);
-    }
-    .result-safe {
-        background: linear-gradient(180deg, #f0fff4 0%, #ffffff 100%);
-        border: 2px solid #198754;
-    }
-    .result-safe::before {
-        background: linear-gradient(90deg, #198754, #146c43);
-    }
-    .result-borderline {
-        background: linear-gradient(180deg, #fffbf0 0%, #ffffff 100%);
-        border: 2px solid #ffc107;
-    }
-    .result-borderline::before {
-        background: linear-gradient(90deg, #ffc107, #e0a800);
-    }
-    .result-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-    }
-    .result-phishing .result-icon {
-        background: linear-gradient(135deg, #dc3545, #c82333);
-        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
-    }
-    .result-safe .result-icon {
-        background: linear-gradient(135deg, #198754, #146c43);
-        box-shadow: 0 10px 30px rgba(25, 135, 84, 0.3);
-    }
-    .result-borderline .result-icon {
-        background: linear-gradient(135deg, #ffc107, #e0a800);
-        box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
-    }
-    .confidence-ring {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 1rem auto;
-        position: relative;
-    }
-    .confidence-ring::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 50%;
-        padding: 6px;
-        background: conic-gradient(var(--ring-color) var(--ring-progress), #e9ecef 0);
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-    }
-    .confidence-value {
-        font-size: 2rem;
-        font-weight: 700;
+    .url-box {
+        background: var(--bg-surface);
+        border-radius: var(--radius-sm);
+        padding: 0.75rem 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        word-break: break-all;
+        border: 1px solid var(--border-color);
     }
     .feature-card {
-        background: #fff;
-        border-radius: 12px;
+        background: var(--glass-bg);
+        border-radius: var(--radius-md);
         padding: 1rem;
         margin-bottom: 0.75rem;
-        border: 1px solid #e9ecef;
+        border: 1px solid var(--border-color);
         transition: all 0.3s ease;
     }
     .feature-card:hover {
-        border-color: #E63946;
+        border-color: var(--accent-glow);
         transform: translateX(4px);
     }
     .feature-card.safe:hover {
-        border-color: #198754;
-    }
-    .severity-badge {
-        font-size: 0.7rem;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-weight: 600;
-    }
-    .severity-high {
-        background: #dc3545;
-        color: white;
-    }
-    .severity-medium {
-        background: #ffc107;
-        color: #1a1a2e;
-    }
-    .severity-low {
-        background: #6c757d;
-        color: white;
+        border-color: var(--safe);
     }
     .probability-bar {
         height: 8px;
         border-radius: 4px;
-        background: #e9ecef;
+        background: var(--border-color);
         overflow: hidden;
     }
     .probability-fill {
@@ -162,30 +56,8 @@
         border-radius: 4px;
         transition: width 1s ease;
     }
-    .url-box {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        font-family: 'Courier New', monospace;
-        font-size: 0.85rem;
-        word-break: break-all;
-        border: 1px solid #e9ecef;
-    }
-    .action-btn {
-        border-radius: 10px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
-    .learn-more-btn {
-        background: #0A1628;
-        color: white;
-        border: none;
-    }
-    .learn-more-btn:hover {
-        background: #1a3a5c;
-        color: white;
-    }
+    .probability-fill.bg-danger { background: var(--danger); }
+    .probability-fill.bg-success { background: var(--safe); }
 </style>
 {% endblock %}
 
@@ -196,7 +68,7 @@
     <div class="row justify-content-center">
         <div class="col-lg-9">
             <!-- Scanner Card -->
-            <div class="scanner-card">
+            <div class="glass-card">
                 <div class="scanner-header text-center">
                     <i class="bi bi-shield-check text-danger" style="font-size: 3rem;"></i>
                     <h2 class="text-white fw-bold mt-2">URL Scanner</h2>
@@ -206,9 +78,9 @@
                 <div class="card-body p-4 p-lg-5">
                     <form method="POST" action="{{ url_for('check_url') }}" id="urlCheckForm">
                         <div class="mb-4">
-                            <label for="url" class="form-label fw-bold text-dark">URL to Analyze</label>
+                            <label for="url" class="form-label fw-bold">URL to Analyze</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0">
+                                <span class="input-group-text bg-dark border-end-0 border-secondary">
                                     <i class="bi bi-globe2 text-muted"></i>
                                 </span>
                                 <input type="url" class="form-control url-input" id="url" name="url"
@@ -216,7 +88,7 @@
                                     {% if url %}value="{{ url }}"{% endif %}>
                             </div>
                         </div>
-                        <button type="submit" class="scan-btn btn btn-danger text-white w-100">
+                        <button type="submit" class="btn btn-glow w-100">
                             <i class="bi bi-shield-check me-2"></i>Analyze URL
                         </button>
                     </form>
@@ -226,7 +98,7 @@
                         <!-- URL Display -->
                         <div class="mb-4">
                             <label class="form-label fw-bold text-muted small text-uppercase">Analyzed URL</label>
-                            <div class="url-box">{{ url }}</div>
+                            <div class="url-box text-white">{{ url }}</div>
                         </div>
 
                         <!-- Result Card -->
@@ -237,10 +109,10 @@
                             <div class="result-icon">
                                 <i class="bi bi-exclamation-triangle-fill text-white" style="font-size: 2.5rem;"></i>
                             </div>
-                            <h3 class="fw-bold text-danger mb-2">⚠️ Phishing Detected!</h3>
+                            <h3 class="fw-bold text-danger mb-2">Phishing Detected!</h3>
                             <p class="text-muted mb-3">This URL shows characteristics of a phishing attack</p>
                             
-                            <div class="confidence-ring" style="--ring-color: #dc3545; --ring-progress: {{ result.confidence }}%;">
+                            <div class="confidence-ring" style="--ring-color: #ef4444; --ring-progress: {{ result.confidence }}%;">
                                 <span class="confidence-value text-danger">{{ "%.0f"|format(result.confidence) }}%</span>
                             </div>
                             <small class="text-muted">Confidence Score</small>
@@ -251,7 +123,7 @@
                             <div class="result-icon">
                                 <i class="bi bi-exclamation-triangle text-white" style="font-size: 2.5rem;"></i>
                             </div>
-                            <h3 class="fw-bold text-warning mb-2">⚠️ Borderline</h3>
+                            <h3 class="fw-bold text-warning mb-2">Borderline</h3>
                             <p class="text-muted mb-3">This URL has ambiguous features. Use caution.</p>
                             
                             <div class="confidence-ring" style="--ring-color: #ffc107; --ring-progress: {{ result.confidence }}%;">
@@ -265,10 +137,10 @@
                             <div class="result-icon">
                                 <i class="bi bi-check-circle-fill text-white" style="font-size: 2.5rem;"></i>
                             </div>
-                            <h3 class="fw-bold text-success mb-2">✅ URL is Safe</h3>
+                            <h3 class="fw-bold text-success mb-2">URL is Safe</h3>
                             <p class="text-muted mb-3">This URL appears to be legitimate</p>
                             
-                            <div class="confidence-ring" style="--ring-color: #198754; --ring-progress: {{ result.confidence }}%;">
+                            <div class="confidence-ring" style="--ring-color: #10b981; --ring-progress: {{ result.confidence }}%;">
                                 <span class="confidence-value text-success">{{ "%.0f"|format(result.confidence) }}%</span>
                             </div>
                             <small class="text-muted">Confidence Score</small>
@@ -309,16 +181,16 @@
                             </h6>
                             <div class="row g-3">
                                 <div class="col-6">
-                                    <div class="text-center p-3 bg-light rounded">
+                                    <div class="text-center p-3 glass-card rounded">
                                         <div class="fw-bold text-danger fs-4">{{ "%.1f"|format(result.probability_phishing) }}%</div>
                                         <small class="text-muted">Phishing Probability</small>
                                         <div class="probability-bar mt-2">
-                                            <div class="probability-fill bg-danger" style=".probability_phwidth: {{ resultishing }}%;"></div>
+                                            <div class="probability-fill bg-danger" style="width: {{ result.probability_phishing }}%;"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="text-center p-3 bg-light rounded">
+                                    <div class="text-center p-3 glass-card rounded">
                                         <div class="fw-bold text-success fs-4">{{ "%.1f"|format(result.probability_legitimate) }}%</div>
                                         <small class="text-muted">Safe Probability</small>
                                         <div class="probability-bar mt-2">
@@ -332,10 +204,10 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex gap-3 justify-content-center">
-                            <button class="action-btn learn-more-btn" data-bs-toggle="modal" data-bs-target="#explanationModal">
+                            <button class="btn btn-glow" data-bs-toggle="modal" data-bs-target="#explanationModal">
                                 <i class="bi bi-lightbulb me-2"></i>Learn More
                             </button>
-                            <a href="{{ url_for('check_url') }}" class="action-btn btn btn-outline-dark">
+                            <a href="{{ url_for('check_url') }}" class="btn btn-outline-light">
                                 <i class="bi bi-arrow-repeat me-2"></i>Scan Another
                             </a>
                         </div>
@@ -351,8 +223,8 @@
 {% if result %}
 <div class="modal fade" id="explanationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <div class="modal-header border-0" style="background: linear-gradient(135deg, #0A1628, #1a3a5c);">
+        <div class="modal-content border-0 shadow-lg glass-card" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-0" style="background: var(--primary-gradient);">
                 <h5 class="modal-title text-white">
                     <i class="bi {{ 'bi-exclamation-triangle' if result.is_phishing else 'bi-check-circle' }} me-2"></i>
                     Analysis Details
@@ -361,7 +233,7 @@
             </div>
             <div class="modal-body p-4">
                 {% if result.is_phishing %}
-                <div class="alert alert-danger">
+                <div class="alert alert-danger bg-danger bg-opacity20 border-danger">
                     <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>This URL was classified as phishing</strong>
                 </div>
                 <h6>How we analyzed:</h6>
@@ -372,12 +244,12 @@
                 </ol>
                 <h6 class="mt-3">Recommendations:</h6>
                 <ul class="small">
-                    <li>❌ Do NOT visit this URL</li>
-                    <li>❌ Do NOT enter personal information</li>
-                    <li>📢 Report to authorities</li>
+                    <li>Do NOT visit this URL</li>
+                    <li>Do NOT enter personal information</li>
+                    <li>Report to authorities</li>
                 </ul>
                 {% else %}
-                <div class="alert alert-success">
+                <div class="alert alert-success bg-success bg-opacity-20 border-success">
                     <strong><i class="bi bi-shield-check me-2"></i>This URL appears legitimate</strong>
                 </div>
                 <h6>How we analyzed:</h6>
@@ -386,7 +258,7 @@
                     <li><strong>ML Classification</strong> - No phishing patterns detected</li>
                     <li><strong>Confidence</strong> - {{ "%.1f"|format(result.confidence) }}% certain</li>
                 </ol>
-                <div class="alert alert-info mt-3">
+                <div class="alert alert-info bg-info bg-opacity-20 border-info mt-3">
                     <small><i class="bi bi-info-circle me-1"></i>Always verify before entering sensitive data!</small>
                 </div>
                 {% endif %}
