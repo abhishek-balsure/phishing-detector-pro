@@ -2,62 +2,189 @@
 
 {% block extra_css %}
 <style>
-    .result-card-phishing {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-        color: white;
-        border-radius: 16px;
-        padding: 2rem;
-    }
-    .result-card-safe {
-        background: linear-gradient(135deg, #198754 0%, #146c43 100%);
-        color: white;
-        border-radius: 16px;
-        padding: 2rem;
-    }
-    .result-card-borderline {
-        background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-        color: #1a1a2e;
-        border-radius: 16px;
-        padding: 2rem;
-    }
-    .confidence-meter {
-        height: 12px;
-        border-radius: 6px;
-        background: rgba(255,255,255,0.3);
+    .scanner-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
         overflow: hidden;
     }
-    .confidence-meter-fill {
-        height: 100%;
-        border-radius: 6px;
-        transition: width 1s ease-in-out;
+    .scanner-header {
+        background: linear-gradient(135deg, #0A1628 0%, #1a3a5c 100%);
+        padding: 2rem;
     }
-    .feature-item {
-        background: rgba(255,255,255,0.1);
-        border-radius: 8px;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
+    .url-input {
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
     }
-    .feature-name {
+    .url-input:focus {
+        border-color: #E63946;
+        box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.1);
+        outline: none;
+    }
+    .scan-btn {
+        background: linear-gradient(135deg, #E63946 0%, #c1121f 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
         font-weight: 600;
-        font-size: 0.9rem;
+        transition: all 0.3s ease;
     }
-    .feature-bar {
+    .scan-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(230, 57, 70, 0.3);
+    }
+    .result-card {
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
         height: 6px;
-        border-radius: 3px;
-        background: rgba(0,0,0,0.2);
-        margin-top: 0.25rem;
     }
-    .feature-bar-fill {
+    .result-phishing {
+        background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%);
+        border: 2px solid #dc3545;
+    }
+    .result-phishing::before {
+        background: linear-gradient(90deg, #dc3545, #c82333);
+    }
+    .result-safe {
+        background: linear-gradient(180deg, #f0fff4 0%, #ffffff 100%);
+        border: 2px solid #198754;
+    }
+    .result-safe::before {
+        background: linear-gradient(90deg, #198754, #146c43);
+    }
+    .result-borderline {
+        background: linear-gradient(180deg, #fffbf0 0%, #ffffff 100%);
+        border: 2px solid #ffc107;
+    }
+    .result-borderline::before {
+        background: linear-gradient(90deg, #ffc107, #e0a800);
+    }
+    .result-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    .result-phishing .result-icon {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+    }
+    .result-safe .result-icon {
+        background: linear-gradient(135deg, #198754, #146c43);
+        box-shadow: 0 10px 30px rgba(25, 135, 84, 0.3);
+    }
+    .result-borderline .result-icon {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        box-shadow: 0 10px 30px rgba(255, 193, 7, 0.3);
+    }
+    .confidence-ring {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 1rem auto;
+        position: relative;
+    }
+    .confidence-ring::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        padding: 6px;
+        background: conic-gradient(var(--ring-color) var(--ring-progress), #e9ecef 0);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+    .confidence-value {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    .feature-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+        border-color: #E63946;
+        transform: translateX(4px);
+    }
+    .feature-card.safe:hover {
+        border-color: #198754;
+    }
+    .severity-badge {
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    .severity-high {
+        background: #dc3545;
+        color: white;
+    }
+    .severity-medium {
+        background: #ffc107;
+        color: #1a1a2e;
+    }
+    .severity-low {
+        background: #6c757d;
+        color: white;
+    }
+    .probability-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+    .probability-fill {
         height: 100%;
-        border-radius: 3px;
+        border-radius: 4px;
+        transition: width 1s ease;
     }
-    .url-display {
-        background: rgba(0,0,0,0.2);
+    .url-box {
+        background: #f8f9fa;
         border-radius: 8px;
-        padding: 0.75rem;
-        word-break: break-all;
-        font-family: monospace;
+        padding: 0.75rem 1rem;
+        font-family: 'Courier New', monospace;
         font-size: 0.85rem;
+        word-break: break-all;
+        border: 1px solid #e9ecef;
+    }
+    .action-btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .learn-more-btn {
+        background: #0A1628;
+        color: white;
+        border: none;
+    }
+    .learn-more-btn:hover {
+        background: #1a3a5c;
+        color: white;
     }
 </style>
 {% endblock %}
@@ -65,88 +192,90 @@
 {% block title %}URL Scanner - Phishing Detector Pro{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-9">
             <!-- Scanner Card -->
-            <div class="card shadow-lg fade-in-up border-0">
-                <div class="card-header d-flex align-items-center gap-2" style="background: #0A1628; color: #fff;">
-                    <i class="bi bi-shield-check fs-4 text-danger"></i>
-                    <h4 class="mb-0">URL Scanner</h4>
+            <div class="scanner-card">
+                <div class="scanner-header text-center">
+                    <i class="bi bi-shield-check text-danger" style="font-size: 3rem;"></i>
+                    <h2 class="text-white fw-bold mt-2">URL Scanner</h2>
+                    <p class="text-white-50 mb-0">Enter any URL to check if it's safe or phishing</p>
                 </div>
-                <div class="card-body p-4">
-                    <form method="POST"
-                        action="{% if quick_check %}{{ url_for('quick_check') }}{% else %}{{ url_for('check_url') }}{% endif %}"
-                        id="urlCheckForm">
-                        <div class="mb-3">
-                            <label for="url" class="form-label fw-bold">Enter URL to Analyze</label>
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text bg-white"><i class="bi bi-globe2 text-danger"></i></span>
-                                <input type="url" class="form-control" id="url" name="url"
-                                    placeholder="https://example.com" required {% if url %}value="{{ url }}" {% endif %}>
+                
+                <div class="card-body p-4 p-lg-5">
+                    <form method="POST" action="{{ url_for('check_url') }}" id="urlCheckForm">
+                        <div class="mb-4">
+                            <label for="url" class="form-label fw-bold text-dark">URL to Analyze</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="bi bi-globe2 text-muted"></i>
+                                </span>
+                                <input type="url" class="form-control url-input" id="url" name="url"
+                                    placeholder="https://example.com" required 
+                                    {% if url %}value="{{ url }}"{% endif %}>
                             </div>
-                            <div class="form-text"><i class="bi bi-info-circle"></i> We analyze 25+ URL features using ML.</div>
                         </div>
-                        <button type="submit" class="btn btn-lg w-100" style="background: #E63946; border-color: #E63946; color: white;">
-                            <i class="bi bi-shield-check"></i> Analyze URL
+                        <button type="submit" class="scan-btn btn btn-danger text-white w-100">
+                            <i class="bi bi-shield-check me-2"></i>Analyze URL
                         </button>
                     </form>
 
                     {% if result %}
-                    <div class="result-section mt-4 fade-in-up">
-                        <hr>
-                        
+                    <div class="mt-5">
                         <!-- URL Display -->
                         <div class="mb-4">
-                            <label class="form-label text-muted small fw-bold text-uppercase">URL Analyzed</label>
-                            <div class="url-display">
-                                {{ url }}
-                            </div>
+                            <label class="form-label fw-bold text-muted small text-uppercase">Analyzed URL</label>
+                            <div class="url-box">{{ url }}</div>
                         </div>
 
-                        <!-- Color-coded Result Card -->
-                        {% set result_class = 'result-card-phishing' %}
-                        {% set result_icon = 'bi-exclamation-triangle-fill' %}
-                        {% set result_title = 'Phishing Detected!' %}
+                        <!-- Result Card -->
                         {% set is_borderline = result.confidence >= 40 and result.confidence <= 60 %}
                         
-                        {% if result.is_legitimate and not is_borderline %}
-                            {% set result_class = 'result-card-safe' %}
-                            {% set result_icon = 'bi-check-circle-fill' %}
-                            {% set result_title = 'URL is Safe' %}
-                        {% elif is_borderline %}
-                            {% set result_class = 'result-card-borderline' %}
-                            {% set result_icon = 'bi-exclamation-triangle' %}
-                            {% set result_title = 'Borderline - Use Caution' %}
-                        {% endif %}
-                        
-                        <div class="{{ result_class }} mb-4">
-                            <div class="text-center">
-                                <i class="bi {{ result_icon }} display-3 d-block mb-2"></i>
-                                <h3 class="fw-bold mb-2">{{ result_title }}</h3>
-                                
-                                <!-- Confidence Meter -->
-                                <div class="mt-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <small>Confidence</small>
-                                        <small class="fw-bold">{{ "%.1f"|format(result.confidence) }}%</small>
-                                    </div>
-                                    <div class="confidence-meter">
-                                        <div class="confidence-meter-fill" style="width: {{ result.confidence }}%; background: rgba(255,255,255,0.8);"></div>
-                                    </div>
-                                </div>
-                                
-                                {% if result.is_phishing %}
-                                <p class="mt-2 mb-0 opacity-75">This URL shows characteristics of a phishing attack.</p>
-                                {% elif is_borderline %}
-                                <p class="mt-2 mb-0 opacity-75">This URL has ambiguous features. Proceed with caution.</p>
-                                {% else %}
-                                <p class="mt-2 mb-0 opacity-75">This URL appears to be legitimate.</p>
-                                {% endif %}
+                        {% if result.is_phishing %}
+                        <div class="result-card result-phishing mb-4">
+                            <div class="result-icon">
+                                <i class="bi bi-exclamation-triangle-fill text-white" style="font-size: 2.5rem;"></i>
                             </div>
+                            <h3 class="fw-bold text-danger mb-2">⚠️ Phishing Detected!</h3>
+                            <p class="text-muted mb-3">This URL shows characteristics of a phishing attack</p>
+                            
+                            <div class="confidence-ring" style="--ring-color: #dc3545; --ring-progress: {{ result.confidence }}%;">
+                                <span class="confidence-value text-danger">{{ "%.0f"|format(result.confidence) }}%</span>
+                            </div>
+                            <small class="text-muted">Confidence Score</small>
                         </div>
+                        
+                        {% elif is_borderline %}
+                        <div class="result-card result-borderline mb-4">
+                            <div class="result-icon">
+                                <i class="bi bi-exclamation-triangle text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h3 class="fw-bold text-warning mb-2">⚠️ Borderline</h3>
+                            <p class="text-muted mb-3">This URL has ambiguous features. Use caution.</p>
+                            
+                            <div class="confidence-ring" style="--ring-color: #ffc107; --ring-progress: {{ result.confidence }}%;">
+                                <span class="confidence-value text-warning">{{ "%.0f"|format(result.confidence) }}%</span>
+                            </div>
+                            <small class="text-muted">Confidence Score</small>
+                        </div>
+                        
+                        {% else %}
+                        <div class="result-card result-safe mb-4">
+                            <div class="result-icon">
+                                <i class="bi bi-check-circle-fill text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h3 class="fw-bold text-success mb-2">✅ URL is Safe</h3>
+                            <p class="text-muted mb-3">This URL appears to be legitimate</p>
+                            
+                            <div class="confidence-ring" style="--ring-color: #198754; --ring-progress: {{ result.confidence }}%;">
+                                <span class="confidence-value text-success">{{ "%.0f"|format(result.confidence) }}%</span>
+                            </div>
+                            <small class="text-muted">Confidence Score</small>
+                        </div>
+                        {% endif %}
 
-                        <!-- Why is this suspicious? / Why is this safe? -->
+                        <!-- Why Section -->
                         {% if result.feature_importance and result.feature_importance|length > 0 %}
                         <div class="mb-4">
                             <h5 class="fw-bold mb-3">
@@ -155,20 +284,18 @@
                             </h5>
                             
                             {% for feature in result.feature_importance[:5] %}
-                            <div class="feature-item">
+                            <div class="feature-card {% if not result.is_phishing %}safe{% endif %}">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div class="feature-name">
-                                        {% if feature.severity == 'high' %}
-                                        <span class="badge bg-danger me-2">HIGH</span>
-                                        {% elif feature.severity == 'medium' %}
-                                        <span class="badge bg-warning text-dark me-2">MED</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary me-2">LOW</span>
-                                        {% endif %}
-                                        {{ feature.feature }}
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <span class="severity-badge severity-{{ feature.severity }} me-2">
+                                                {{ feature.severity|upper }}
+                                            </span>
+                                            <strong>{{ feature.feature }}</strong>
+                                        </div>
+                                        <small class="text-muted">{{ feature.description }}</small>
                                     </div>
                                 </div>
-                                <small class="opacity-75">{{ feature.description }}</small>
                             </div>
                             {% endfor %}
                         </div>
@@ -177,449 +304,98 @@
                         <!-- Probability Breakdown -->
                         {% if result.probability_phishing and result.probability_legitimate %}
                         <div class="mb-4">
-                            <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2"></i>Probability Breakdown</h6>
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-pie-chart me-2"></i>Probability Breakdown
+                            </h6>
                             <div class="row g-3">
                                 <div class="col-6">
-                                    <div class="text-center p-3 rounded" style="background: rgba(220,53,69,0.1);">
-                                        <div class="fs-4 fw-bold text-danger">{{ "%.1f"|format(result.probability_phishing) }}%</div>
-                                        <small class="text-muted">Phishing</small>
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <div class="fw-bold text-danger fs-4">{{ "%.1f"|format(result.probability_phishing) }}%</div>
+                                        <small class="text-muted">Phishing Probability</small>
+                                        <div class="probability-bar mt-2">
+                                            <div class="probability-fill bg-danger" style=".probability_phwidth: {{ resultishing }}%;"></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="text-center p-3 rounded" style="background: rgba(25,135,84,0.1);">
-                                        <div class="fs-4 fw-bold text-success">{{ "%.1f"|format(result.probability_legitimate) }}%</div>
-                                        <small class="text-muted">Legitimate</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- Learn More Button -->
-                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#explanationModal">
-                            <i class="bi bi-lightbulb me-2"></i>Learn More
-                        </button>
-                    </div>
-                    {% endif %}
-
-                    <!-- Error State -->
-                    {% if result and result.error %}
-                    <div class="alert alert-danger mt-4">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        {{ result.error }}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Explanation Modal -->
-{% if result %}
-<div class="modal fade" id="explanationModal" tabindex="-1" aria-labelledby="explanationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header" style="background: #0A1628; color: white;">
-                <h5 class="modal-title" id="explanationModalLabel">
-                    <i class="bi {{ 'bi-exclamation-triangle' if result.is_phishing else 'bi-check-circle' }} me-2"></i>
-                    {{ 'Phishing Analysis Details' if result.is_phishing else 'Safe URL Details' }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {% if result.is_phishing %}
-                <div class="alert alert-danger">
-                    <h6><i class="bi bi-exclamation-triangle-fill me-2"></i>This URL was classified as phishing</h6>
-                </div>
-                <h6 class="fw-bold mb-3">🔍 Analysis Details:</h6>
-                <ol>
-                    <li><strong>Feature Extraction</strong> - 25+ URL features were analyzed</li>
-                    <li><strong>ML Prediction</strong> - Random Forest classifier detected phishing patterns</li>
-                    <li><strong>Confidence</strong> - {{ "%.1f"|format(result.confidence) }}% certain this is malicious</li>
-                </ol>
-                <h6 class="fw-bold mt-4 mb-3">🛡️ Recommendations:</h6>
-                <ul>
-                    <li>Do NOT visit this URL</li>
-                    <li>Do NOT enter any personal information</li>
-                    <li>Report this URL to authorities</li>
-                </ul>
-                {% else %}
-                <div class="alert alert-success">
-                    <h6><i class="bi bi-shield-check me-2"></i>This URL appears legitimate</h6>
-                </div>
-                <h6 class="fw-bold mb-3">🔍 Analysis Details:</h6>
-                <ol>
-                    <li><strong>Feature Extraction</strong> - 25+ URL features analyzed</li>
-                    <li><strong>ML Prediction</strong> - No phishing patterns detected</li>
-                    <li><strong>Confidence</strong> - {{ "%.1f"|format(result.confidence) }}% certain this is safe</li>
-                </ol>
-                <div class="alert alert-info mt-4">
-                    <i class="bi bi-info-circle me-2"></i>Always stay vigilant even with safe URLs!
-                </div>
-                {% endif %}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="{{ url_for('check_url') }}" class="btn" style="background: #E63946; color: white;">Scan Another</a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
-                        <!-- Threat Intelligence Section -->
-                        {% if threat_intel %}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-shield-lock"></i> Threat Intelligence Cross-Validation
-                            </label>
-                            <div class="threat-intel-card">
-                                <div class="row g-3">
-                                    <div class="col-md-4 text-center">
-                                        <div class="ti-summary">
-                                            {% if threat_intel.threat_level == 'critical' %}
-                                            <div class="ti-level critical"><i
-                                                    class="bi bi-exclamation-octagon-fill"></i></div>
-                                            <span class="badge bg-danger">CRITICAL</span>
-                                            {% elif threat_intel.threat_level == 'high' %}
-                                            <div class="ti-level high"><i class="bi bi-exclamation-triangle-fill"></i>
-                                            </div>
-                                            <span class="badge bg-warning text-dark">HIGH RISK</span>
-                                            {% else %}
-                                            <div class="ti-level low"><i class="bi bi-check-circle-fill"></i></div>
-                                            <span class="badge bg-success">LOW RISK</span>
-                                            {% endif %}
-                                            <p class="small text-muted mt-2">{{ threat_intel.flagged_by }}/{{
-                                                threat_intel.total_sources }} sources flagged</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="ti-sources">
-                                            <!-- URLhaus -->
-                                            <div
-                                                class="ti-source-item {{ 'flagged' if threat_intel.urlhaus.found else '' }}">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <i class="bi bi-globe me-1"></i>
-                                                        <strong>URLhaus</strong>
-                                                        <small class="text-muted ms-1">(abuse.ch)</small>
-                                                    </div>
-                                                    {% if threat_intel.urlhaus.found %}
-                                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i>
-                                                        Found</span>
-                                                    {% else %}
-                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>
-                                                        Clean</span>
-                                                    {% endif %}
-                                                </div>
-                                                {% if threat_intel.urlhaus.found %}
-                                                <small class="text-danger">Threat: {{ threat_intel.urlhaus.threat }} |
-                                                    Status: {{ threat_intel.urlhaus.status }}</small>
-                                                {% endif %}
-                                            </div>
-                                            <!-- PhishTank -->
-                                            <div
-                                                class="ti-source-item {{ 'flagged' if threat_intel.phishtank.found and threat_intel.phishtank.is_phishing else '' }}">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <i class="bi bi-binoculars me-1"></i>
-                                                        <strong>PhishTank</strong>
-                                                        <small class="text-muted ms-1">(Community)</small>
-                                                    </div>
-                                                    {% if threat_intel.phishtank.found and
-                                                    threat_intel.phishtank.is_phishing %}
-                                                    <span class="badge bg-danger"><i class="bi bi-x-circle"></i>
-                                                        Phishing</span>
-                                                    {% elif threat_intel.phishtank.found %}
-                                                    <span class="badge bg-warning text-dark"><i
-                                                            class="bi bi-exclamation-circle"></i> In DB</span>
-                                                    {% else %}
-                                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i>
-                                                        Clean</span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <div class="fw-bold text-success fs-4">{{ "%.1f"|format(result.probability_legitimate) }}%</div>
+                                        <small class="text-muted">Safe Probability</small>
+                                        <div class="probability-bar mt-2">
+                                            <div class="probability-fill bg-success" style="width: {{ result.probability_legitimate }}%;"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- Features Chart -->
-                        {% if result.features %}
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-bar-chart"></i> Feature Analysis
-                            </label>
-                            <div class="card">
-                                <div class="card-body">
-                                    <canvas id="featureChart" height="300"></canvas>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Features Table -->
-                        <div class="mb-4">
-                            <details>
-                                <summary class="form-label fw-bold" style="cursor: pointer;">
-                                    <i class="bi bi-table"></i> Detailed Feature Values (click to expand)
-                                </summary>
-                                <div class="table-responsive mt-2">
-                                    <table class="table table-sm table-bordered">
-                                        <tbody>
-                                            {% for key, value in result.features.items() %}
-                                            <tr>
-                                                <td class="text-muted" style="width: 50%;">
-                                                    {{ key.replace('_', ' ').title() }}
-                                                </td>
-                                                <td class="text-end fw-bold">
-                                                    {% if value is number %}
-                                                    {{ "%.2f"|format(value) if value != value|int else value }}
-                                                    {% else %}
-                                                    {{ value }}
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </details>
                         </div>
                         {% endif %}
 
                         <!-- Action Buttons -->
-                        <div class="mt-4 d-flex flex-wrap gap-2 justify-content-center">
-                            <button type="button" class="btn btn-outline-primary"
-                                onclick="copyToClipboard('{{ url }}', this)">
-                                <i class="bi bi-clipboard"></i> Copy URL
+                        <div class="d-flex gap-3 justify-content-center">
+                            <button class="action-btn learn-more-btn" data-bs-toggle="modal" data-bs-target="#explanationModal">
+                                <i class="bi bi-lightbulb me-2"></i>Learn More
                             </button>
-                            <form method="POST" action="{{ url_for('add_bookmark') }}" class="d-inline">
-                                <input type="hidden" name="url" value="{{ url }}">
-                                <input type="hidden" name="result" value="{{ result.result }}">
-                                <input type="hidden" name="confidence" value="{{ result.confidence }}">
-                                <button type="submit" class="btn btn-outline-danger">
-                                    <i class="bi bi-bookmark-heart"></i> Bookmark
-                                </button>
-                            </form>
-                            <a href="{{ url_for('check_url') }}" class="btn btn-primary">
-                                <i class="bi bi-arrow-clockwise"></i> Check Another
+                            <a href="{{ url_for('check_url') }}" class="action-btn btn btn-outline-dark">
+                                <i class="bi bi-arrow-repeat me-2"></i>Scan Another
                             </a>
                         </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
-
-            <!-- Tips Card -->
-            <div class="card mt-4 fade-in-up">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i class="bi bi-lightbulb-fill text-warning"></i>
-                    <span class="fw-bold">Tips to Identify Phishing</span>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="tip-item">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                Check for misspellings in the domain name
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tip-item">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                Look for suspicious subdomains
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tip-item">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                Verify the SSL certificate (https://)
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tip-item">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                Be wary of urgency or threats in the message
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tip-item">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                Avoid clicking shortened URLs from unknown sources
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="tip-item">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                Check if the brand domain matches the official website
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    {% if result and result.features %}
-    document.addEventListener('DOMContentLoaded', function () {
-        const features = {{ result.features | tojson
-    }};
-    const labels = Object.keys(features).map(k => k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-    const values = Object.values(features);
-
-    // Color based on result
-    const isPhishing = {{ 'true' if result.is_phishing else 'false' }};
-    const barColor = isPhishing ? 'rgba(255, 107, 107, 0.7)' : 'rgba(102, 126, 234, 0.7)';
-    const borderColor = isPhishing ? 'rgba(255, 107, 107, 1)' : 'rgba(102, 126, 234, 1)';
-
-    new Chart(document.getElementById('featureChart'), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Feature Value',
-                data: values,
-                backgroundColor: barColor,
-                borderColor: borderColor,
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            indexAxis: 'y',
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            return ` Value: ${context.parsed.x.toFixed(4)}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { grid: { color: 'rgba(0,0,0,0.05)' } },
-                y: {
-                    ticks: { font: { size: 10, family: 'Inter' } },
-                    grid: { display: false }
-                }
-            },
-            animation: { duration: 1200, easing: 'easeOutQuart' }
-        }
-    });
-});
-    {% endif %}
-
-    function copyToClipboard(text, btn) {
-        navigator.clipboard.writeText(text).then(function () {
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
-            btn.classList.add('btn-success');
-            btn.classList.remove('btn-outline-primary');
-            setTimeout(function () {
-                btn.innerHTML = originalHTML;
-                btn.classList.remove('btn-success');
-                btn.classList.add('btn-outline-primary');
-            }, 2000);
-        });
-    }
-</script>
 
 <!-- Explanation Modal -->
 {% if result %}
-<div class="modal fade" id="explanationModal" tabindex="-1" aria-labelledby="explanationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-{{ 'danger' if result.is_phishing else 'success' }} text-white">
-                <h5 class="modal-title" id="explanationModalLabel">
+<div class="modal fade" id="explanationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #0A1628, #1a3a5c);">
+                <h5 class="modal-title text-white">
                     <i class="bi {{ 'bi-exclamation-triangle' if result.is_phishing else 'bi-check-circle' }} me-2"></i>
-                    {{ 'Why This is a Phishing URL' if result.is_phishing else 'Why This is a Safe URL' }}
+                    Analysis Details
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 {% if result.is_phishing %}
                 <div class="alert alert-danger">
-                    <h6><i class="bi bi-exclamation-triangle-fill me-2"></i>Warning: This URL shows characteristics commonly found in phishing attacks</h6>
+                    <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>This URL was classified as phishing</strong>
                 </div>
-                
-                <h6 class="fw-bold mb-3">🔍 How We Analyzed This URL:</h6>
-                <div class="alert alert-light">
-                    <ol class="mb-0">
-                        <li class="mb-2"><strong>URL Structure Analysis</strong> - We extracted 25+ features including length, special characters, and domain structure</li>
-                        <li class="mb-2"><strong>Domain Verification</strong> - Checked for suspicious TLDs, IP addresses, and brand impersonation</li>
-                        <li class="mb-2"><strong>Content Patterns</strong> - Looked for keywords commonly used in phishing (verify, login, bank, secure, etc.)</li>
-                        <li class="mb-2"><strong>ML Prediction</strong> - Our Random Forest model analyzed all features and classified this as phishing</li>
-                    </ol>
-                </div>
-                
-                <h6 class="fw-bold mb-3">⚠️ Red Flags Found:</h6>
-                <div class="row g-2">
-                    {% for feature in result.feature_importance[:5] %}
-                    <div class="col-12">
-                        <div class="d-flex align-items-center p-2 rounded" style="background: rgba(220,53,69,0.1);">
-                            <span class="badge bg-danger me-2">{{ feature.severity|upper }}</span>
-                            <div>
-                                <strong>{{ feature.feature }}</strong>
-                                <p class="mb-0 text-muted small">{{ feature.description }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                
-                <h6 class="fw-bold mt-4 mb-3">🛡️ How to Stay Safe:</h6>
-                <ul class="list-group">
-                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Don't click on this URL</li>
-                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Never enter personal information on this site</li>
-                    <li class="list-group-item"><i class="bi bi-x-circle text-danger me-2"></i>Report this URL to authorities</li>
-                    <li class="list-group-item"><i class="bi bi-check text-success me-2"></i>Go directly to the official website instead</li>
+                <h6>How we analyzed:</h6>
+                <ol class="small">
+                    <li><strong>Feature Extraction</strong> - 25+ URL features analyzed</li>
+                    <li><strong>ML Classification</strong> - Random Forest detected phishing patterns</li>
+                    <li><strong>Confidence</strong> - {{ "%.1f"|format(result.confidence) }}% certain</li>
+                </ol>
+                <h6 class="mt-3">Recommendations:</h6>
+                <ul class="small">
+                    <li>❌ Do NOT visit this URL</li>
+                    <li>❌ Do NOT enter personal information</li>
+                    <li>📢 Report to authorities</li>
                 </ul>
-                
                 {% else %}
                 <div class="alert alert-success">
-                    <h6><i class="bi bi-shield-check me-2"></i>This URL appears legitimate based on our analysis</h6>
+                    <strong><i class="bi bi-shield-check me-2"></i>This URL appears legitimate</strong>
                 </div>
-                
-                <h6 class="fw-bold mb-3">🔍 How We Analyzed This URL:</h6>
-                <div class="alert alert-light">
-                    <ol class="mb-0">
-                        <li class="mb-2"><strong>URL Structure Analysis</strong> - We extracted 25+ features from this URL</li>
-                        <li class="mb-2"><strong>Domain Verification</strong> - Confirmed a valid domain structure</li>
-                        <li class="mb-2"><strong>Content Patterns</strong> - No suspicious keywords or patterns detected</li>
-                        <li class="mb-2"><strong>ML Prediction</strong> - Our model classified this as legitimate with {{ "%.1f"|format(result.confidence) }}% confidence</li>
-                    </ol>
-                </div>
-                
-                <h6 class="fw-bold mb-3">✅ Safety Checks Passed:</h6>
-                <ul class="list-group">
-                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Valid domain structure</li>
-                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>No suspicious patterns detected</li>
-                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Standard URL format</li>
-                    <li class="list-group-item"><i class="bi bi-check-circle text-success me-2"></i>Confidence: {{ "%.1f"|format(result.confidence) }}%</li>
-                </ul>
-                
+                <h6>How we analyzed:</h6>
+                <ol class="small">
+                    <li><strong>Feature Extraction</strong> - 25+ URL features analyzed</li>
+                    <li><strong>ML Classification</strong> - No phishing patterns detected</li>
+                    <li><strong>Confidence</strong> - {{ "%.1f"|format(result.confidence) }}% certain</li>
+                </ol>
                 <div class="alert alert-info mt-3">
-                    <i class="bi bi-info-circle me-2"></i><strong>Still stay vigilant!</strong> Even safe URLs can become compromised. Always verify before entering sensitive information.
+                    <small><i class="bi bi-info-circle me-1"></i>Always verify before entering sensitive data!</small>
                 </div>
                 {% endif %}
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="{{ url_for('check_url') }}" class="btn btn-primary">Scan Another URL</a>
             </div>
         </div>
     </div>
 </div>
 {% endif %}
-
 {% endblock %}
