@@ -23,10 +23,11 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: #0A1628;">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
-                <i class="bi bi-shield-fill-check"></i> ShieldGuard <span class="text-warning">Pro</span>
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('index') }}">
+                <i class="bi bi-shield-fill-check text-danger me-2" style="font-size: 1.5rem;"></i>
+                <span>Phishing Detector <span class="text-danger">Pro</span></span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -122,30 +123,30 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer mt-5">
-        <div class="container">
+    <footer class="mt-5" style="background-color: #0A1628;">
+        <div class="container py-4">
             <div class="row g-4">
-                <div class="col-lg-4">
-                    <h5><i class="bi bi-shield-fill-check text-warning"></i> ShieldGuard Pro</h5>
-                    <p class="opacity-75 mb-3">Premium ML-powered phishing detection to keep you safe online. Built with advanced machine learning.</p>
+                <div class="col-lg-5">
+                    <h5 class="text-white"><i class="bi bi-shield-fill-check text-danger me-2"></i>Phishing Detector Pro</h5>
+                    <p class="text-white-50 mb-3">ML-powered phishing detection to keep you safe online. Built with advanced machine learning.</p>
                     <div class="d-flex gap-2">
                         <span class="badge bg-success"><i class="bi bi-check-circle"></i> 95%+ Accuracy</span>
-                        <span class="badge bg-info"><i class="bi bi-cpu"></i> ML Powered</span>
+                        <span class="badge" style="background-color: #E63946;"><i class="bi bi-cpu"></i> ML Powered</span>
                     </div>
                 </div>
                 <div class="col-lg-2">
                     <h6 class="text-white mb-3">Quick Links</h6>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="{{ url_for('index') }}"><i class="bi bi-chevron-right"></i> Home</a></li>
-                        <li><a href="{{ url_for('about') }}"><i class="bi bi-chevron-right"></i> About</a></li>
-                        <li><a href="{{ url_for('help_page') }}"><i class="bi bi-chevron-right"></i> Help</a></li>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('index') }}" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li><a href="{{ url_for('about') }}" class="text-white-50 text-decoration-none">About</a></li>
+                        <li><a href="{{ url_for('help_page') }}" class="text-white-50 text-decoration-none">Help</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-3">
                     <h6 class="text-white mb-3">Scan Tools</h6>
-                    <ul class="list-unstyled footer-links">
-                        <li><a href="{{ url_for('check_url') }}"><i class="bi bi-chevron-right"></i> URL Scanner</a></li>
-                        <li><a href="{{ url_for('email_scanner') }}"><i class="bi bi-chevron-right"></i> Email Scanner</a></li>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('check_url') }}" class="text-white-50 text-decoration-none">URL Scanner</a></li>
+                        <li><a href="{{ url_for('email_scanner') }}" class="text-white-50 text-decoration-none">Email Scanner</a></li>
                         <li><a href="{{ url_for('qr_scanner') }}"><i class="bi bi-chevron-right"></i> QR Scanner</a></li>
                         <li><a href="{{ url_for('batch_check') }}"><i class="bi bi-chevron-right"></i> Batch Check</a></li>
                     </ul>
