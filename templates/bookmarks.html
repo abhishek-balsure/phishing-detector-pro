@@ -5,44 +5,45 @@
 {% block extra_css %}
 <style>
     .bookmark-card {
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border: 1px solid #1e3a5f;
+        border-radius: 12px;
+        background: #15203b;
         overflow: hidden;
     }
     .bookmark-item {
         padding: 20px;
-        border-bottom: 1px solid #f0f0f0;
+        border-bottom: 1px solid #1e3a5f;
         transition: all 0.3s;
     }
     .bookmark-item:last-child {
         border-bottom: none;
     }
     .bookmark-item:hover {
-        background: linear-gradient(90deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+        background: rgba(59, 130, 246, 0.08);
     }
     .result-badge {
         padding: 6px 14px;
-        border-radius: 20px;
+        border-radius: 6px;
         font-size: 0.75rem;
         font-weight: 600;
     }
     .phishing-badge {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
-        color: white;
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
     }
     .safe-badge {
-        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
-        color: white;
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
     }
     .action-btn {
         width: 36px;
         height: 36px;
-        border-radius: 10px;
+        border-radius: 8px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         transition: all 0.3s;
+        border: none;
     }
     .action-btn:hover {
         transform: scale(1.15);
