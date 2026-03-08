@@ -5,46 +5,99 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-:root {
-    /* MetaMask Color Palette */
+/* DARK THEME (Default) */
+[data-theme="dark"] {
     --accent: #21B55E;
     --accent-hover: #1DA750;
     --accent-glow: rgba(33, 181, 94, 0.3);
     --primary: #FFFFFF;
-    --secondary: #F4F4F4;
     --success: #21B55E;
     --warning: #F59E0B;
     --danger: #EF4444;
     
-    /* Backgrounds - Pure black like MetaMask */
     --bg-dark: #000000;
     --bg-surface: #0D0D0D;
     --bg-card: #1A1A1A;
     --bg-card-hover: #242424;
     
-    /* Borders */
     --border-color: #333333;
     --border-light: #444444;
     
-    /* Typography */
-    --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
     --text-main: #FFFFFF;
     --text-secondary: #F4F4F4;
     --text-muted: #A0A0A0;
     --text-dim: #666666;
     
-    /* Transitions & Radii */
-    --transition: all 0.2s ease;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    
+    --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
     --radius-xl: 16px;
+    --transition: all 0.2s ease;
+}
+
+/* LIGHT THEME */
+[data-theme="light"] {
+    --accent: #21B55E;
+    --accent-hover: #1DA750;
+    --accent-glow: rgba(33, 181, 94, 0.2);
+    --primary: #1A1A1A;
+    --success: #21B55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
     
-    /* Shadows */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --bg-dark: #F5F5F5;
+    --bg-surface: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-card-hover: #F0F0F0;
+    
+    --border-color: #E0E0E0;
+    --border-light: #CCCCCC;
+    
+    --text-main: #1A1A1A;
+    --text-secondary: #333333;
+    --text-muted: #666666;
+    --text-dim: #999999;
+    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+    
+    --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --transition: all 0.2s ease;
+}
+
+/* Theme transition */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Toggle Button */
+#themeToggle {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: color 0.2s ease;
+}
+
+#themeToggle:hover {
+    color: var(--accent);
+}
     --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Theme transition */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ========================================
