@@ -5,74 +5,71 @@
 {% block extra_css %}
 <style>
     .dashboard-hero {
-        padding: 3rem;
-        background: rgba(15, 23, 42, 0.4);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-xl);
-        margin-bottom: 3rem;
-        position: relative;
-        overflow: hidden;
+        padding: 2rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        margin-bottom: 2rem;
     }
 
-    .user-profile-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: rgba(255, 255, 255, 0.05);
-        padding: 0.5rem 1rem;
-        border-radius: 100px;
-        border: 1px solid var(--glass-border);
-        margin-bottom: 1.5rem;
+    .stat-widget {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+    }
+
+    .progress {
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+
+    .progress-bar-glow {
+        height: 100%;
+        background: linear-gradient(90deg, #21B55E, #1DA750);
+        border-radius: 4px;
     }
 
     .action-grid-card {
-        padding: 1.5rem;
-        text-align: center;
-        transition: var(--transition);
-        height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.75rem;
-        cursor: pointer;
-        text-decoration: none !important;
-    }
-
-    .action-grid-card i {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        padding: 1.5rem;
+        text-decoration: none;
+        color: var(--text-main);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: var(--transition);
     }
 
     .action-grid-card:hover {
-        background: rgba(255, 255, 255, 0.05);
-        transform: translateY(-5px);
         border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-2px);
     }
 
-    .stat-mini-card {
-        background: var(--bg-card);
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-lg);
-        padding: 1.25rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
+    .action-grid-card i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--accent);
     }
 
-    .icon-box-sm {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--glass-border);
+    .text-accent {
+        color: var(--accent) !important;
+    }
+
+    .text-success {
+        color: var(--success) !important;
+    }
+
+    .text-danger {
+        color: var(--danger) !important;
+    }
+
+    .text-main {
+        color: var(--text-main) !important;
     }
 </style>
 {% endblock %}
@@ -158,8 +155,7 @@
             <div class="glass-card h-100 p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="mb-0">Activity Intelligence</h5>
-                    <select class="form-select form-select-sm bg-transparent border-secondary text-dim"
-                        style="width: auto;">
+                    <select class="form-select form-select-sm" style="width: auto; background: var(--bg-card); color: var(--text-muted); border-color: var(--border-color);">
                         <option>Last 7 Days</option>
                         <option>Last 30 Days</option>
                     </select>
@@ -196,8 +192,8 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive border-0">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-white bg-opacity-5">
+                <table class="table table-hover align-middle mb-0" style="color: var(--text-main);">
+                    <thead style="background: var(--bg-card);">
                         <tr>
                             <th class="ps-4">Resource Identifier</th>
                             <th>Assessment</th>
@@ -251,68 +247,73 @@
                 type: 'line',
                 data: {
                     labels: {{ activity_labels | tojson }},
-    },
-        datasets: [{
-            label: 'Threat Intensity',
-            data: {{ url_activity | tojson }},
-        borderColor: '#6366f1',
-        borderWidth: 3,
-        tension: 0.4,
-        fill: true,
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        pointRadius: 4,
-        pointBackgroundColor: '#6366f1'
-                }, {
-            label: 'Clean Traffic',
-            data: {{ email_activity | tojson }},
-        borderColor: '#10b981',
-        borderWidth: 2,
-        tension: 0.4,
-        fill: false,
-        pointRadius: 0
-                }]
-            },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false }
-        },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: { color: 'rgba(255,255,255,0.4)' }
-            },
-            y: {
-                grid: { color: 'rgba(255,255,255,0.05)' },
-                ticks: { color: 'rgba(255,255,255,0.4)', beginAtZero: true }
-            }
+                    datasets: [{
+                        label: 'URL Scans',
+                        data: {{ url_activity | tojson }},
+                        borderColor: '#21B55E',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(33, 181, 94, 0.1)',
+                        pointRadius: 4,
+                        pointBackgroundColor: '#21B55E'
+                    }, {
+                        label: 'Email Scans',
+                        data: {{ email_activity | tojson }},
+                        borderColor: '#666666',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            labels: { color: '#A0A0A0' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: '#333333' },
+                            ticks: { color: '#A0A0A0' }
+                        },
+                        y: {
+                            grid: { color: '#333333' },
+                            ticks: { color: '#A0A0A0', beginAtZero: true }
+                        }
+                    }
+                }
+            });
         }
-    }
-        });
-    }
 
-    const pieCtx = document.getElementById('scanPieChart');
-    if (pieCtx) {
-        new Chart(pieCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Phishing', 'Safe'],
-                datasets: [{
-                    data: [{{ stats.phishing_count or 0 }}, {{ stats.safe_count or 0 }}],
-            backgroundColor: ['#ef4444', '#10b981'],
-            borderWidth: 0,
-            hoverOffset: 10
-        }]
-            },
-    options: {
-        cutout: '80%',
-            plugins: {
-            legend: { display: false }
+        const pieCtx = document.getElementById('scanPieChart');
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Phishing', 'Safe'],
+                    datasets: [{
+                        data: [{{ stats.phishing_count or 0 }}, {{ stats.safe_count or 0 }}],
+                        backgroundColor: ['#EF4444', '#21B55E'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    cutout: '80%',
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            labels: { color: '#A0A0A0' }
+                        }
+                    }
+                }
+            });
         }
-    }
-        });
-    }
-});
+    });
 </script>
 {% endblock %}
