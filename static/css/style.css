@@ -1,49 +1,50 @@
 /*
- * Phishing Detector Pro - Premium Design System
- * Modern, futuristic cyberpunk architecture with glassmorphism
+ * Phishing Detector Pro - MetaMask Style Theme
+ * Clean, minimal dark design like MetaMask
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-    /* Color Palette - Vibrant & Professional */
-    --accent: #6366f1;
-    --accent-glow: rgba(99, 102, 241, 0.4);
-    --primary: #8b5cf6;
-    --primary-light: #a78bfa;
-    --secondary: #06b6d4;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+    /* MetaMask Color Palette */
+    --accent: #21B55E;
+    --accent-hover: #1DA750;
+    --accent-glow: rgba(33, 181, 94, 0.3);
+    --primary: #FFFFFF;
+    --secondary: #F4F4F4;
+    --success: #21B55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
     
-    /* Backgrounds */
-    --bg-dark: #020617;
-    --bg-surface: rgba(15, 23, 42, 0.6);
-    --bg-card: rgba(30, 41, 59, 0.4);
+    /* Backgrounds - Pure black like MetaMask */
+    --bg-dark: #000000;
+    --bg-surface: #0D0D0D;
+    --bg-card: #1A1A1A;
+    --bg-card-hover: #242424;
     
-    /* Glassmorphism */
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shimmer: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    /* Borders */
+    --border-color: #333333;
+    --border-light: #444444;
     
     /* Typography */
     --font-main: 'Plus Jakarta Sans', -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
-    --text-dim: #64748b;
+    --text-main: #FFFFFF;
+    --text-secondary: #F4F4F4;
+    --text-muted: #A0A0A0;
+    --text-dim: #666666;
     
     /* Transitions & Radii */
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
+    --transition: all 0.2s ease;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
     
     /* Shadows */
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 12px 24px rgba(0, 0, 0, 0.25);
-    --shadow-lg: 0 24px 48px rgba(99, 102, 241, 0.15);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 /* ========================================
@@ -66,49 +67,18 @@ body {
     flex-direction: column;
 }
 
-/* Animated Background */
+/* Clean dark background - MetaMask style */
 .bg-scene {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    overflow: hidden;
-    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+    display: none;
 }
 
 .bg-blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(100px);
-    opacity: 0.15;
-    animation: blob-float 20s infinite alternate ease-in-out;
+    display: none;
 }
 
-.blob-1 { top: -10%; right: -5%; width: 500px; height: 500px; background: var(--accent); }
-.blob-2 { bottom: -10%; left: -5%; width: 600px; height: 600px; background: var(--primary); }
-.blob-3 { top: 40%; left: 30%; width: 400px; height: 400px; background: var(--secondary); opacity: 0.1; }
-
-@keyframes blob-float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(50px, 50px) scale(1.1); }
-}
-
-/* Grid Overlay */
+/* Simple grid - MetaMask minimal style */
 body::after {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-    z-index: -1;
-    pointer-events: none;
+    display: none;
 }
 
 /* ========================================
@@ -120,39 +90,32 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 50%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    display: inline-block;
+    color: var(--accent);
 }
 
 .text-muted { color: var(--text-muted) !important; }
 .text-dim { color: var(--text-dim) !important; }
 
 /* ========================================
-   NAVBAR (Glassmorphism)
+   NAVBAR - MetaMask Style
    ======================================== */
 .glass-nav {
-    background: rgba(2, 6, 23, 0.8) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--glass-border);
+    background: var(--bg-dark) !important;
+    border-bottom: 1px solid var(--border-color);
     padding: 0.75rem 0;
-    transition: var(--transition);
 }
 
 .navbar-brand {
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
 }
 
 .nav-link {
     font-weight: 500;
     color: var(--text-muted) !important;
-    padding: 0.6rem 1.2rem !important;
-    border-radius: var(--radius-md);
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--radius-sm);
     transition: var(--transition);
 }
 
@@ -191,29 +154,24 @@ h1, h2, h3, h4, h5, h6 {
    ======================================== */
 .glass-card {
     background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
     transition: var(--transition);
-    overflow: hidden;
 }
 
 .glass-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: var(--shadow-lg);
+    border-color: var(--border-light);
+    background: var(--bg-card-hover);
 }
 
 .card-header {
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid var(--glass-border);
-    padding: 1.5rem;
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem;
 }
 
 .card-body {
-    padding: 1.5rem;
+    padding: 1.25rem;
 }
 
 /* Stat Cards */
@@ -269,27 +227,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-glow {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+    background: var(--accent);
     border: none;
     color: white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 8px rgba(33, 181, 94, 0.3);
 }
 
 .btn-glow:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(33, 181, 94, 0.4);
     color: white;
 }
 
 .btn-outline-primary {
-    border: 1px solid var(--accent);
-    color: var(--accent);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
 }
 
 .btn-outline-primary:hover {
-    background: var(--accent);
-    color: white;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    background: var(--bg-card-hover);
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 /* ========================================
