@@ -2,74 +2,92 @@
 
 {% block title %}Sign Up - ShieldGuard Pro{% endblock %}
 
+{% block extra_css %}
+<style>
+    .auth-card {
+        max-width: 500px;
+        margin: 4rem auto;
+        padding: 3rem;
+    }
+
+    .auth-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--success-gradient);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 2rem;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2);
+        color: white;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5 col-lg-4">
-            <div class="card shadow-lg fade-in-up"
-                style="border-top: 4px solid transparent; border-image: var(--primary-gradient) 1;">
-                <div class="card-body p-4 p-md-5">
-                    <div class="text-center mb-4">
-                        <div
-                            style="width: 70px; height: 70px; border-radius: 50%; background: var(--success-gradient); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; box-shadow: 0 8px 25px rgba(81, 207, 102, 0.3);">
-                            <i class="bi bi-person-plus-fill text-white" style="font-size: 1.8rem;"></i>
-                        </div>
-                        <h2 class="fw-bold">Create Account</h2>
-                        <p class="text-muted">Join ShieldGuard Pro for free</p>
+<div class="container">
+    <div class="glass-card auth-card fade-up">
+        <div class="text-center">
+            <div class="auth-icon">
+                <i class="bi bi-person-plus-fill"></i>
+            </div>
+            <h2 class="fw-bold mb-1">Join <span class="gradient-text">ShieldGuard</span></h2>
+            <p class="text-muted mb-4">Start your journey to a safer digital experience.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label small uppercase tracking-wider text-dim">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" name="username" placeholder="Choose username" required
+                            minlength="3" autofocus>
                     </div>
+                </div>
 
-                    <form method="POST" action="{{ url_for('signup') }}" id="signupForm">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" class="form-control" id="username" name="username"
-                                    placeholder="Choose a username" required minlength="3" autofocus>
-                            </div>
-                        </div>
+                <div class="col-12">
+                    <label class="form-label small uppercase tracking-wider text-dim">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" name="email" placeholder="email@example.com" required>
+                    </div>
+                </div>
 
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    placeholder="Enter your email" required>
-                            </div>
-                        </div>
+                <div class="col-md-6">
+                    <label class="form-label small uppercase tracking-wider text-dim">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="••••••"
+                            required minlength="6">
+                    </div>
+                </div>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Create a password" required minlength="6">
-                            </div>
-                            <div class="form-text">Must be at least 6 characters long.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirm Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                <input type="password" class="form-control" id="confirm_password"
-                                    name="confirm_password" placeholder="Confirm your password" required>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 btn-lg">
-                            <i class="bi bi-person-plus"></i> Create Account
-                        </button>
-                    </form>
-
-                    <hr class="my-4">
-
-                    <div class="text-center">
-                        <p class="mb-0">Already have an account?
-                            <a href="{{ url_for('login') }}" class="fw-bold">Sign in</a>
-                        </p>
+                <div class="col-md-6">
+                    <label class="form-label small uppercase tracking-wider text-dim">Confirm</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                            placeholder="••••••" required>
                     </div>
                 </div>
             </div>
+
+            <p class="small text-muted mt-3 mb-4">
+                By creating an account, you agree to our <a href="#" class="text-accent">Terms of Service</a>.
+            </p>
+
+            <button type="submit" class="btn btn-glow w-100 py-2 mb-4">
+                Create Account
+            </button>
+        </form>
+
+        <div class="text-center pt-3 border-top border-secondary border-opacity-10">
+            <p class="text-dim small mb-0">Already have an account?
+                <a href="{{ url_for('login') }}" class="text-white fw-bold text-decoration-none">Sign in</a>
+            </p>
         </div>
     </div>
 </div>
@@ -83,11 +101,8 @@
 
         if (password !== confirmPassword) {
             e.preventDefault();
-            if (window.showToast) {
-                showToast('Passwords do not match!', 'error');
-            } else {
-                alert('Passwords do not match!');
-            }
+            // Assuming base.html flash messages or a toast system exists
+            alert('Passwords do not match!');
         }
     });
 </script>
