@@ -3,10 +3,14 @@
 {% block title %}ShieldGuard Pro - AI-Powered Phishing Protection{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
 <style>
     .hero-section {
         padding: 8rem 0;
         position: relative;
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     }
 
     .hero-badge {
@@ -32,7 +36,9 @@
     .scan-card-home {
         max-width: 800px;
         margin: 3rem auto 0;
-        background: rgba(15, 23, 42, 0.6);
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-xl);
         padding: 2.5rem;
@@ -48,7 +54,7 @@
         transform: translateX(-50%);
         width: 40%;
         height: 1px;
-        background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
     }
 
     .feature-icon-wrapper {
@@ -71,12 +77,45 @@
         color: white;
         transform: translateY(-5px) rotate(8deg);
     }
+
+    .stat-widget {
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-xl);
+    }
+
+    .bg-surface {
+        background: var(--bg-tertiary);
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-tertiary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-hover);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Skip to Content Link for Accessibility -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
 <!-- Hero Section -->
-<section class="hero-section text-center">
+<section class="hero-section text-center" id="main-content">
     <div class="container">
         <div class="hero-badge fade-in">
             <i class="bi bi-shield-lock-fill"></i>
@@ -92,18 +131,20 @@
 
         <!-- Quick URL Check -->
         <div class="scan-card-home glass-card fade-up">
-            <form action="{{ url_for('quick_check') }}" method="POST">
+            <form action="{{ url_for('quick_check') }}" method="POST" id="quickCheckForm">
                 <div class="row g-3">
                     <div class="col-lg-9">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                            <input type="url" name="url" class="form-control"
-                                placeholder="Enter URL to analyze (e.g., https://paypal-secure.com)" required>
+                            <input type="url" name="url" id="quickUrlInput" class="form-input"
+                                placeholder="Enter URL to analyze (e.g., https://paypal-secure.com)" required aria-label="URL to scan">
                         </div>
+                        <div id="urlValidation" role="alert"></div>
                     </div>
                     <div class="col-lg-3">
-                        <button type="submit" class="btn btn-glow w-100 h-100">
+                        <button type="submit" class="btn btn-primary w-100 h-100" id="scanBtn">
                             Scan Now
+                            <span class="spinner" id="scanSpinner" style="display: none;"></span>
                         </button>
                     </div>
                 </div>
@@ -235,12 +276,34 @@
     </div>
 </section>
 
+<!-- Results Section (Hidden by default) -->
+<section id="resultsSection" class="py-5" style="display: none;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold h1">Scan Results</h2>
+            <p class="text-muted">Detailed analysis of the URL you scanned</p>
+        </div>
+        <div id="resultsContent" class="row">
+            <!-- Results will be dynamically inserted here -->
+        </div>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Animated counter
+    // Skip link functionality
     document.addEventListener('DOMContentLoaded', function () {
+        const skipLink = document.querySelector('.skip-link');
+        if (skipLink) {
+            skipLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('main-content').focus();
+            });
+        }
+
+        // Animated counter
         const counters = document.querySelectorAll('[data-count]');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -277,6 +340,73 @@
                     validation.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Valid URL format</small>';
                 }
             });
+        }
+
+        // Form submission handling
+        const form = document.getElementById('quickCheckForm');
+        const scanBtn = document.getElementById('scanBtn');
+        const scanSpinner = document.getElementById('scanSpinner');
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const url = urlInput.value.trim();
+
+                // Show loading state
+                scanBtn.disabled = true;
+                scanSpinner.style.display = 'inline-block';
+                scanBtn.textContent = 'Scanning...';
+
+                // Simulate API call (replace with actual fetch)
+                setTimeout(() => {
+                    // Hide loading state
+                    scanBtn.disabled = false;
+                    scanSpinner.style.display = 'none';
+                    scanBtn.textContent = 'Scan Now';
+
+                    // Show results
+                    showResults(url);
+                }, 2000);
+            });
+        }
+
+        function showResults(url) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContent = document.getElementById('resultsContent');
+
+            // Create result cards
+            const resultCard = document.createElement('div');
+            resultCard.className = 'col-lg-6 mx-auto glass-card card-entrance';
+            resultCard.innerHTML = `
+                <div class="text-center mb-4">
+                    <h3>Scan Results for: <span class="gradient-text">${url}</span></h3>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h1 text-success mb-2" id="resultStatus">Safe</div>
+                            <small class="text-muted">Status</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <div class="h1 text-primary mb-2" id="resultScore">95</div>
+                            <small class="text-muted">Confidence</small>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="badge badge-success mb-3">No Phishing Detected</div>
+                        <p class="text-muted">This URL appears to be safe and legitimate.</p>
+                    </div>
+                </div>
+            `;
+
+            resultsContent.innerHTML = '';
+            resultsContent.appendChild(resultCard);
+            resultsSection.style.display = 'block';
+
+            // Animate result card
+            resultCard.classList.add('card-entrance');
         }
     });
 </script>

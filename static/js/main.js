@@ -1,293 +1,434 @@
-/**
- * ShieldGuard Pro - Main JavaScript v2.0
- * Enhanced UI interactions, dark mode, animations, and utilities
- */
+/* Main JavaScript - Interactive Features */
 
-document.addEventListener('DOMContentLoaded', function () {
+// Theme Toggle Functionality
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
 
-    // ====================================================
-    // DARK MODE TOGGLE
-    // ====================================================
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const html = document.documentElement;
+// Check for saved theme preference or default to dark
+const currentTheme = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', currentTheme);
 
-    function setDarkMode(isDark) {
-        html.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
-        localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');
-        if (darkModeToggle) {
-            const icon = darkModeToggle.querySelector('i');
-            if (icon) {
-                icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-            }
-        }
-    }
+// Theme toggle function
+function toggleTheme() {
+  const currentTheme = html.getAttribute('data-theme');
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+}
 
-    // Initialize from saved preference
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode === 'enabled') {
-        setDarkMode(true);
-    }
+// Add theme toggle button to DOM if it doesn't exist
+if (!document.getElementById('themeToggle')) {
+  const toggleButton = document.createElement('button');
+  toggleButton.id = 'themeToggle';
+  toggleButton.className = 'btn btn-outline-primary theme-toggle';
+  toggleButton.innerHTML = '<i class="bi bi-moon"></i>';
+  toggleButton.setAttribute('aria-label', 'Toggle theme');
+  toggleButton.style.cssText = 'position: fixed; top: 1rem; right: 1rem; z-index: 1000;';
+  document.body.appendChild(toggleButton);
+  toggleButton.addEventListener('click', toggleTheme);
+}
 
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('click', function () {
-            const isDark = html.getAttribute('data-bs-theme') !== 'dark';
-            setDarkMode(isDark);
-        });
-    }
+// Form Handling and Validation
+class FormValidator {
+  constructor(formElement) {
+    this.form = formElement;
+    this.inputs = formElement.querySelectorAll('input, select, textarea');
+    this.submitBtn = formElement.querySelector('button[type="submit"]');
+    this.isValid = false;
+    this.init();
+  }
 
-    // ====================================================
-    // AUTO-HIDE ALERTS
-    // ====================================================
-    document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
-        setTimeout(function () {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000);
+  init() {
+    this.inputs.forEach(input => {
+      input.addEventListener('blur', () => this.validateInput(input));
+      input.addEventListener('input', () => this.validateInput(input));
     });
 
-    // ====================================================
-    // FADE-IN ON SCROLL (Intersection Observer)
-    // ====================================================
-    const fadeElements = document.querySelectorAll('.fade-in-up');
-    if (fadeElements.length > 0) {
-        const fadeObserver = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        fadeObserver.unobserve(entry.target);
-                    }
-                });
-            },
-            { threshold: 0.1, rootMargin: '0px 0px -20px 0px' }
-        );
-        fadeElements.forEach((el) => fadeObserver.observe(el));
+    this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+  }
+
+  validateInput(input) {
+    const isValid = input.checkValidity();
+    const inputGroup = input.closest('.input-group') || input.parentElement;
+
+    if (inputGroup) {
+      const feedback = inputGroup.querySelector('.form-feedback');
+      if (feedback) feedback.remove();
     }
 
-    // ====================================================
-    // BACK TO TOP BUTTON
-    // ====================================================
-    const backToTopBtn = document.createElement('div');
-    backToTopBtn.className = 'back-to-top';
-    backToTopBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
-    backToTopBtn.setAttribute('title', 'Back to top');
-    document.body.appendChild(backToTopBtn);
-
-    window.addEventListener('scroll', function () {
-        if (window.scrollY > 400) {
-            backToTopBtn.classList.add('show');
-        } else {
-            backToTopBtn.classList.remove('show');
-        }
-    });
-
-    backToTopBtn.addEventListener('click', function () {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // ====================================================
-    // URL VALIDATION ON INPUT
-    // ====================================================
-    const urlInputs = document.querySelectorAll('input[type="url"], input[name="url"]');
-    urlInputs.forEach(function (input) {
-        input.addEventListener('input', function () {
-            const url = this.value.trim();
-            if (url.length === 0) {
-                this.classList.remove('is-valid', 'is-invalid');
-                return;
-            }
-            const urlPattern = /^https?:\/\/.+/i;
-            if (urlPattern.test(url)) {
-                this.classList.add('is-valid');
-                this.classList.remove('is-invalid');
-            } else {
-                this.classList.add('is-invalid');
-                this.classList.remove('is-valid');
-            }
-        });
-    });
-
-    // ====================================================
-    // FORM SUBMIT LOADING STATE
-    // ====================================================
-    document.querySelectorAll('form').forEach(function (form) {
-        form.addEventListener('submit', function () {
-            const submitBtn = form.querySelector('button[type="submit"]');
-            if (submitBtn && !submitBtn.classList.contains('loading')) {
-                const originalHTML = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
-                submitBtn.classList.add('loading');
-                // Reset after 15 seconds if page doesn't redirect
-                setTimeout(function () {
-                    submitBtn.innerHTML = originalHTML;
-                    submitBtn.classList.remove('loading');
-                }, 15000);
-            }
-        });
-    });
-
-    // ====================================================
-    // PASSWORD STRENGTH METER
-    // ====================================================
-    const passwordInput = document.getElementById('password');
-    if (passwordInput && document.getElementById('signupForm')) {
-        const strengthContainer = document.createElement('div');
-        strengthContainer.className = 'mt-2';
-        strengthContainer.id = 'passwordStrength';
-        passwordInput.closest('.mb-3').appendChild(strengthContainer);
-
-        passwordInput.addEventListener('input', function () {
-            const password = this.value;
-            let strength = 0;
-            let label = '';
-            let colorClass = '';
-
-            if (password.length >= 6) strength++;
-            if (password.length >= 10) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-            switch (strength) {
-                case 0: case 1: label = 'Weak'; colorClass = 'bg-danger'; break;
-                case 2: label = 'Fair'; colorClass = 'bg-warning'; break;
-                case 3: label = 'Good'; colorClass = 'bg-info'; break;
-                default: label = 'Strong'; colorClass = 'bg-success'; break;
-            }
-
-            const percent = Math.min(100, (strength / 5) * 100);
-            strengthContainer.innerHTML = `
-                <div class="progress" style="height: 6px;">
-                    <div class="progress-bar ${colorClass}" style="width: ${percent}%"></div>
-                </div>
-                <small class="${colorClass.replace('bg-', 'text-')} mt-1 d-block">${label}</small>
-            `;
-        });
+    if (!isValid) {
+      input.classList.remove('success');
+      input.classList.add('error');
+      this.showError(input, input.validationMessage);
+    } else {
+      input.classList.remove('error');
+      input.classList.add('success');
+      this.showSuccess(input);
     }
 
-    // ====================================================
-    // TOAST NOTIFICATIONS
-    // ====================================================
-    window.showToast = function (message, type = 'info') {
-        let container = document.querySelector('.toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
+    this.checkFormValidity();
+  }
 
-        const iconMap = {
-            success: 'bi-check-circle-fill',
-            error: 'bi-exclamation-triangle-fill',
-            warning: 'bi-exclamation-circle-fill',
-            info: 'bi-info-circle-fill',
-        };
+  showError(input, message) {
+    const inputGroup = input.closest('.input-group') || input.parentElement;
+    const feedback = document.createElement('div');
+    feedback.className = 'form-feedback text-danger small mt-1';
+    feedback.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${message}`;
+    inputGroup.appendChild(feedback);
+  }
 
-        const toast = document.createElement('div');
-        toast.className = `toast-notification ${type}`;
-        toast.innerHTML = `<i class="bi ${iconMap[type] || iconMap.info}"></i> ${message}`;
-        container.appendChild(toast);
+  showSuccess(input) {
+    const inputGroup = input.closest('.input-group') || input.parentElement;
+    const feedback = inputGroup.querySelector('.form-feedback');
+    if (feedback) feedback.remove();
+  }
 
-        setTimeout(function () {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(100px)';
-            setTimeout(() => toast.remove(), 300);
-        }, 3500);
+  checkFormValidity() {
+    this.isValid = Array.from(this.inputs).every(input => input.checkValidity());
+    if (this.submitBtn) {
+      this.submitBtn.disabled = !this.isValid;
+    }
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    if (!this.isValid) return;
+
+    this.showLoadingState();
+    this.simulateAPICall();
+  }
+
+  showLoadingState() {
+    if (this.submitBtn) {
+      const originalText = this.submitBtn.textContent;
+      this.submitBtn.disabled = true;
+      this.submitBtn.innerHTML = `
+        <span class="spinner" style="width: 20px; height: 20px;"></span> 
+        Loading...
+      `;
+      this.submitBtn.setAttribute('data-original-text', originalText);
+    }
+  }
+
+  hideLoadingState() {
+    if (this.submitBtn) {
+      const originalText = this.submitBtn.getAttribute('data-original-text');
+      this.submitBtn.disabled = false;
+      this.submitBtn.innerHTML = originalText;
+      this.submitBtn.removeAttribute('data-original-text');
+    }
+  }
+
+  simulateAPICall() {
+    // Simulate API call delay
+    setTimeout(() => {
+      this.hideLoadingState();
+      this.showResults();
+    }, 2000);
+  }
+
+  showResults() {
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsContent = document.getElementById('resultsContent');
+
+    // Create result cards
+    const resultCard = document.createElement('div');
+    resultCard.className = 'col-lg-6 mx-auto glass-card card-entrance';
+    resultCard.innerHTML = `
+      <div class="text-center mb-4">
+        <h3>Scan Results for: <span class="gradient-text">${this.form.url.value}</span></h3>
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="text-center">
+            <div class="h1 text-success mb-2" id="resultStatus">Safe</div>
+            <small class="text-muted">Status</small>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="text-center">
+            <div class="h1 text-primary mb-2" id="resultScore">95</div>
+            <small class="text-muted">Confidence</small>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="badge badge-success mb-3">No Phishing Detected</div>
+          <p class="text-muted">This URL appears to be safe and legitimate.</p>
+        </div>
+      </div>
+    `;
+
+    resultsContent.innerHTML = '';
+    resultsContent.appendChild(resultCard);
+    resultsSection.style.display = 'block';
+
+    // Animate result card
+    setTimeout(() => {
+      resultCard.classList.add('card-entrance');
+    }, 100);
+  }
+}
+
+// Initialize form validator for quick check form
+const quickCheckForm = document.getElementById('quickCheckForm');
+if (quickCheckForm) {
+  new FormValidator(quickCheckForm);
+}
+
+// Animation Controller
+class AnimationController {
+  constructor() {
+    this.animations = new Set();
+    this.init();
+  }
+
+  init() {
+    this.setupIntersectionObserver();
+    this.setupScrollAnimations();
+  }
+
+  setupIntersectionObserver() {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
     };
 
-    // ====================================================
-    // COPY TO CLIPBOARD
-    // ====================================================
-    window.copyToClipboard = function (text, btn) {
-        navigator.clipboard.writeText(text).then(function () {
-            if (btn) {
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
-                btn.classList.add('btn-success');
-                btn.classList.remove('btn-outline-primary');
-                setTimeout(function () {
-                    btn.innerHTML = originalHTML;
-                    btn.classList.remove('btn-success');
-                    btn.classList.add('btn-outline-primary');
-                }, 2000);
-            }
-            showToast('Copied to clipboard!', 'success');
-        }).catch(function () {
-            showToast('Failed to copy', 'error');
-        });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const element = entry.target;
+          const animationClass = element.getAttribute('data-animation');
+          if (animationClass && !this.animations.has(element)) {
+            element.classList.add(animationClass);
+            this.animations.add(element);
+          }
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements with data-animation attribute
+    document.querySelectorAll('[data-animation]').forEach(el => {
+      observer.observe(el);
+    });
+  }
+
+  setupScrollAnimations() {
+    let ticking = false;
+
+    const updateAnimations = () => {
+      ticking = false;
+      // Add scroll-based animations here if needed
     };
 
-    // ====================================================
-    // CONFETTI FOR SAFE RESULTS
-    // ====================================================
-    const safeResult = document.querySelector('.result-alert.success');
-    if (safeResult) {
-        createConfetti();
+    const requestTick = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateAnimations);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', requestTick, { passive: true });
+  }
+
+  // Trigger animation on element
+  triggerAnimation(element, animationClass) {
+    if (!this.animations.has(element)) {
+      element.classList.add(animationClass);
+      this.animations.add(element);
     }
+  }
 
-    function createConfetti() {
-        const colors = ['#51cf66', '#40c057', '#ffd700', '#4facfe', '#667eea'];
-        const confettiCount = 60;
+  // Remove animation from element
+  removeAnimation(element, animationClass) {
+    element.classList.remove(animationClass);
+    this.animations.delete(element);
+  }
+}
 
-        for (let i = 0; i < confettiCount; i++) {
-            const confetti = document.createElement('div');
-            confetti.style.cssText = `
-                position: fixed;
-                width: ${Math.random() * 10 + 5}px;
-                height: ${Math.random() * 10 + 5}px;
-                background: ${colors[Math.floor(Math.random() * colors.length)]};
-                left: ${Math.random() * 100}vw;
-                top: -20px;
-                border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
-                pointer-events: none;
-                z-index: 9999;
-                animation: confettiFall ${2 + Math.random() * 3}s linear ${Math.random() * 0.5}s forwards;
-            `;
-            document.body.appendChild(confetti);
-            setTimeout(() => confetti.remove(), 5500);
-        }
+// Initialize animation controller
+const animationController = new AnimationController();
 
-        // Inject the animation if not already present
-        if (!document.getElementById('confettiStyles')) {
-            const style = document.createElement('style');
-            style.id = 'confettiStyles';
-            style.textContent = `
-                @keyframes confettiFall {
-                    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-                    80% { opacity: 1; }
-                    100% { transform: translateY(100vh) rotate(${360 + Math.random() * 360}deg); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    }
+// Utility Functions
+const utils = {
+  // Create a ripple effect on click
+  createRipple(event, element) {
+    const ripple = document.createElement('span');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
 
-    // ====================================================
-    // ANIMATED COUNTER
-    // ====================================================
-    document.querySelectorAll('[data-count]').forEach(function (el) {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        const target = parseInt(el.dataset.count);
-                        if (isNaN(target)) return;
-                        let current = 0;
-                        const increment = Math.max(1, Math.floor(target / 50));
-                        const timer = setInterval(function () {
-                            current += increment;
-                            if (current >= target) {
-                                current = target;
-                                clearInterval(timer);
-                            }
-                            el.textContent = current.toLocaleString();
-                        }, 30);
-                        observer.unobserve(el);
-                    }
-                });
-            },
-            { threshold: 0.5 }
-        );
-        observer.observe(el);
+    ripple.style.cssText = `
+      position: absolute;
+      width: ${size}px;
+      height: ${size}px;
+      left: ${x}px;
+      top: ${y}px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
+    `;
+
+    element.appendChild(ripple);
+
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  },
+
+  // Debounce function
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  },
+
+  // Throttle function
+  throttle(func, limit) {
+    let inThrottle;
+    return function() {
+      const args = arguments;
+      const context = this;
+      if (!inThrottle) {
+        func.apply(context, args);
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, limit);
+      }
+    };
+  }
+};
+
+// Add ripple effect to buttons
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', (e) => {
+      if (!button.classList.contains('btn-loading')) {
+        utils.createRipple(e, button);
+      }
     });
+  });
 });
+
+// Add CSS for ripple animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes ripple {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// Performance monitoring
+if ('performance' in window) {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (window.performance && window.performance.memory) {
+        const memory = window.performance.memory;
+        console.log('Memory usage:', {
+          used: Math.round(memory.usedJSHeapSize / 1048576 * 100) / 100 + 'MB',
+          total: Math.round(memory.totalJSHeapSize / 1048576 * 100) / 100 + 'MB',
+          limit: Math.round(memory.jsHeapSizeLimit / 1048576 * 100) / 100 + 'MB'
+        });
+      }
+    }, 0);
+  });
+}
+
+// Error handling
+window.addEventListener('error', (e) => {
+  console.error('JavaScript error:', e.error);
+  // You could send this to an error tracking service
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+
+// Accessibility enhancements
+class AccessibilityEnhancer {
+  constructor() {
+    this.init();
+  }
+
+  init() {
+    this.setupKeyboardNavigation();
+    this.setupScreenReaderAnnouncements();
+    this.setupFocusManagement();
+  }
+
+  setupKeyboardNavigation() {
+    // Trap focus within modals (if you add modals later)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && e.shiftKey) {
+        const focusableElements = document.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+        if (document.activeElement === focusableElements[0]) {
+          e.preventDefault();
+          lastFocusable.focus();
+        }
+      }
+    });
+  }
+
+  setupScreenReaderAnnouncements() {
+    // Create a live region for screen reader announcements
+    if (!document.getElementById('screenReaderAnnouncements')) {
+      const liveRegion = document.createElement('div');
+      liveRegion.id = 'screenReaderAnnouncements';
+      liveRegion.setAttribute('aria-live', 'polite');
+      liveRegion.setAttribute('aria-atomic', 'true');
+      liveRegion.style.cssText = 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;';
+      document.body.appendChild(liveRegion);
+    }
+  }
+
+  announce(message) {
+    const liveRegion = document.getElementById('screenReaderAnnouncements');
+    if (liveRegion) {
+      liveRegion.textContent = message;
+    }
+  }
+
+  setupFocusManagement() {
+    // Add focus indicators
+    const style = document.createElement('style');
+    style.textContent = `
+      :focus:not(:focus-visible) {
+        outline: none;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+// Initialize accessibility enhancer
+const accessibilityEnhancer = new AccessibilityEnhancer();
+
+// Export for potential use in other scripts
+window.ShieldGuard = {
+  utils,
+  animationController,
+  accessibilityEnhancer,
+  FormValidator
+};
+</script>
+{% endblock %}
