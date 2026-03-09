@@ -5,29 +5,11 @@
 {% block extra_css %}
 <style>
     .dashboard-hero {
-        padding: 2rem;
+        padding: 1.5rem;
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
-        margin-bottom: 2rem;
-    }
-
-    .stat-widget {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-    }
-
-    .progress {
-        height: 8px;
-        background: var(--border-color);
-        border-radius: 4px;
-    }
-
-    .progress-bar-glow {
-        height: 100%;
-        background: linear-gradient(90deg, #21B55E, #1DA750);
-        border-radius: 4px;
+        margin-bottom: 1.5rem;
     }
 
     .action-grid-card {
@@ -35,19 +17,20 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 1.5rem;
+        padding: 1.25rem;
         text-decoration: none;
         color: var(--text-main);
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
-        transition: var(--transition);
+        transition: all 0.2s;
     }
 
     .action-grid-card:hover {
         border-color: var(--accent);
         color: var(--accent);
         transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
     }
 
     .action-grid-card i {
@@ -56,264 +39,162 @@
         color: var(--accent);
     }
 
-    .text-accent {
-        color: var(--accent) !important;
-    }
-
-    .text-success {
-        color: var(--success) !important;
-    }
-
-    .text-danger {
-        color: var(--danger) !important;
-    }
-
-    .text-main {
-        color: var(--text-main) !important;
+    .action-grid-card h6 {
+        margin: 0;
+        font-size: 0.9rem;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-4">
     <!-- Welcome Section -->
-    <div class="dashboard-hero fade-up">
+    <div class="dashboard-hero">
         <div class="row align-items-center">
-            <div class="col-lg-7">
-                <div class="user-profile-badge">
-                    <div class="user-avatar" style="width: 24px; height: 24px; font-size: 0.7rem;">{{
-                        session.username[0]|upper }}</div>
-                    <span class="small text-muted">Account Certified: <span class="text-success">Active</span></span>
-                </div>
-                <h1 class="fw-bold mb-2">Welcome Back, <span class="gradient-text">{{ session.username }}</span></h1>
-                <p class="text-dim mb-4">You have scanned {{ stats.total_scans or 0 }} items this month. Your security
-                    score is <span class="text-success fw-bold">Excellent</span>.</p>
-                <div class="d-flex gap-3">
-                    <a href="{{ url_for('check_url') }}" class="btn btn-glow">
-                        <i class="bi bi-shield-check me-2"></i>New Scan
-                    </a>
-                    <a href="{{ url_for('history') }}" class="btn btn-outline-primary">
-                        <i class="bi bi-clock-history me-2"></i>History
-                    </a>
-                </div>
+            <div class="col-lg-8">
+                <h4 class="fw-bold mb-1">Welcome Back, <span class="gradient-text">{{ session.username }}</span></h4>
+                <p class="text-muted small mb-0">You have scanned {{ stats.total_scans or 0 }} items total.</p>
             </div>
-            <div class="col-lg-5 d-none d-lg-block">
-                <div class="stat-widget p-4">
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-dim">Overall Safety</span>
-                        <span class="text-success">98.2%</span>
-                    </div>
-                    <div class="progress mb-4">
-                        <div class="progress-bar-glow" style="width: 98.2%"></div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="text-dim small uppercase">Threats Blocked</div>
-                            <div class="h4 fw-bold text-danger">{{ stats.phishing_count or 0 }}</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-dim small uppercase">Safe Scans</div>
-                            <div class="h4 fw-bold text-success">{{ stats.safe_count or 0 }}</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a href="{{ url_for('check_url') }}" class="btn btn-glow">
+                    <i class="bi bi-shield-check me-2"></i>New Scan
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Quick Tools Grid -->
-    <div class="row g-4 mb-5">
+    <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3">
-            <a href="{{ url_for('check_url') }}" class="glass-card action-grid-card">
+            <a href="{{ url_for('check_url') }}" class="action-grid-card">
                 <i class="bi bi-link-45deg"></i>
-                <h6 class="mb-0">URL Scanner</h6>
+                <h6>URL Scanner</h6>
             </a>
         </div>
         <div class="col-6 col-lg-3">
-            <a href="{{ url_for('email_scanner') }}" class="glass-card action-grid-card">
-                <i class="bi bi-envelope-at" style="filter: hue-rotate(45deg);"></i>
-                <h6 class="mb-0">Email Guard</h6>
+            <a href="{{ url_for('email_scanner') }}" class="action-grid-card">
+                <i class="bi bi-envelope"></i>
+                <h6>Email Scanner</h6>
             </a>
         </div>
         <div class="col-6 col-lg-3">
-            <a href="{{ url_for('qr_scanner') }}" class="glass-card action-grid-card">
-                <i class="bi bi-qr-code" style="filter: hue-rotate(90deg);"></i>
-                <h6 class="mb-0">QR Scanner</h6>
+            <a href="{{ url_for('qr_scanner') }}" class="action-grid-card">
+                <i class="bi bi-qr-code"></i>
+                <h6>QR Scanner</h6>
             </a>
         </div>
         <div class="col-6 col-lg-3">
-            <a href="{{ url_for('batch_check') }}" class="glass-card action-grid-card">
-                <i class="bi bi-stack" style="filter: hue-rotate(180deg);"></i>
-                <h6 class="mb-0">Batch Check</h6>
+            <a href="{{ url_for('batch_check') }}" class="action-grid-card">
+                <i class="bi bi-collection"></i>
+                <h6>Batch Check</h6>
             </a>
         </div>
     </div>
 
-    <!-- Charts & Analytics -->
-    <div class="row g-4 mb-5">
-        <div class="col-lg-8">
-            <div class="glass-card h-100 p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0">Activity Intelligence</h5>
-                    <select class="form-select form-select-sm" style="width: auto; background: var(--bg-card); color: var(--text-muted); border-color: var(--border-color);">
-                        <option>Last 7 Days</option>
-                        <option>Last 30 Days</option>
-                    </select>
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="glass-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 44px; height: 44px; background: #dcfce7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #22c55e;">
+                        <i class="bi bi-shield-check fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0">{{ stats.safe_count or 0 }}</div>
+                        <small class="text-muted">Safe URLs</small>
+                    </div>
                 </div>
-                <canvas id="activityChart" style="height: 300px;"></canvas>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="glass-card h-100 p-4 d-flex flex-column">
-                <h5 class="mb-4">Threat Distribution</h5>
-                <div class="flex-grow-1 d-flex align-items-center justify-content-center">
-                    <canvas id="scanPieChart"></canvas>
-                </div>
-                <div class="mt-4">
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span><i class="bi bi-circle-fill text-danger me-2"></i> Phishing</span>
-                        <span class="text-main">{{ stats.phishing_count or 0 }}</span>
+        <div class="col-6 col-lg-3">
+            <div class="glass-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 44px; height: 44px; background: #fee2e2; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ef4444;">
+                        <i class="bi bi-shield-exclamation fs-5"></i>
                     </div>
-                    <div class="d-flex justify-content-between small">
-                        <span><i class="bi bi-circle-fill text-success me-2"></i> Legitimate</span>
-                        <span class="text-main">{{ stats.safe_count or 0 }}</span>
+                    <div>
+                        <div class="h4 fw-bold mb-0">{{ stats.phishing_count or 0 }}</div>
+                        <small class="text-muted">Phishing</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="glass-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 44px; height: 44px; background: #dbeafe; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #3b82f6;">
+                        <i class="bi bi-search fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0">{{ stats.total_scans or 0 }}</div>
+                        <small class="text-muted">Total Scans</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="glass-card p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 44px; height: 44px; background: #fef3c7; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #f59e0b;">
+                        <i class="bi bi-bookmark-heart fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0">{{ recent_bookmarks|length }}</div>
+                        <small class="text-muted">Bookmarks</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent History -->
-    <div class="glass-card mb-5">
+    <!-- Recent Scans -->
+    <div class="glass-card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Intelligence Log</h5>
-            <a href="{{ url_for('history') }}" class="text-accent small text-decoration-none">Full History <i
-                    class="bi bi-arrow-right"></i></a>
+            <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Scans</h6>
+            <a href="{{ url_for('history') }}" class="btn btn-sm btn-outline-primary">View All</a>
         </div>
         <div class="card-body p-0">
-            <div class="table-responsive border-0">
-                <table class="table table-hover align-middle mb-0" style="color: var(--text-main);">
-                    <thead style="background: var(--bg-card);">
-                        <tr>
-                            <th class="ps-4">Resource Identifier</th>
-                            <th>Assessment</th>
-                            <th>Confidence</th>
-                            <th>Platform</th>
-                            <th class="pe-4">Timestamp</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for scan in recent_scans[:5] %}
-                        <tr>
-                            <td class="ps-4">
-                                <code class="text-accent small">{{ scan.url[:60] }}...</code>
-                            </td>
-                            <td>
-                                {% if scan.result == 'phishing' %}
-                                <span class="badge badge-phishing">Critical Threat</span>
-                                {% else %}
-                                <span class="badge badge-safe">Verified Safe</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="progress w-100" style="height: 6px;">
-                                        <div class="progress-bar-glow {{ 'bg-danger' if scan.result == 'phishing' else 'bg-success' }}"
-                                            style="width: {{ scan.confidence }}%"></div>
-                                    </div>
-                                    <span class="small">{{ "%.0f"|format(scan.confidence) }}%</span>
+            {% if recent_scans %}
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>URL</th>
+                        <th>Result</th>
+                        <th>Confidence</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scan in recent_scans[:5] %}
+                    <tr>
+                        <td><code class="small">{{ scan.url[:45] }}...</code></td>
+                        <td>
+                            {% if scan.result == 'phishing' %}
+                            <span class="badge bg-danger">Phishing</span>
+                            {% else %}
+                            <span class="badge bg-success">Safe</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress" style="width: 50px; height: 6px;">
+                                    <div class="progress-bar {{ 'bg-danger' if scan.result == 'phishing' else 'bg-success' }}" style="width: {{ scan.confidence }}%"></div>
                                 </div>
-                            </td>
-                            <td><span class="badge bg-dark border border-secondary">{{ scan.scan_type or 'Web' }}</span>
-                            </td>
-                            <td class="pe-4 text-dim small">{{ scan.created_at[:10] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <small>{{ "%.0f"|format(scan.confidence) }}%</small>
+                            </div>
+                        </td>
+                        <td class="text-muted small">{{ scan.created_at[:10] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                <p class="text-muted mt-2 mb-0">No scans yet</p>
             </div>
+            {% endif %}
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const ctx = document.getElementById('activityChart');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {{ activity_labels | tojson }},
-                    datasets: [{
-                        label: 'URL Scans',
-                        data: {{ url_activity | tojson }},
-                        borderColor: '#21B55E',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: 'rgba(33, 181, 94, 0.1)',
-                        pointRadius: 4,
-                        pointBackgroundColor: '#21B55E'
-                    }, {
-                        label: 'Email Scans',
-                        data: {{ email_activity | tojson }},
-                        borderColor: '#666666',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: false,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { 
-                            display: true,
-                            labels: { color: '#A0A0A0' }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { color: '#333333' },
-                            ticks: { color: '#A0A0A0' }
-                        },
-                        y: {
-                            grid: { color: '#333333' },
-                            ticks: { color: '#A0A0A0', beginAtZero: true }
-                        }
-                    }
-                }
-            });
-        }
-
-        const pieCtx = document.getElementById('scanPieChart');
-        if (pieCtx) {
-            new Chart(pieCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Phishing', 'Safe'],
-                    datasets: [{
-                        data: [{{ stats.phishing_count or 0 }}, {{ stats.safe_count or 0 }}],
-                        backgroundColor: ['#EF4444', '#21B55E'],
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    cutout: '80%',
-                    plugins: {
-                        legend: { 
-                            display: true,
-                            labels: { color: '#A0A0A0' }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
 {% endblock %}
