@@ -4,15 +4,39 @@
 
 {% block extra_css %}
 <style>
+    /* Hero Section */
     .hero-section {
-        padding: 7rem 0 5rem;
+        padding: 6rem 0 4rem;
         position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(0, 171, 228, 0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(0, 155, 77, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
     }
 
     .hero-badge {
-        background: linear-gradient(135deg, var(--accent-light), var(--secondary-light));
-        border: 1px solid var(--secondary-light);
-        color: var(--secondary);
+        background: linear-gradient(135deg, var(--light-blue), #d0ebf7);
+        border: 1px solid var(--bright-blue);
+        color: var(--bright-blue);
         padding: 0.6rem 1.5rem;
         border-radius: 100px;
         font-weight: 600;
@@ -20,35 +44,40 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         animation: fadeInUp 0.6s ease forwards;
     }
 
     .hero-title {
-        font-size: clamp(2.5rem, 5vw, 4rem);
-        line-height: 1.15;
-        margin-bottom: 1.5rem;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        line-height: 1.1;
+        margin-bottom: 1.25rem;
         animation: fadeInUp 0.7s ease forwards;
         animation-delay: 0.1s;
         opacity: 0;
     }
 
     .hero-subtitle {
+        font-size: 1.2rem;
+        color: var(--gray-600);
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
         animation: fadeInUp 0.7s ease forwards;
         animation-delay: 0.2s;
         opacity: 0;
     }
 
+    /* Scan Card */
     .scan-card-home {
-        max-width: 850px;
-        margin: 3rem auto 0;
-        background: var(--bg-card);
-        border: 2px solid var(--border-color);
+        max-width: 900px;
+        margin: 0 auto;
+        background: var(--white);
+        border: none;
         border-radius: var(--radius-xl);
-        padding: 2.5rem;
-        box-shadow: var(--shadow-lg);
+        padding: 2rem;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
         position: relative;
-        overflow: hidden;
+        z-index: 1;
         animation: fadeInUp 0.8s ease forwards;
         animation-delay: 0.3s;
         opacity: 0;
@@ -60,182 +89,422 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--accent), var(--secondary), var(--success));
+        height: 6px;
+        background: linear-gradient(90deg, var(--bright-blue), var(--green), var(--tangerine));
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     }
 
-    .feature-icon-wrapper {
-        width: 70px;
-        height: 70px;
-        background: linear-gradient(135deg, var(--accent-light), var(--secondary-light));
-        border-radius: var(--radius-lg);
+    .scan-card-home .form-control {
+        font-size: 1.1rem;
+        padding: 1rem 1.25rem !important;
+    }
+
+    .scan-card-home .btn {
+        font-size: 1.1rem;
+        padding: 1rem 2rem;
+    }
+
+    .scan-badges {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1.25rem;
+        flex-wrap: wrap;
+    }
+
+    .scan-badges span {
         display: flex;
         align-items: center;
-        justify-content: center;
-        font-size: 1.75rem;
-        margin-bottom: 1.5rem;
-        transition: var(--transition);
-        color: var(--accent);
+        gap: 0.5rem;
+        color: var(--gray-500);
+        font-weight: 500;
+        font-size: 0.9rem;
     }
 
-    .glass-card:hover .feature-icon-wrapper {
-        background: linear-gradient(135deg, var(--accent), var(--secondary));
-        color: white;
-        transform: translateY(-5px) rotate(8deg);
+    .scan-badges i {
+        font-size: 1.1rem;
     }
 
-    .stat-widget {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-xl);
-        padding: 2rem;
-    }
-
-    .bg-surface {
-        background: var(--bg-secondary);
-    }
-
+    /* Features */
     .features-section {
-        animation: fadeInUp 0.8s ease forwards;
-        animation-delay: 0.4s;
-        opacity: 0;
+        padding: 5rem 0;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .section-subtitle {
+        color: var(--gray-500);
+        font-size: 1.1rem;
+        margin-bottom: 3rem;
     }
 
     .feature-card {
         height: 100%;
+        padding: 2rem;
+        border: none;
+        border-radius: var(--radius-lg);
+        background: var(--white);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 171, 228, 0.15);
+    }
+
+    .feature-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--light-blue), #d0ebf7);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon-wrapper {
+        background: linear-gradient(135deg, var(--bright-blue), var(--green));
+        color: var(--white);
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .feature-card h4 {
+        margin-bottom: 0.75rem;
+        font-size: 1.25rem;
+    }
+
+    .feature-card p {
+        color: var(--gray-500);
+        font-size: 0.95rem;
+        margin-bottom: 1.25rem;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        background: linear-gradient(135deg, var(--bright-blue), #0091c7);
+        padding: 4rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stats-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .stat-box {
+        text-align: center;
+        color: var(--white);
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-box .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-box .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* How It Works */
+    .how-section {
+        padding: 5rem 0;
+        background: var(--light-blue);
+    }
+
+    .how-card {
+        background: var(--white);
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        height: 100%;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--bright-blue), var(--green));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+    }
+
+    .how-card h4 {
+        margin-bottom: 0.75rem;
+    }
+
+    .how-card p {
+        color: var(--gray-500);
+        margin-bottom: 0;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 5rem 0;
+        text-align: center;
+    }
+
+    .cta-box {
+        background: linear-gradient(135deg, var(--green), #008243);
+        border-radius: var(--radius-xl);
+        padding: 4rem 2rem;
+        color: var(--white);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-box::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+
+    .cta-box h2 {
+        color: var(--white);
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-box p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-box .btn {
+        background: var(--white);
+        color: var(--green);
+        font-weight: 700;
+        padding: 1rem 2.5rem;
+        border: none;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-box .btn:hover {
+        background: var(--tangerine);
+        color: var(--gray-800);
+        transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-card {
         opacity: 0;
-        animation: fadeInUp 0.5s ease forwards;
+        animation: fadeInUp 0.6s ease forwards;
     }
 
-    .feature-card:nth-child(1) { animation-delay: 0.5s; }
-    .feature-card:nth-child(2) { animation-delay: 0.6s; }
-    .feature-card:nth-child(3) { animation-delay: 0.7s; }
-    .feature-card:nth-child(4) { animation-delay: 0.8s; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
 
-    .how-it-works-section {
-        animation: fadeInUp 0.8s ease forwards;
-        animation-delay: 0.6s;
-        opacity: 0;
-    }
+    /* Mobile */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 4rem 0 3rem;
+        }
 
-    .stat-card-animate {
-        animation: fadeInUp 0.5s ease forwards;
-    }
+        .scan-badges {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
 
-    .stat-card-animate:nth-child(1) { animation-delay: 0.7s; }
-    .stat-card-animate:nth-child(2) { animation-delay: 0.8s; }
-    .stat-card-animate:nth-child(3) { animation-delay: 0.9s; }
-    .stat-card-animate:nth-child(4) { animation-delay: 1.0s; }
+        .section-title {
+            font-size: 2rem;
+        }
 
-    ::-webkit-scrollbar-thumb {
-        background: var(--primary);
-        border-radius: 4px;
-    }
+        .stat-box .stat-number {
+            font-size: 2.5rem;
+        }
 
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--primary-hover);
+        .cta-box h2 {
+            font-size: 1.75rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Skip to Content Link for Accessibility -->
-<a href="#main-content" class="skip-link">Skip to main content</a>
-
 <!-- Hero Section -->
 <section class="hero-section text-center" id="main-content">
     <div class="container">
-        <div class="hero-badge fade-in">
-            <i class="bi bi-shield-lock-fill"></i>
-            95.8% Detection Accuracy Powered by AI
+        <div class="hero-badge">
+            <i class="bi bi-shield-check"></i>
+            AI-Powered Phishing Protection
         </div>
+        
         <h1 class="hero-title fw-bold">
-            Stay Ahead of <span class="gradient-text">Cyber Threats</span>
+            Stay Safe Online with<br>
+            <span class="gradient-text">ShieldGuard Pro</span>
         </h1>
-        <p class="lead text-muted mx-auto mb-5" style="max-width: 700px;">
-            ShieldGuard Pro uses advanced machine learning to analyze and block phishing attempts in real-time. Secure
-            your digital life with a single click.
+        
+        <p class="hero-subtitle mx-auto">
+            Protect yourself from phishing attacks with advanced AI detection. 
+            Scan URLs, emails, and QR codes instantly.
         </p>
 
         <!-- Quick URL Check -->
-        <div class="scan-card-home glass-card fade-up">
+        <div class="scan-card-home">
             <form action="{{ url_for('quick_check') }}" method="POST" id="quickCheckForm">
-                <div class="row g-3">
+                <div class="row g-3 align-items-center">
                     <div class="col-lg-9">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
-                            <input type="url" name="url" id="quickUrlInput" class="form-input"
-                                placeholder="Enter URL to analyze (e.g., https://paypal-secure.com)" required aria-label="URL to scan">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="bi bi-globe2 text-accent"></i>
+                            </span>
+                            <input type="url" name="url" id="quickUrlInput" class="form-control border-start-0"
+                                placeholder="Enter URL to scan (e.g., https://example.com)" required>
                         </div>
-                        <div id="urlValidation" role="alert"></div>
                     </div>
                     <div class="col-lg-3">
-                        <button type="submit" class="btn btn-primary w-100 h-100" id="scanBtn">
-                            Scan Now
-                            <span class="spinner" id="scanSpinner" style="display: none;"></span>
+                        <button type="submit" class="btn btn-primary w-100" id="scanBtn">
+                            <i class="bi bi-search me-2"></i>Scan URL
                         </button>
                     </div>
                 </div>
             </form>
-            <div class="d-flex justify-content-center gap-4 mt-4 small text-dim">
-                <span><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Instant Results</span>
-                <span><i class="bi bi-cpu-fill text-primary me-1"></i> ML Powered</span>
-                <span><i class="bi bi-check-all text-success me-1"></i> Free to Use</span>
+            <div class="scan-badges">
+                <span><i class="bi bi-lightning-charge-fill text-warning"></i> Instant Results</span>
+                <span><i class="bi bi-shield-check text-success"></i> 95%+ Accuracy</span>
+                <span><i class="bi bi-heart text-danger"></i> Free to Use</span>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Features Grid -->
-<section class="py-5">
+<section class="features-section">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold h1">Multi-Layered <span class="gradient-text">Protection</span></h2>
-            <p class="text-muted">Comprehensive tools designed to detect phishing across all platforms.</p>
+            <h2 class="section-title fw-bold">Powerful <span class="gradient-text">Protection Tools</span></h2>
+            <p class="section-subtitle">Everything you need to stay safe online</p>
         </div>
+        
         <div class="row g-4">
             <div class="col-md-6 col-lg-3">
-                <div class="glass-card p-4 h-100">
+                <div class="feature-card animate-card delay-1">
                     <div class="feature-icon-wrapper">
                         <i class="bi bi-globe"></i>
                     </div>
                     <h4>URL Scanner</h4>
-                    <p class="text-muted small">Deep analysis of URL structure, domain age, and security certificates.
-                    </p>
-                    <a href="{{ url_for('check_url') }}" class="btn btn-outline-primary btn-sm mt-auto">Open Scanner</a>
+                    <p>Analyze any URL for phishing indicators with 25+ ML features</p>
+                    <a href="{{ url_for('check_url') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i> Scan Now
+                    </a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="glass-card p-4 h-100">
-                    <div class="feature-icon-wrapper" style="color: var(--warning);">
-                        <i class="bi bi-envelope-at"></i>
+                <div class="feature-card animate-card delay-2">
+                    <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #d4edda, #c3e6cb);">
+                        <i class="bi bi-envelope-at" style="color: var(--green);"></i>
                     </div>
                     <h4>Email Guardian</h4>
-                    <p class="text-muted small">Analyze email headers and content for sophisticated phishing patterns.
-                    </p>
-                    <a href="{{ url_for('email_scanner') }}" class="btn btn-outline-primary btn-sm mt-auto">Scan
-                        Email</a>
+                    <p>Scan emails for suspicious links and phishing patterns</p>
+                    <a href="{{ url_for('email_scanner') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i> Scan Email
+                    </a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="glass-card p-4 h-100">
-                    <div class="feature-icon-wrapper" style="color: var(--success);">
-                        <i class="bi bi-qr-code"></i>
+                <div class="feature-card animate-card delay-3">
+                    <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #fff8e1, #ffecb3);">
+                        <i class="bi bi-qr-code" style="color: #f59e0b;"></i>
                     </div>
-                    <h4>QR Verified</h4>
-                    <p class="text-muted small">Safely decode and verify QR codes before visiting embedded links.</p>
-                    <a href="{{ url_for('qr_scanner') }}" class="btn btn-outline-primary btn-sm mt-auto">Scan QR</a>
+                    <h4>QR Scanner</h4>
+                    <p>Verify QR codes before visiting embedded links</p>
+                    <a href="{{ url_for('qr_scanner') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i> Scan QR
+                    </a>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="glass-card p-4 h-100">
-                    <div class="feature-icon-wrapper" style="color: var(--secondary);">
-                        <i class="bi bi-stack"></i>
+                <div class="feature-card animate-card delay-4">
+                    <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #e9ecef, #dee2e6);">
+                        <i class="bi bi-layers" style="color: var(--gray-600);"></i>
                     </div>
                     <h4>Batch Analysis</h4>
-                    <p class="text-muted small">Process multiple URLs simultaneously for enterprise-level efficiency.
-                    </p>
-                    <a href="{{ url_for('batch_check') }}" class="btn btn-outline-primary btn-sm mt-auto">Batch Scan</a>
+                    <p>Scan multiple URLs at once for efficiency</p>
+                    <a href="{{ url_for('batch_check') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right me-1"></i> Batch Scan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <div class="stat-box">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-box">
+                    <div class="stat-number">1M+</div>
+                    <div class="stat-label">URLs Scanned</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-box">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">Threats Blocked</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-box">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Protection</div>
                 </div>
             </div>
         </div>
@@ -243,199 +512,49 @@
 </section>
 
 <!-- How It Works -->
-<section class="py-5 bg-surface">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <h2 class="display-5 fw-bold mb-4">How Our <span class="gradient-text">AI Neural Engine</span> Works
-                </h2>
-                <p class="text-muted mb-4">We've trained our models on millions of verified phishing and legitimate URLs
-                    to provide you with the highest level of protection.</p>
-                <div class="d-flex flex-column gap-3">
-                    <div class="d-flex gap-3">
-                        <div class="h4 text-accent">01</div>
-                        <div>
-                            <h6>Feature Extraction</h6>
-                            <p class="text-dim small">Our system extracts 25+ unique features from every URL in
-                                milliseconds.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-3">
-                        <div class="h4 text-primary">02</div>
-                        <div>
-                            <h6>Machine Learning Classification</h6>
-                            <p class="text-dim small">A Random Forest ensemble model classifies the URL based on trained
-                                patterns.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-3">
-                        <div class="h4 text-secondary">03</div>
-                        <div>
-                            <h6>Threat Intel Cross-Check</h6>
-                            <p class="text-dim small">Real-time verification against global threat feeds for 100%
-                                confidence.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="stat-widget text-center p-5">
-                    <div class="row g-4">
-                        <div class="col-6">
-                            <h2 class="fw-bold gradient-text mb-1">95.4%</h2>
-                            <small class="text-muted uppercase">Accuracy</small>
-                        </div>
-                        <div class="col-6">
-                            <h2 class="fw-bold gradient-text mb-1">0.2s</h2>
-                            <small class="text-muted uppercase">Latency</small>
-                        </div>
-                        <div class="col-6">
-                            <h2 class="fw-bold gradient-text mb-1">1M+</h2>
-                            <small class="text-muted uppercase">Scanned</small>
-                        </div>
-                        <div class="col-6">
-                            <h2 class="fw-bold gradient-text mb-1">24/7</h2>
-                            <small class="text-muted uppercase">Protection</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Results Section (Hidden by default) -->
-<section id="resultsSection" class="py-5" style="display: none;">
+<section class="how-section">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold h1">Scan Results</h2>
-            <p class="text-muted">Detailed analysis of the URL you scanned</p>
+            <h2 class="section-title fw-bold">How It <span class="gradient-text">Works</span></h2>
+            <p class="section-subtitle">Simple steps to stay protected</p>
         </div>
-        <div id="resultsContent" class="row">
-            <!-- Results will be dynamically inserted here -->
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="how-card">
+                    <div class="step-number">1</div>
+                    <h4>Enter URL</h4>
+                    <p>Paste any URL you want to check. Our system accepts links from emails, messages, or websites.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="how-card">
+                    <div class="step-number">2</div>
+                    <h4>AI Analysis</h4>
+                    <p>Our ML model analyzes 25+ features including domain age, SSL, and suspicious patterns.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="how-card">
+                    <div class="step-number">3</div>
+                    <h4>Get Results</h4>
+                    <p>Receive instant results with confidence score and detailed threat analysis.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Skip link functionality
-    document.addEventListener('DOMContentLoaded', function () {
-        const skipLink = document.querySelector('.skip-link');
-        if (skipLink) {
-            skipLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('main-content').focus();
-            });
-        }
-
-        // Animated counter
-        const counters = document.querySelectorAll('[data-count]');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const el = entry.target;
-                    const target = parseInt(el.dataset.count);
-                    if (isNaN(target)) return;
-                    let current = 0;
-                    const increment = Math.max(1, Math.floor(target / 60));
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= target) {
-                            current = target;
-                            clearInterval(timer);
-                        }
-                        el.textContent = current.toLocaleString();
-                    }, 30);
-                    observer.unobserve(el);
-                }
-            });
-        }, { threshold: 0.5 });
-        counters.forEach(el => observer.observe(el));
-
-        // URL validation on quick check
-        const urlInput = document.getElementById('quickUrlInput');
-        const validation = document.getElementById('urlValidation');
-        if (urlInput && validation) {
-            urlInput.addEventListener('input', function () {
-                const url = this.value.trim();
-                if (url.length === 0) { validation.innerHTML = ''; return; }
-                if (!url.match(/^https?:\/\/.+/i)) {
-                    validation.innerHTML = '<small class="text-danger"><i class="bi bi-exclamation-circle"></i> Must start with http:// or https://</small>';
-                } else {
-                    validation.innerHTML = '<small class="text-success"><i class="bi bi-check-circle"></i> Valid URL format</small>';
-                }
-            });
-        }
-
-        // Form submission handling
-        const form = document.getElementById('quickCheckForm');
-        const scanBtn = document.getElementById('scanBtn');
-        const scanSpinner = document.getElementById('scanSpinner');
-
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const url = urlInput.value.trim();
-
-                // Show loading state
-                scanBtn.disabled = true;
-                scanSpinner.style.display = 'inline-block';
-                scanBtn.textContent = 'Scanning...';
-
-                // Simulate API call (replace with actual fetch)
-                setTimeout(() => {
-                    // Hide loading state
-                    scanBtn.disabled = false;
-                    scanSpinner.style.display = 'none';
-                    scanBtn.textContent = 'Scan Now';
-
-                    // Show results
-                    showResults(url);
-                }, 2000);
-            });
-        }
-
-        function showResults(url) {
-            const resultsSection = document.getElementById('resultsSection');
-            const resultsContent = document.getElementById('resultsContent');
-
-            // Create result cards
-            const resultCard = document.createElement('div');
-            resultCard.className = 'col-lg-6 mx-auto glass-card card-entrance';
-            resultCard.innerHTML = `
-                <div class="text-center mb-4">
-                    <h3>Scan Results for: <span class="gradient-text">${url}</span></h3>
-                </div>
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="text-center">
-                            <div class="h1 text-success mb-2" id="resultStatus">Safe</div>
-                            <small class="text-muted">Status</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center">
-                            <div class="h1 text-primary mb-2" id="resultScore">95</div>
-                            <small class="text-muted">Confidence</small>
-                        </div>
-                    </div>
-                    <div class="col-12">
-                        <div class="badge badge-success mb-3">No Phishing Detected</div>
-                        <p class="text-muted">This URL appears to be safe and legitimate.</p>
-                    </div>
-                </div>
-            `;
-
-            resultsContent.innerHTML = '';
-            resultsContent.appendChild(resultCard);
-            resultsSection.style.display = 'block';
-
-            // Animate result card
-            resultCard.classList.add('card-entrance');
-        }
-    });
-</script>
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-box">
+            <h2>Ready to Stay Safe?</h2>
+            <p>Join thousands of users who trust ShieldGuard Pro for their online security.</p>
+            <a href="{{ url_for('signup') }}" class="btn">
+                <i class="bi bi-shield-fill-check me-2"></i>Get Started Free
+            </a>
+        </div>
+    </div>
+</section>
 {% endblock %}
