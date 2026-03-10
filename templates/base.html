@@ -19,11 +19,13 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg sticky-top glass-nav">
+    <nav class="navbar navbar-expand-lg sticky-top" style="background: var(--white); box-shadow: 0 2px 20px rgba(0,0,0,0.08);">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                <i class="bi bi-shield-fill-check text-accent me-2"></i>
-                <span>ShieldGuard <span class="gradient-text">Pro</span></span>
+                <div style="width: 42px; height: 42px; background: linear-gradient(135deg, var(--bright-blue), var(--green)); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                    <i class="bi bi-shield-fill-check text-white" style="font-size: 1.4rem;"></i>
+                </div>
+                <span style="font-weight: 800; font-size: 1.35rem;">ShieldGuard <span style="background: linear-gradient(135deg, var(--bright-blue), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Pro</span></span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
