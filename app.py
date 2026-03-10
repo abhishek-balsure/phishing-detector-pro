@@ -591,7 +591,10 @@ def predict_url(url):
             'probability_phishing': round(prob_phishing * 100, 2),
             'probability_legitimate': round(prob_legitimate * 100, 2),
             'severity': severity,
-            'feature_importance': feature_importance
+            'feature_importance': feature_importance,
+            'whois_info': get_whois_info(url),
+            'ssl_info': get_ssl_info(url),
+            'reputation': get_domain_reputation(url)
         }
     except Exception as e:
         logger.error(f"Error predicting URL {url}: {e}")
@@ -682,6 +685,208 @@ def extract_urls_from_text(text):
         r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     )
     return url_pattern.findall(text)
+
+
+# ============================================================================
+# ADVANCED ANALYSIS FEATURES
+# ============================================================================
+
+def get_whois_info(url):
+    """
+    Get Whois information for a domain.
+    Returns domain registration details, age, and expiration.
+    """
+    if not WHOIS_AVAILABLE:
+        return {'available': False, 'error': 'Whois module not available'}
+    
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+        
+        if ':' in domain:
+            domain = domain.split(':')[0]
+        
+        parts = domain.split('.')
+        if len(parts) > 2:
+            domain = '.'.join(parts[-2:])
+        
+        w = whois.whois(domain)
+        
+        creation_date = w.creation_date
+        if isinstance(creation_date, list):
+            creation_date = creation_date[0]
+        
+        expiration_date = w.expiration_date
+        if isinstance(expiration_date, list):
+            expiration_date = expiration_date[0]
+        
+        domain_age_days = None
+        if creation_date:
+            if isinstance(creation_date, str):
+                try:
+                    creation_date = datetime.strptime(creation_date, '%Y-%m-%d %H:%M:%S')
+                except:
+                    try:
+                        creation_date = datetime.strptime(creation_date.split(' ')[0], '%Y-%m-%d')
+                    except:
+                        creation_date = None
+            
+            if creation_date and isinstance(creation_date, datetime):
+                domain_age_days = (datetime.now() - creation_date).days
+        
+        registrar = w.registrar
+        if isinstance(registrar, list):
+            registrar = registrar[0] if registrar else 'Unknown'
+        
+        return {
+            'available': True,
+            'domain': domain,
+            'registrar': registrar or 'Unknown',
+            'creation_date': creation_date.strftime('%Y-%m-%d') if creation_date and isinstance(creation_date, datetime) else str(creation_date) if creation_date else 'Unknown',
+            'expiration_date': expiration_date.strftime('%Y-%m-%d') if expiration_date and isinstance(expiration_date, datetime) else str(expiration_date) if expiration_date else 'Unknown',
+            'domain_age_days': domain_age_days,
+            'domain_age_years': round(domain_age_days / 365, 1) if domain_age_days else None,
+            ' registrant': w.registrant_name if hasattr(w, 'registrant_name') else None,
+            'country': w.country if hasattr(w, 'country') else None,
+            'emails': w.emails if hasattr(w, 'emails') else None
+        }
+    except Exception as e:
+        logger.warning(f"Whois lookup failed for {url}: {e}")
+        return {'available': False, 'error': str(e)}
+
+
+def get_ssl_info(url):
+    """
+    Analyze SSL certificate of a URL.
+    Returns certificate validity, issuer, and expiration.
+    """
+    parsed = urlparse(url)
+    hostname = parsed.netloc.split(':')[0] if ':' in parsed.netloc else parsed.netloc
+    
+    if parsed.scheme != 'https':
+        return {
+            'available': True,
+            'has_ssl': False,
+            'valid': False,
+            'issue': 'No HTTPS/SSL certificate'
+        }
+    
+    try:
+        import ssl
+        import socket
+        
+        context = ssl.create_default_context()
+        
+        with socket.create_connection((hostname, 443), timeout=5) as sock:
+            with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+                cert = ssock.getpeercert()
+        
+        if not cert:
+            return {
+                'available': True,
+                'has_ssl': True,
+                'valid': False,
+                'issue': 'No certificate found'
+            }
+        
+        subject = dict(x[0] for x in cert['subject'])
+        issuer = dict(x[0] for x in cert['issuer'])
+        
+        not_before = datetime.strptime(cert['notBefore'].replace(' GMT', ''), '%b %d %H:%M:%S %Y')
+        not_after = datetime.strptime(cert['notAfter'].replace(' GMT', ''), '%b %d %H:%M:%S %Y')
+        
+        days_until_expiry = (not_after - datetime.now()).days
+        is_valid = datetime.now() >= not_before and datetime.now() <= not_after
+        
+        return {
+            'available': True,
+            'has_ssl': True,
+            'valid': is_valid,
+            'issuer': issuer.get('commonName', 'Unknown'),
+            'subject': subject.get('commonName', hostname),
+            'not_before': not_before.strftime('%Y-%m-%d'),
+            'not_after': not_after.strftime('%Y-%m-%d'),
+            'days_until_expiry': days_until_expiry,
+            'version': cert.get('version', 'Unknown'),
+            'serial_number': cert.get('serialNumber', 'Unknown')
+        }
+    except ssl.SSLCertVerificationError as e:
+        return {
+            'available': True,
+            'has_ssl': True,
+            'valid': False,
+            'issue': f'Certificate verification failed: {str(e)}'
+        }
+    except Exception as e:
+        logger.warning(f"SSL analysis failed for {url}: {e}")
+        return {
+            'available': True,
+            'has_ssl': False,
+            'valid': False,
+            'issue': str(e)
+        }
+
+
+def get_domain_reputation(url):
+    """
+    Check domain reputation across multiple threat intelligence sources.
+    """
+    parsed = urlparse(url)
+    domain = parsed.netloc.lower()
+    
+    if ':' in domain:
+        domain = domain.split(':')[0]
+    
+    parts = domain.split('.')
+    if len(parts) > 2:
+        domain = '.'.join(parts[-2:])
+    
+    reputation = {
+        'domain': domain,
+        'is_new_domain': None,
+        'risk_signals': [],
+        'safety_score': 100
+    }
+    
+    try:
+        whois_info = get_whois_info(url)
+        if whois_info.get('available') and whois_info.get('domain_age_days'):
+            age = whois_info['domain_age_days']
+            reputation['is_new_domain'] = age < 90
+            
+            if age < 30:
+                reputation['risk_signals'].append('Domain created within last 30 days')
+                reputation['safety_score'] -= 30
+            elif age < 90:
+                reputation['risk_signals'].append('Domain created within last 90 days')
+                reputation['safety_score'] -= 15
+            
+            if age > 365:
+                reputation['safety_score'] += 10
+        
+        ssl_info = get_ssl_info(url)
+        if ssl_info.get('available'):
+            if not ssl_info.get('has_ssl'):
+                reputation['risk_signals'].append('No SSL certificate')
+                reputation['safety_score'] -= 20
+            elif not ssl_info.get('valid'):
+                reputation['risk_signals'].append('Invalid SSL certificate')
+                reputation['safety_score'] -= 25
+            elif ssl_info.get('days_until_expiry', 0) < 30:
+                reputation['risk_signals'].append('SSL certificate expiring soon')
+                reputation['safety_score'] -= 10
+        
+        if 'paypal' in domain.lower() or 'apple' in domain.lower() or 'google' in domain.lower() or 'microsoft' in domain.lower():
+            if not any(brand in domain.lower() for brand in ['paypal.com', 'apple.com', 'google.com', 'microsoft.com']):
+                reputation['risk_signals'].append('Possible brand impersonation')
+                reputation['safety_score'] -= 40
+        
+        reputation['safety_score'] = max(0, min(100, reputation['safety_score']))
+        
+    except Exception as e:
+        logger.warning(f"Reputation check failed: {e}")
+    
+    return reputation
 
 
 # ============================================================================
