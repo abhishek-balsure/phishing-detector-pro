@@ -16,7 +16,7 @@
 
     .scanner-icon-main {
         font-size: 3.5rem;
-        background: linear-gradient(135deg, var(--accent), var(--secondary));
+        background: linear-gradient(135deg, var(--bright-blue), var(--green));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 1rem;
@@ -161,9 +161,9 @@
         transform: translateX(5px);
     }
 
-    .whois-card { border-left: 4px solid var(--secondary); }
-    .ssl-card { border-left: 4px solid var(--accent); }
-    .reputation-card { border-left: 4px solid var(--warning); }
+    .whois-card { border-left: 4px solid var(--green); }
+    .ssl-card { border-left: 4px solid var(--bright-blue); }
+    .reputation-card { border-left: 4px solid var(--tangerine); }
 
     .badge-safe { background: var(--success-light); color: #047857; }
     .badge-danger { background: var(--danger-light); color: #b91c1c; }
@@ -237,13 +237,13 @@
                 </div>
                 <div class="col-md-3">
                     <div class="stat-card">
-                        <div class="h3 fw-bold mb-0 text-secondary">{{ result.whois_info.available if result.whois_info else 'N/A' }}</div>
+                        <div class="h3 fw-bold mb-0" style="color: var(--green);">{{ result.whois_info.available if result.whois_info else 'N/A' }}</div>
                         <div class="small text-muted uppercase">Whois</div>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="stat-card">
-                        <div class="h3 fw-bold mb-0 {% if result.ssl_info.has_ssl if result.ssl_info else false %}text-success{% else %}text-danger{% endif %}">
+                        <div class="h3 fw-bold mb-0" style="{% if result.ssl_info and result.ssl_info.has_ssl %}color: var(--green);{% else %}color: var(--danger);{% endif %}">
                             {% if result.ssl_info and result.ssl_info.has_ssl %}<i class="bi bi-lock-fill"></i>{% else %}<i class="bi bi-unlock"></i>{% endif %}
                         </div>
                         <div class="small text-muted uppercase">SSL Status</div>
@@ -402,7 +402,7 @@
 <div class="modal fade" id="explainModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content glass-card overflow-hidden">
-            <div class="modal-header border-0" style="background: linear-gradient(135deg, var(--gray-50), var(--bg-lavender));">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, var(--light-blue), var(--ivory));">
                 <h5 class="modal-title fw-bold"><i class="bi bi-robot me-2"></i>AI Engine Intelligence Report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
