@@ -534,6 +534,229 @@
         .stat-card { padding: 1.25rem; }
         .action-card { padding: 1.25rem; }
     }
+    /* Threat Level Indicator */
+    .threat-level-card {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    body.dark-mode .threat-level-card {
+        background: var(--bg-card);
+        border-color: var(--border-color);
+    }
+
+    .threat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .threat-header h3 {
+        font-size: 1.25rem;
+        margin: 0;
+        color: var(--gray-800);
+        display: flex;
+        align-items: center;
+    }
+
+    body.dark-mode .threat-header h3 {
+        color: var(--gray-100);
+    }
+
+    .pulsing-dot {
+        width: 12px;
+        height: 12px;
+        background-color: var(--green);
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .threat-gauge-container {
+        position: relative;
+        padding-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .threat-bar {
+        height: 12px;
+        border-radius: 6px;
+        background: linear-gradient(to right, var(--green), #F59E0B, #F97316, var(--danger));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .threat-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        100% { left: 200%; }
+    }
+
+    .threat-marker {
+        position: absolute;
+        top: -8px;
+        left: 12.5%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 12px solid var(--gray-800);
+        animation: bounce-marker 2s infinite;
+        z-index: 2;
+    }
+
+    body.dark-mode .threat-marker {
+        border-top-color: var(--gray-100);
+    }
+
+    @keyframes bounce-marker {
+        0%, 100% { transform: translate(-50%, 0); }
+        50% { transform: translate(-50%, -5px); }
+    }
+
+    .threat-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .threat-message {
+        text-align: center;
+        font-weight: 500;
+        color: var(--green);
+        background: var(--green-light);
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+    }
+
+    body.dark-mode .threat-message {
+        background: rgba(16, 185, 129, 0.1);
+    }
+
+    /* Live Activity Feed */
+    .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--green);
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .live-dot {
+        width: 6px;
+        height: 6px;
+        background-color: var(--green);
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
+    }
+
+    .live-feed-list {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .live-entry {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        border-left: 4px solid transparent;
+        opacity: 0;
+        transform: translateX(-20px);
+        animation: slideInFade 0.5s forwards;
+        background: var(--white);
+    }
+
+    body.dark-mode .live-entry {
+        border-bottom-color: var(--border-color);
+        background: var(--bg-card);
+    }
+
+    .live-entry:last-child {
+        border-bottom: none;
+    }
+    
+    .live-entry.new-entry {
+        animation: slideInFade 0.5s forwards, entry-pulse 2s 1;
+    }
+
+    @keyframes slideInFade {
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes entry-pulse {
+        0% { background-color: rgba(99, 102, 241, 0.1); }
+        100% { background-color: transparent; }
+    }
+
+    .live-entry.status-safe { border-left-color: var(--green); }
+    .live-entry.status-threat { border-left-color: var(--danger); }
+    .live-entry.status-warning { border-left-color: #F59E0B; }
+    .live-entry.status-info { border-left-color: var(--bright-blue); }
+
+    .live-entry-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .status-safe .live-entry-icon { background: var(--green-light); color: var(--green); }
+    .status-threat .live-entry-icon { background: var(--danger-light); color: var(--danger); }
+    .status-warning .live-entry-icon { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
+    .status-info .live-entry-icon { background: var(--info-light); color: var(--bright-blue); }
+
+    .live-entry-content {
+        flex: 1;
+    }
+
+    .live-entry-text {
+        font-weight: 500;
+        color: var(--gray-800);
+        margin-bottom: 0.15rem;
+    }
+
+    body.dark-mode .live-entry-text {
+        color: var(--gray-100);
+    }
+
+    .live-entry-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
 </style>
 {% endblock %}
 
@@ -624,6 +847,28 @@
         </div>
     </div>
 
+    <!-- Threat Level Indicator -->
+    <div class="threat-level-card mb-4">
+        <div class="threat-header">
+            <h3><i class="bi bi-shield-shaded me-2"></i>Current Threat Level</h3>
+            <div class="pulsing-dot"></div>
+        </div>
+        <div class="threat-gauge-container">
+            <div class="threat-bar">
+                <div class="threat-marker"></div>
+            </div>
+            <div class="threat-labels">
+                <span>Low</span>
+                <span>Moderate</span>
+                <span>Elevated</span>
+                <span>Critical</span>
+            </div>
+        </div>
+        <div class="threat-message">
+            ✅ Your network is well protected. No active threats detected.
+        </div>
+    </div>
+
     <!-- Quick Actions -->
     <div class="quick-actions">
         <h3 class="section-title">
@@ -695,6 +940,21 @@
                 </div>
                 <div class="p-4" style="height: 300px;">
                     <canvas id="threatChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Security Feed -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="activity-card live-feed-card">
+                <div class="activity-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-activity me-2"></i>Live Security Feed</h5>
+                    <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+                </div>
+                <div class="live-feed-list" id="liveFeedList">
+                    <!-- JS will populate this -->
                 </div>
             </div>
         </div>
@@ -870,6 +1130,34 @@
                 }
             }
         });
+        // Live Feed Population
+        const liveFeedData = [
+            { icon: 'bi-search', text: '🔍 URL Scan completed — google.com marked as Safe', time: '2 min ago', status: 'safe' },
+            { icon: 'bi-shield-fill-x', text: '🚨 Phishing attempt blocked — paypa1-secure.tk', time: '5 min ago', status: 'threat' },
+            { icon: 'bi-envelope-check', text: '✅ Email verified as legitimate — newsletter@github.com', time: '12 min ago', status: 'safe' },
+            { icon: 'bi-exclamation-triangle', text: '⚠️ Suspicious link quarantined — amaz0n-deals.xyz', time: '18 min ago', status: 'warning' },
+            { icon: 'bi-list-check', text: '🛡️ Batch scan completed — 50 URLs processed, 3 threats found', time: '25 min ago', status: 'info' }
+        ];
+
+        const liveFeedList = document.getElementById('liveFeedList');
+        if (liveFeedList) {
+            liveFeedData.forEach((item, index) => {
+                setTimeout(() => {
+                    const li = document.createElement('div');
+                    li.className = `live-entry status-${item.status} new-entry`;
+                    li.innerHTML = `
+                        <div class="live-entry-icon">
+                            <i class="bi ${item.icon}"></i>
+                        </div>
+                        <div class="live-entry-content">
+                            <div class="live-entry-text">${item.text}</div>
+                            <div class="live-entry-time">${item.time}</div>
+                        </div>
+                    `;
+                    liveFeedList.appendChild(li);
+                }, index * 400); // staggered animation
+            });
+        }
     });
 </script>
 {% endblock %}

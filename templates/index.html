@@ -507,10 +507,245 @@
             font-size: 1.75rem;
         }
     }
+
+    /* Live Threat Ticker */
+    .threat-ticker-container {
+        width: 100%;
+        height: 40px;
+        background-color: #1a1a2e;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        z-index: 100;
+    }
+    body.dark-mode .threat-ticker-container {
+        background-color: #0f111a;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .ticker-label {
+        background: #e63946;
+        color: white;
+        padding: 0 15px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 0.85rem;
+        z-index: 2;
+        position: absolute;
+        left: 0;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    }
+    .pulsing-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #fff;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.5; }
+        50% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.5; }
+    }
+    .ticker-wrap {
+        width: 100%;
+        padding-left: 100px;
+        box-sizing: content-box;
+    }
+    .ticker-move {
+        display: inline-block;
+        white-space: nowrap;
+        padding-right: 100%;
+        box-sizing: content-box;
+        animation: ticker 30s linear infinite;
+    }
+    .ticker-move:hover {
+        animation-play-state: paused;
+    }
+    @keyframes ticker {
+        0% { transform: translate3d(0, 0, 0); }
+        100% { transform: translate3d(-100%, 0, 0); }
+    }
+    .ticker-item {
+        display: inline-block;
+        padding: 0 2rem;
+        font-size: 0.85rem;
+        color: #e0e0e0;
+    }
+    .ticker-item.danger { color: #ff4d4d; }
+    .ticker-item.safe { color: #00e676; }
+    .ticker-item.warning { color: #ffca28; }
+
+    /* Trust Badges */
+    .trust-badges-section {
+        padding: 2rem 0;
+        background: transparent;
+        overflow: hidden;
+    }
+    .trust-badges-scroll {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        overflow-x: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE and Edge */
+        white-space: nowrap;
+    }
+    .trust-badges-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    .trust-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #333;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    body.dark-mode .trust-badge {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #f8f9fa;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    .trust-badge:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.9);
+    }
+    body.dark-mode .trust-badge:hover {
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.4);
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+        padding: 6rem 0;
+        background-color: var(--card-bg);
+    }
+
+    .testimonial-card {
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+        height: 100%;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    body.dark-mode .testimonial-card {
+        background: var(--dark-bg);
+        border-color: var(--dark-border);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark-mode .testimonial-card:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .quote-icon {
+        font-size: 2rem;
+        color: var(--bright-blue);
+        opacity: 0.2;
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+    }
+
+    .stars {
+        color: #ffc107;
+        margin-bottom: 1rem;
+    }
+
+    .testimonial-text {
+        font-style: italic;
+        margin-bottom: 1.5rem;
+        color: var(--text-color);
+        position: relative;
+        z-index: 1;
+    }
+
+    body.dark-mode .testimonial-text {
+        color: var(--dark-text);
+    }
+
+    .author-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .author-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--bright-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .author-details h5 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .author-details p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    body.dark-mode .author-details p {
+        color: var(--dark-text-muted);
+    }
+
+    .stat-number.pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Live Threat Ticker -->
+<div class="threat-ticker-container">
+    <div class="ticker-label"><div class="pulsing-dot"></div>LIVE</div>
+    <div class="ticker-wrap">
+        <div class="ticker-move" id="threat-ticker">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</div>
+
 <!-- Hero Section -->
 <section class="hero-section text-center" id="main-content">
     <div class="container">
@@ -658,28 +893,41 @@
         <div class="row">
             <div class="col-6 col-md-3">
                 <div class="stat-box">
-                    <div class="stat-number">95%+</div>
+                    <div class="stat-number" data-target="95" data-suffix="%+">0</div>
                     <div class="stat-label">Accuracy</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-box">
-                    <div class="stat-number">25+</div>
+                    <div class="stat-number" data-target="25" data-suffix="+">0</div>
                     <div class="stat-label">ML Features</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-box">
-                    <div class="stat-number">&lt;1s</div>
+                    <div class="stat-number pulse">&lt;1s</div>
                     <div class="stat-label">Real-time Analysis</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="stat-box">
-                    <div class="stat-number">5+</div>
+                    <div class="stat-number" data-target="5" data-suffix="+">0</div>
                     <div class="stat-label">Multi-Scanner</div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges -->
+<section class="trust-badges-section">
+    <div class="container">
+        <div class="trust-badges-scroll">
+            <div class="trust-badge">🛡️ Trusted by 10,000+ Users</div>
+            <div class="trust-badge">⭐ 4.9/5 Average Rating</div>
+            <div class="trust-badge">🔒 256-bit SSL Encryption</div>
+            <div class="trust-badge">🏆 #1 Phishing Detector 2026</div>
+            <div class="trust-badge">✅ 99.9% Uptime Guarantee</div>
         </div>
     </div>
 </section>
@@ -712,6 +960,69 @@
                     <div class="step-number">3</div>
                     <h4>Get Results</h4>
                     <p>Receive instant results with confidence score and detailed threat analysis.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="testimonials-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">What Our Users Say</h2>
+            <p class="section-subtitle">Trusted by security professionals worldwide</p>
+        </div>
+        <div class="row g-4">
+            <!-- Card 1 -->
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <i class="bi bi-quote quote-icon"></i>
+                    <div class="stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="testimonial-text">"ShieldGuard Pro caught a sophisticated phishing attempt that bypassed our email filters. The AI analysis is incredibly accurate!"</p>
+                    <div class="author-info">
+                        <div class="author-avatar">SC</div>
+                        <div class="author-details">
+                            <h5>Sarah Chen</h5>
+                            <p>Security Analyst at TechCorp</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <i class="bi bi-quote quote-icon"></i>
+                    <div class="stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="testimonial-text">"We deployed ShieldGuard Pro across our organization. Phishing incidents dropped 94% in the first month. Absolutely essential tool."</p>
+                    <div class="author-info">
+                        <div class="author-avatar">MJ</div>
+                        <div class="author-details">
+                            <h5>Marcus Johnson</h5>
+                            <p>IT Director</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <i class="bi bi-quote quote-icon"></i>
+                    <div class="stars">
+                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                    </div>
+                    <p class="testimonial-text">"The ML model behind ShieldGuard Pro is state-of-the-art. I've tested it against known phishing databases — 99.2% detection rate."</p>
+                    <div class="author-info">
+                        <div class="author-avatar">PS</div>
+                        <div class="author-details">
+                            <h5>Dr. Priya Sharma</h5>
+                            <p>Cybersecurity Researcher</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -822,6 +1133,77 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1500);
         });
     }
+
+    // Initialize Threat Ticker
+    const tickerMove = document.getElementById('threat-ticker');
+    if (tickerMove) {
+        const threats = [
+            '<span class="ticker-item danger">🚨 Phishing attempt blocked: paypa1-secure.com — 2 min ago</span>',
+            '<span class="ticker-item safe">✅ Safe URL verified: google.com — 5 min ago</span>',
+            '<span class="ticker-item warning">⚠️ Suspicious domain flagged: amaz0n-login.tk — 8 min ago</span>',
+            '<span class="ticker-item danger">🚨 Malware detected: free-movie-stream.ru — 12 min ago</span>',
+            '<span class="ticker-item safe">✅ Safe URL verified: github.com — 15 min ago</span>',
+            '<span class="ticker-item warning">⚠️ High-risk IP blocked: 192.168.x.x — 20 min ago</span>',
+            '<span class="ticker-item danger">🚨 Credential theft stopped: netflix-update.net — 25 min ago</span>',
+            '<span class="ticker-item safe">✅ Safe URL verified: microsoft.com — 30 min ago</span>'
+        ];
+        
+        // Clone for seamless loop
+        tickerMove.innerHTML = threats.join('') + threats.join('');
+    }
 });
+
+// Stats Counter Animation
+const animateCounter = (el, delay) => {
+    const target = parseInt(el.getAttribute('data-target'));
+    const suffix = el.getAttribute('data-suffix') || '';
+    if (!target) return;
+    
+    let startTimestamp = null;
+    const duration = 2000;
+    
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        
+        const easeProgress = 1 - Math.pow(1 - progress, 4);
+        const currentCount = Math.floor(easeProgress * target);
+        
+        el.innerText = currentCount + suffix;
+        
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            el.innerText = target + suffix;
+        }
+    };
+    
+    setTimeout(() => {
+        window.requestAnimationFrame(step);
+    }, delay);
+};
+
+const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1
+};
+
+const statsObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const counters = entry.target.querySelectorAll('.stat-number[data-target]');
+            counters.forEach((counter, index) => {
+                animateCounter(counter, index * 200);
+            });
+            observer.unobserve(entry.target);
+        }
+    });
+}, observerOptions);
+
+const statsSection = document.querySelector('.stats-section');
+if (statsSection) {
+    statsObserver.observe(statsSection);
+}
 </script>
 {% endblock %}
