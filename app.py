@@ -86,6 +86,14 @@ app.config['RATELIMIT_HEADERS_ENABLED'] = True
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
+# Fix Flask so it generates correct external URLs when running behind Docker / reverse proxy
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+# Base URL of this deployment — used to build the exact OAuth callback URL
+# Set APP_BASE_URL in .env to override (e.g. https://yourdomain.com)
+APP_BASE_URL = os.environ.get('APP_BASE_URL', 'http://35.154.32.25:5000').rstrip('/')
+
 jwt = JWTManager(app)
 limiter = Limiter(
     key_func=get_remote_address,
@@ -127,9 +135,12 @@ def setup_oauth():
                 client_secret=github_client_secret,
                 scope=['user:email'],
                 redirect_to='github_callback',
+                # Hardcode the callback URL so GitHub always gets the right address
+                # regardless of Docker networking / proxy headers
+                redirect_url=f'{APP_BASE_URL}/auth/github/authorized',
             )
             app.register_blueprint(github_bp, url_prefix='/auth/github')
-            logger.info(f"✅ GitHub OAuth blueprint registered — client_id: {github_client_id[:8]}...")
+            logger.info(f"✅ GitHub OAuth blueprint registered — callback: {APP_BASE_URL}/auth/github/authorized")
         except Exception as e:
             logger.error(f"❌ Failed to setup GitHub OAuth: {e}", exc_info=True)
     else:

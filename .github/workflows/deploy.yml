@@ -88,6 +88,7 @@ jobs:
             printf "GITHUB_CLIENT_ID=%s\n"     "$GH_OAUTH_CLIENT_ID"      >> ~/.env
             printf "GITHUB_CLIENT_SECRET=%s\n" "$GH_OAUTH_CLIENT_SECRET"  >> ~/.env
             printf "OAUTHLIB_INSECURE_TRANSPORT=1\n"                       >> ~/.env
+            printf "APP_BASE_URL=http://35.154.32.25:5000\n"               >> ~/.env
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
