@@ -364,6 +364,124 @@
         background: #3d3d5c;
     }
 
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 1.5rem 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border-color, #e2e8f0);
+    }
+
+    .divider span {
+        padding: 0 1rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    /* GitHub Button */
+    .btn-github {
+        width: 100%;
+        height: 54px;
+        border-radius: 12px;
+        border: 2px solid #24292e;
+        background: #24292e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        font-weight: 700;
+        font-size: 0.97rem;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        margin-bottom: 0;
+    }
+
+    .btn-github::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-github:hover::before { left: 100%; }
+
+    .btn-github:hover {
+        background: #1a1f24;
+        border-color: #1a1f24;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(36, 41, 46, 0.45);
+        color: #ffffff;
+    }
+
+    .btn-github:active { transform: translateY(0); }
+
+    .github-spinner {
+        display: none;
+        width: 18px; height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* GitHub auto-fill feature chips */
+    .github-features {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 0.85rem;
+    }
+
+    .github-feature-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.75rem;
+        background: rgba(36,41,46,0.07);
+        border: 1px solid rgba(36,41,46,0.15);
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .github-feature-chip i { color: #22c55e; font-size: 0.8rem; }
+
+    body.dark-mode .github-feature-chip {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(255,255,255,0.15);
+        color: #cbd5e1;
+    }
+
+    body.dark-mode .btn-github {
+        border-color: #444d56;
+        background: #2d333b;
+    }
+
+    body.dark-mode .btn-github:hover {
+        background: #22272e;
+        border-color: #768390;
+    }
+
     /* Responsive */
     @media (max-width: 576px) {
         .auth-page { padding: 1rem 0.5rem; }
@@ -388,6 +506,29 @@
         </div>
 
         <div class="auth-body">
+
+            <!-- ✅ GITHUB SIGNUP — auto-fetches name, email, username -->
+            <a href="{{ url_for('login_github') }}" class="btn-github" id="githubSignupBtn">
+                <span class="github-spinner" id="githubSignupSpinner"></span>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <span id="githubSignupBtnText">Sign up with GitHub — It's Free</span>
+            </a>
+
+            <!-- What GitHub auto-fills -->  
+            <div class="github-features">
+                <span class="github-feature-chip"><i class="bi bi-check-circle-fill"></i> Username</span>
+                <span class="github-feature-chip"><i class="bi bi-check-circle-fill"></i> Email</span>
+                <span class="github-feature-chip"><i class="bi bi-check-circle-fill"></i> Display Name</span>
+                <span class="github-feature-chip"><i class="bi bi-check-circle-fill"></i> No Password Needed</span>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider" style="margin-top:1.5rem;">
+                <span>or create account manually</span>
+            </div>
+
             <form method="POST" action="{{ url_for('signup') }}" id="signupForm" novalidate>
                 <div class="row g-3">
                     <!-- Username -->
@@ -619,6 +760,17 @@ document.getElementById('confirm_password').addEventListener('input', function()
     } else {
         this.classList.remove('is-valid', 'is-invalid');
     }
+});
+
+// GitHub signup button — show loading state on click
+document.getElementById('githubSignupBtn').addEventListener('click', function(e) {
+    const spinner  = document.getElementById('githubSignupSpinner');
+    const text     = document.getElementById('githubSignupBtnText');
+    spinner.style.display  = 'inline-block';
+    text.textContent       = 'Connecting to GitHub...';
+    this.style.pointerEvents = 'none';
+    this.style.opacity       = '0.85';
+    // href navigation continues naturally
 });
 </script>
 {% endblock %}

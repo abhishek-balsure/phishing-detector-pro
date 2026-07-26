@@ -67,7 +67,38 @@ jobs:
           source: "docker-compose.prod.yml"
           target: "~/"
 
-      - name: Rename and deploy on EC2
+      - name: Write .env file to EC2
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: SECRET_KEY,JWT_SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,GH_OAUTH_CLIENT_ID,GH_OAUTH_CLIENT_SECRET,ADMIN_PASSWORD
+          script: |
+            printf "SECRET_KEY=%s\n"           "$SECRET_KEY"               > ~/.env
+            printf "JWT_SECRET_KEY=%s\n"       "$JWT_SECRET_KEY"           >> ~/.env
+            printf "DATABASE_URL=postgresql://%s:%s@db:5432/%s\n" "$POSTGRES_USER" "$POSTGRES_PASSWORD" "$POSTGRES_DB" >> ~/.env
+            printf "POSTGRES_DB=%s\n"          "$POSTGRES_DB"              >> ~/.env
+            printf "POSTGRES_USER=%s\n"        "$POSTGRES_USER"            >> ~/.env
+            printf "POSTGRES_PASSWORD=%s\n"    "$POSTGRES_PASSWORD"        >> ~/.env
+            printf "REDIS_URL=redis://redis:6379/0\n"                      >> ~/.env
+            printf "FLASK_APP=app.py\n"                                    >> ~/.env
+            printf "FLASK_ENV=production\n"                                >> ~/.env
+            printf "ADMIN_PASSWORD=%s\n"       "$ADMIN_PASSWORD"           >> ~/.env
+            printf "GITHUB_CLIENT_ID=%s\n"     "$GH_OAUTH_CLIENT_ID"      >> ~/.env
+            printf "GITHUB_CLIENT_SECRET=%s\n" "$GH_OAUTH_CLIENT_SECRET"  >> ~/.env
+            printf "OAUTHLIB_INSECURE_TRANSPORT=1\n"                       >> ~/.env
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          GH_OAUTH_CLIENT_ID: ${{ secrets.GH_OAUTH_CLIENT_ID }}
+          GH_OAUTH_CLIENT_SECRET: ${{ secrets.GH_OAUTH_CLIENT_SECRET }}
+
+      - name: Deploy on EC2
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -77,15 +108,6 @@ jobs:
           command_timeout: 20m
           script: |
             mv ~/docker-compose.prod.yml ~/docker-compose.yml
-            cat > ~/.env << 'EOF'
-            SECRET_KEY=${{ secrets.SECRET_KEY }}
-            DATABASE_URL=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}
-            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            REDIS_URL=redis://redis:6379/0
-            POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-            POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            EOF
             cd ~
             docker-compose down
             docker-compose pull
