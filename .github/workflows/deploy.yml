@@ -56,7 +56,7 @@ jobs:
     needs: docker-build-push
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy docker-compose.prod.yml to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -67,12 +67,14 @@ jobs:
           source: "docker-compose.prod.yml"
           target: "~/"
 
-      - name: Write .env file to EC2
-        uses: appleboy/ssh-action@v0.1.5
+      - name: Deploy and Configure .env on EC2
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          command_timeout: 20m
           envs: SECRET_KEY,JWT_SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,GH_OAUTH_CLIENT_ID,GH_OAUTH_CLIENT_SECRET,ADMIN_PASSWORD
           script: |
             printf "SECRET_KEY=%s\n"           "$SECRET_KEY"               > ~/.env
@@ -89,6 +91,14 @@ jobs:
             printf "GITHUB_CLIENT_SECRET=%s\n" "$GH_OAUTH_CLIENT_SECRET"  >> ~/.env
             printf "OAUTHLIB_INSECURE_TRANSPORT=1\n"                       >> ~/.env
             printf "APP_BASE_URL=http://35.154.32.25:5000\n"               >> ~/.env
+
+            mv ~/docker-compose.prod.yml ~/docker-compose.yml
+            cd ~
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d --remove-orphans
+            docker image prune -f
+            echo "✅ Deployed successfully!"
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
@@ -98,20 +108,3 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           GH_OAUTH_CLIENT_ID: ${{ secrets.GH_OAUTH_CLIENT_ID }}
           GH_OAUTH_CLIENT_SECRET: ${{ secrets.GH_OAUTH_CLIENT_SECRET }}
-
-      - name: Deploy on EC2
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script_stop: true
-          command_timeout: 20m
-          script: |
-            mv ~/docker-compose.prod.yml ~/docker-compose.yml
-            cd ~
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d --remove-orphans
-            docker image prune -f
-            echo "✅ Deployed successfully!"
