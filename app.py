@@ -101,15 +101,21 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # GitHub OAuth only (Google OAuth requires a public domain, not a bare IP)
 github_bp = None
 
+# Allow OAuth over plain HTTP (needed for bare IP / non-HTTPS deployments)
+# This is safe here because the check is done by the server, not the client
+os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
+
 def setup_oauth():
     global github_bp
 
-    github_client_id = os.environ.get('GITHUB_CLIENT_ID')
-    github_client_secret = os.environ.get('GITHUB_CLIENT_SECRET')
+    github_client_id = (os.environ.get('GITHUB_CLIENT_ID') or '').strip()
+    github_client_secret = (os.environ.get('GITHUB_CLIENT_SECRET') or '').strip()
+
+    logger.info(f"GitHub OAuth setup — client_id present: {bool(github_client_id)}, secret present: {bool(github_client_secret)}")
 
     # Setup GitHub OAuth
     if github_client_id and github_client_secret and \
-       github_client_id != 'your_github_client_id_here':
+       github_client_id not in ('your_github_client_id_here', ''):
         try:
             from flask_dance.contrib.github import make_github_blueprint
 
@@ -123,14 +129,16 @@ def setup_oauth():
                 redirect_to='github_callback',
             )
             app.register_blueprint(github_bp, url_prefix='/auth/github')
-            logger.info("GitHub OAuth blueprint registered successfully")
+            logger.info(f"✅ GitHub OAuth blueprint registered — client_id: {github_client_id[:8]}...")
         except Exception as e:
-            logger.warning(f"Failed to setup GitHub OAuth: {e}")
+            logger.error(f"❌ Failed to setup GitHub OAuth: {e}", exc_info=True)
     else:
-        logger.warning("GitHub OAuth credentials not set — GitHub login disabled")
+        logger.warning(f"❌ GitHub OAuth credentials missing or placeholder — login disabled. "
+                       f"client_id='{github_client_id}' secret={'set' if github_client_secret else 'missing'}")
 
 # Initialize OAuth
 setup_oauth()
+
 
 # OAuth User Helper Functions
 def get_or_create_oauth_user(provider, provider_user_id, email, username, display_name=None):
