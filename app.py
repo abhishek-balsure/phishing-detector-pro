@@ -861,7 +861,11 @@ def predict_url(url):
             confidence = 0.85 if prediction == 1 else 0.85
             prob_phishing = 1.0 if prediction == 1 else 0.0
             prob_legitimate = 0.0 if prediction == 1 else 1.0
-        result = 'phishing' if prediction == 1 else 'legitimate'
+        
+        # Increase threshold to 0.65 to reduce false positives on safe sites
+        result = 'phishing' if prob_phishing >= 0.65 else 'legitimate'
+        # Override binary prediction to match new threshold
+        prediction = 1 if result == 'phishing' else 0
         feature_importance = []
         severity = 'none'
         if prediction == 1:

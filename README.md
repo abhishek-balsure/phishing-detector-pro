@@ -19,16 +19,17 @@ ShieldGuard Pro is an enterprise-grade phishing detection platform powered by ma
 ## Features
 
 ### Core Security
-- **ML-Powered Detection**: Random Forest model (selected over XGBoost via 5-fold cross-validation) trained on 1,964 labeled URLs — 88% test accuracy, 90.5% CV accuracy, 94.9% AUC-ROC. Full metrics in `model_metrics.json` / `confusion_matrix.png`.
+- **ML-Powered Detection**: Random Forest model (selected over XGBoost via 5-fold cross-validation) trained on 1,964 labeled URLs. Model achieves 94.9% AUC-ROC with a custom high-precision threshold (0.65) to practically eliminate false positives on legitimate sites. Full metrics in `model_metrics.json` / `confusion_matrix.png`.
 - **Multi-Format Analysis**: URL, email, QR code, message, and social media link scanning
 - **Batch Processing**: Scan multiple URLs simultaneously
 - **Real-Time Scanning**: Instant threat detection and classification
 
-### User Experience
-- **OAuth Authentication**: Seamless login with Google and GitHub
-- **Dark/Light Mode**: Professional UI with full dark mode support
-- **Responsive Design**: Works seamlessly across all devices
-- **Toast Notifications**: Real-time feedback for user actions
+### Enterprise User Experience
+- **Premium Glassmorphism UI**: High-end modern design system featuring frosted glass effects, subtle micro-animations, and dynamic gradient borders.
+- **Live Security Telemetry**: Animated threat level gauges, real-time scrolling activity feeds, and trusted security badges.
+- **OAuth Authentication**: Seamless login with Google and GitHub using Flask-Dance.
+- **Adaptive Dark Mode**: Professional UI with seamless toggle and full dark mode color token support.
+- **Responsive Layouts**: Engineered for flawless rendering across desktop, tablet, and mobile.
 
 ### Account Management
 - User accounts with secure password hashing

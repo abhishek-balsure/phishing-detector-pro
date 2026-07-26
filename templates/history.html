@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Intelligence Log - ShieldGuard Pro{% endblock %}
+{% block title %}Scan History - ShieldGuard Pro{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -112,7 +112,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-white bg-opacity-5">
                     <tr>
-                        <th class="ps-4">Neural Scanner Target</th>
+                        <th class="ps-4">AI Scanner Target</th>
                         <th>Assessment</th>
                         <th>Confidence</th>
                         <th>Type</th>
@@ -181,7 +181,7 @@
         {% else %}
         <div class="text-center py-5">
             <i class="bi bi-database-exclamation display-1 text-dim opacity-20 mb-3"></i>
-            <h5 class="text-dim">No Intelligence Found</h5>
+            <h5 class="text-dim">No History Found</h5>
             <p class="text-muted small">No scan history matches your current parameters.</p>
             <a href="{{ url_for('check_url') }}" class="btn btn-glow btn-sm px-4">Initialize New Scan</a>
         </div>
