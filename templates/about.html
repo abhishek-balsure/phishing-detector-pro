@@ -24,13 +24,13 @@
 
     .tech-pill {
         background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--glass-border);
+        border: 1px solid var(--border-color);
         padding: 1rem 1.5rem;
         border-radius: var(--radius-lg);
         display: flex;
         align-items: center;
         gap: 1rem;
-        transition: var(--transition);
+        transition: background var(--transition-normal), color var(--transition-normal);
     }
 
     .tech-pill:hover {
@@ -40,7 +40,7 @@
     }
 
     .pipeline-step-premium {
-        border-left: 2px solid var(--glass-border);
+        border-left: 2px solid var(--border-color);
         padding-left: 2rem;
         padding-bottom: 2rem;
         position: relative;

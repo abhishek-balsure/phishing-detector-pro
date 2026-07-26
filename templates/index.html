@@ -445,7 +445,7 @@
     }
 
     .cta-box .btn {
-        background: var(--white);
+        background: var(--bg-card);
         color: var(--green);
         font-weight: 700;
         padding: 1rem 2.5rem;
@@ -508,77 +508,6 @@
         }
     }
 
-    /* Live Threat Ticker */
-    .threat-ticker-container {
-        width: 100%;
-        height: 40px;
-        background-color: #1a1a2e;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        z-index: 100;
-    }
-    body.dark-mode .threat-ticker-container {
-        background-color: #0f111a;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .ticker-label {
-        background: #e63946;
-        color: white;
-        padding: 0 15px;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        font-weight: bold;
-        font-size: 0.85rem;
-        z-index: 2;
-        position: absolute;
-        left: 0;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    }
-    .pulsing-dot {
-        width: 8px;
-        height: 8px;
-        background-color: #fff;
-        border-radius: 50%;
-        margin-right: 8px;
-        animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-        0% { transform: scale(0.95); opacity: 0.5; }
-        50% { transform: scale(1.2); opacity: 1; }
-        100% { transform: scale(0.95); opacity: 0.5; }
-    }
-    .ticker-wrap {
-        width: 100%;
-        padding-left: 100px;
-        box-sizing: content-box;
-    }
-    .ticker-move {
-        display: inline-block;
-        white-space: nowrap;
-        padding-right: 100%;
-        box-sizing: content-box;
-        animation: ticker 30s linear infinite;
-    }
-    .ticker-move:hover {
-        animation-play-state: paused;
-    }
-    @keyframes ticker {
-        0% { transform: translate3d(0, 0, 0); }
-        100% { transform: translate3d(-100%, 0, 0); }
-    }
-    .ticker-item {
-        display: inline-block;
-        padding: 0 2rem;
-        font-size: 0.85rem;
-        color: #e0e0e0;
-    }
-    .ticker-item.danger { color: #ff4d4d; }
-    .ticker-item.safe { color: #00e676; }
-    .ticker-item.warning { color: #ffca28; }
 
     /* Trust Badges */
     .trust-badges-section {
@@ -630,99 +559,6 @@
         box-shadow: 0 8px 15px rgba(0,0,0,0.4);
     }
 
-    /* Testimonials Section */
-    .testimonials-section {
-        padding: 6rem 0;
-        background-color: var(--bg-secondary);
-    }
-
-    .testimonial-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 16px;
-        padding: 2rem;
-        height: 100%;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        position: relative;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .testimonial-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-md);
-    }
-
-    body.dark-mode .testimonial-card {
-        background: var(--bg-surface);
-        border-color: var(--border-light);
-        box-shadow: var(--shadow-sm);
-    }
-
-    body.dark-mode .testimonial-card:hover {
-        box-shadow: var(--shadow-md);
-    }
-
-    .quote-icon {
-        font-size: 2rem;
-        color: var(--bright-blue);
-        opacity: 0.2;
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-    }
-
-    .stars {
-        color: #ffc107;
-        margin-bottom: 1rem;
-    }
-
-    .testimonial-text {
-        font-style: italic;
-        margin-bottom: 1.5rem;
-        color: var(--text-primary);
-        position: relative;
-        z-index: 1;
-    }
-
-    body.dark-mode .testimonial-text {
-        color: var(--text-primary);
-    }
-
-    .author-info {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .author-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: var(--bright-blue);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 1.2rem;
-    }
-
-    .author-details h5 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 600;
-    }
-
-    .author-details p {
-        margin: 0;
-        font-size: 0.85rem;
-        color: var(--text-muted);
-    }
-
-    body.dark-mode .author-details p {
-        color: var(--text-muted);
-    }
-
     .stat-number.pulse {
         animation: pulse 2s infinite;
     }
@@ -736,16 +572,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- Live Threat Ticker -->
-<div class="threat-ticker-container">
-    <div class="ticker-label"><div class="pulsing-dot"></div>LIVE</div>
-    <div class="ticker-wrap">
-        <div class="ticker-move" id="threat-ticker">
-            <!-- Populated by JS -->
-        </div>
-    </div>
-</div>
-
 <!-- Hero Section -->
 <section class="hero-section text-center" id="main-content">
     <div class="container">
@@ -874,7 +700,7 @@
             <div>
                 <div class="feature-card animate-card" style="background: rgba(100, 116, 139, 0.03);">
                     <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0);">
-                        <i class="bi bi-layers" style="color: #64748B;"></i>
+                        <i class="bi bi-layers" style="background: #64748B;"></i>
                     </div>
                     <h4>Batch Analysis</h4>
                     <p>Scan multiple URLs at once for efficiency</p>
@@ -960,69 +786,6 @@
                     <div class="step-number">3</div>
                     <h4>Get Results</h4>
                     <p>Receive instant results with confidence score and detailed threat analysis.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Testimonials Section -->
-<section class="testimonials-section">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="section-title">What Our Users Say</h2>
-            <p class="section-subtitle">Trusted by security professionals worldwide</p>
-        </div>
-        <div class="row g-4">
-            <!-- Card 1 -->
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <i class="bi bi-quote quote-icon"></i>
-                    <div class="stars">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"ShieldGuard Pro caught a sophisticated phishing attempt that bypassed our email filters. The AI analysis is incredibly accurate!"</p>
-                    <div class="author-info">
-                        <div class="author-avatar">SC</div>
-                        <div class="author-details">
-                            <h5>Sarah Chen</h5>
-                            <p>Security Analyst at TechCorp</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 2 -->
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <i class="bi bi-quote quote-icon"></i>
-                    <div class="stars">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"We deployed ShieldGuard Pro across our organization. Phishing incidents dropped 94% in the first month. Absolutely essential tool."</p>
-                    <div class="author-info">
-                        <div class="author-avatar">MJ</div>
-                        <div class="author-details">
-                            <h5>Marcus Johnson</h5>
-                            <p>IT Director</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Card 3 -->
-            <div class="col-md-4">
-                <div class="testimonial-card">
-                    <i class="bi bi-quote quote-icon"></i>
-                    <div class="stars">
-                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                    </div>
-                    <p class="testimonial-text">"The ML model behind ShieldGuard Pro is state-of-the-art. I've tested it against known phishing databases — 99.2% detection rate."</p>
-                    <div class="author-info">
-                        <div class="author-avatar">PS</div>
-                        <div class="author-details">
-                            <h5>Dr. Priya Sharma</h5>
-                            <p>Cybersecurity Researcher</p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1133,23 +896,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1500);
         });
     }
-
-    // Initialize Threat Ticker
-    const tickerMove = document.getElementById('threat-ticker');
-    if (tickerMove) {
-        const threats = [
-            '<span class="ticker-item danger">🚨 Phishing attempt blocked: paypa1-secure.com — 2 min ago</span>',
-            '<span class="ticker-item safe">✅ Safe URL verified: google.com — 5 min ago</span>',
-            '<span class="ticker-item warning">⚠️ Suspicious domain flagged: amaz0n-login.tk — 8 min ago</span>',
-            '<span class="ticker-item danger">🚨 Malware detected: free-movie-stream.ru — 12 min ago</span>',
-            '<span class="ticker-item safe">✅ Safe URL verified: github.com — 15 min ago</span>',
-            '<span class="ticker-item warning">⚠️ High-risk IP blocked: 192.168.x.x — 20 min ago</span>',
-            '<span class="ticker-item danger">🚨 Credential theft stopped: netflix-update.net — 25 min ago</span>',
-            '<span class="ticker-item safe">✅ Safe URL verified: microsoft.com — 30 min ago</span>'
-        ];
-        
-        // Clone for seamless loop
-        tickerMove.innerHTML = threats.join('') + threats.join('');
     }
 });
 

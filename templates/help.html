@@ -15,15 +15,15 @@
         gap: 0.75rem;
         padding: 0.75rem 1.25rem;
         border-radius: 8px;
-        color: var(--text-dim);
+        color: var(--text-muted);
         text-decoration: none;
-        transition: var(--transition);
+        transition: background var(--transition-normal), color var(--transition-normal);
         border: 1px solid transparent;
     }
 
     .help-nav-link:hover {
         background: rgba(255, 255, 255, 0.05);
-        color: var(--text-main);
+        color: var(--text-primary);
     }
 
     .help-nav-link.active {
@@ -51,7 +51,7 @@
 
     .faq-accordion .accordion-item {
         background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--glass-border);
+        border: 1px solid var(--border-color);
         margin-bottom: 1rem;
         border-radius: 12px !important;
         overflow: hidden;
@@ -59,18 +59,18 @@
 
     .faq-accordion .accordion-button {
         background: transparent;
-        color: var(--text-main);
+        color: var(--text-primary);
         box-shadow: none;
         padding: 1.25rem;
     }
 
     .faq-accordion .accordion-button:not(.collapsed) {
-        border-bottom: 1px solid var(--glass-border);
+        border-bottom: 1px solid var(--border-color);
         background: rgba(255, 255, 255, 0.02);
     }
 
     .faq-accordion .accordion-body {
-        color: var(--text-dim);
+        color: var(--text-muted);
         padding: 1.25rem;
     }
 </style>
