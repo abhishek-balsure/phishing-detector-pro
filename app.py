@@ -98,56 +98,36 @@ limiter = Limiter(
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # ===== OAUTH CONFIGURATION =====
-# Google OAuth
-google_bp = None
+# GitHub OAuth only (Google OAuth requires a public domain, not a bare IP)
 github_bp = None
 
 def setup_oauth():
-    global google_bp, github_bp
-    
-    # Get OAuth credentials from environment
-    google_client_id = os.environ.get('GOOGLE_CLIENT_ID')
-    google_client_secret = os.environ.get('GOOGLE_CLIENT_SECRET')
+    global github_bp
+
     github_client_id = os.environ.get('GITHUB_CLIENT_ID')
     github_client_secret = os.environ.get('GITHUB_CLIENT_SECRET')
-    
-    # Setup Google OAuth
-    if google_client_id and google_client_secret:
-        try:
-            from flask_dance.contrib.google import make_google_blueprint
-            
-            app.config['GOOGLE_OAUTH_CLIENT_ID'] = google_client_id
-            app.config['GOOGLE_OAUTH_CLIENT_SECRET'] = google_client_secret
-            
-            google_bp = make_google_blueprint(
-                client_id=google_client_id,
-                client_secret=google_client_secret,
-                scope=['openid', 'email', 'profile'],
-                redirect_to='google_callback'
-            )
-            app.register_blueprint(google_bp, url_prefix='/auth/google')
-            logger.info("Google OAuth blueprint registered")
-        except Exception as e:
-            logger.warning(f"Failed to setup Google OAuth: {e}")
-    
+
     # Setup GitHub OAuth
-    if github_client_id and github_client_secret:
+    if github_client_id and github_client_secret and \
+       github_client_id != 'your_github_client_id_here':
         try:
             from flask_dance.contrib.github import make_github_blueprint
-            
+
             app.config['GITHUB_OAUTH_CLIENT_ID'] = github_client_id
             app.config['GITHUB_OAUTH_CLIENT_SECRET'] = github_client_secret
-            
+
             github_bp = make_github_blueprint(
                 client_id=github_client_id,
                 client_secret=github_client_secret,
                 scope=['user:email'],
-                redirect_to='github_callback'
+                redirect_to='github_callback',
             )
             app.register_blueprint(github_bp, url_prefix='/auth/github')
-            logger.info("GitHub OAuth blueprint registered")
+            logger.info("GitHub OAuth blueprint registered successfully")
         except Exception as e:
             logger.warning(f"Failed to setup GitHub OAuth: {e}")
+    else:
+        logger.warning("GitHub OAuth credentials not set — GitHub login disabled")
 
 # Initialize OAuth
 setup_oauth()
@@ -244,117 +224,70 @@ def setup_oauth_session(user):
     except Exception as e:
         logger.error(f"Failed to record OAuth login: {e}")
 
-# OAuth Callback Routes
-@app.route('/auth/google/callback')
-def google_callback():
-    """Handle Google OAuth callback."""
-    if not google_bp:
-        flash('Google OAuth is not configured. Please add credentials to .env file.', 'warning')
-        return redirect(url_for('login'))
-    
-    from flask_dance.contrib.google import google
-    
-    if not google.authorized:
-        flash('Google authorization failed. Please try again.', 'danger')
-        return redirect(url_for('login'))
-    
-    try:
-        resp = google.get('/oauth2/v2/userinfo')
-        if resp.ok:
-            user_info = resp.json()
-            provider_user_id = user_info.get('sub') or user_info.get('id')
-            email = user_info.get('email')
-            display_name = user_info.get('name')
-            
-            if not provider_user_id:
-                flash('Failed to get user info from Google.', 'danger')
-                return redirect(url_for('login'))
-            
-            user = get_or_create_oauth_user(
-                provider='google',
-                provider_user_id=provider_user_id,
-                email=email,
-                username=None,
-                display_name=display_name
-            )
-            
-            setup_oauth_session(user)
-            flash(f'Welcome {user["username"]}! You have logged in with Google.', 'success')
-            return redirect(url_for('dashboard'))
-    except Exception as e:
-        logger.error(f"Google OAuth error: {e}")
-        flash('Google login failed. Please try again.', 'danger')
-    
-    return redirect(url_for('login'))
-
+# ===== GITHUB OAUTH CALLBACK =====
 @app.route('/auth/github/callback')
 def github_callback():
-    """Handle GitHub OAuth callback."""
+    """Handle GitHub OAuth callback — called by Flask-Dance after authorization."""
     if not github_bp:
-        flash('GitHub OAuth is not configured. Please add credentials to .env file.', 'warning')
+        flash('GitHub OAuth is not configured. Please set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in .env.', 'warning')
         return redirect(url_for('login'))
-    
+
     from flask_dance.contrib.github import github
-    
+
     if not github.authorized:
-        flash('GitHub authorization failed. Please try again.', 'danger')
+        flash('GitHub authorization failed or was cancelled. Please try again.', 'danger')
         return redirect(url_for('login'))
-    
+
     try:
-        # Get user info
         resp = github.get('/user')
-        if resp.ok:
-            user_info = resp.json()
-            provider_user_id = str(user_info.get('id'))
-            email = user_info.get('email')
-            display_name = user_info.get('name') or user_info.get('login')
-            
-            # If no email in user info, try to get emails
-            if not email:
-                email_resp = github.get('/user/emails')
-                if email_resp.ok:
-                    emails = email_resp.json()
-                    for e in emails:
-                        if e.get('primary') and e.get('verified'):
-                            email = e.get('email')
-                            break
-            
-            if not provider_user_id:
-                flash('Failed to get user info from GitHub.', 'danger')
-                return redirect(url_for('login'))
-            
-            user = get_or_create_oauth_user(
-                provider='github',
-                provider_user_id=provider_user_id,
-                email=email,
-                username=user_info.get('login'),
-                display_name=display_name
-            )
-            
-            setup_oauth_session(user)
-            flash(f'Welcome {user["username"]}! You have logged in with GitHub.', 'success')
-            return redirect(url_for('dashboard'))
+        if not resp.ok:
+            flash('Could not fetch your GitHub profile. Please try again.', 'danger')
+            return redirect(url_for('login'))
+
+        user_info = resp.json()
+        provider_user_id = str(user_info.get('id', ''))
+        email = user_info.get('email')
+        display_name = user_info.get('name') or user_info.get('login')
+        github_username = user_info.get('login')
+
+        # GitHub sometimes hides email — fetch from /user/emails
+        if not email:
+            email_resp = github.get('/user/emails')
+            if email_resp.ok:
+                for entry in email_resp.json():
+                    if entry.get('primary') and entry.get('verified'):
+                        email = entry.get('email')
+                        break
+
+        if not provider_user_id:
+            flash('Could not retrieve your GitHub user ID. Please try again.', 'danger')
+            return redirect(url_for('login'))
+
+        user = get_or_create_oauth_user(
+            provider='github',
+            provider_user_id=provider_user_id,
+            email=email,
+            username=github_username,
+            display_name=display_name,
+        )
+
+        setup_oauth_session(user)
+        flash(f'Welcome, {user["username"]}! You are now signed in via GitHub. 🎉', 'success')
+        return redirect(url_for('dashboard'))
+
     except Exception as e:
-        logger.error(f"GitHub OAuth error: {e}")
-        flash('GitHub login failed. Please try again.', 'danger')
-    
-    return redirect(url_for('login'))
+        logger.error(f"GitHub OAuth callback error: {e}")
+        flash('GitHub login failed unexpectedly. Please try again.', 'danger')
+        return redirect(url_for('login'))
 
-# Direct OAuth login routes (for button clicks)
-@app.route('/login/google')
-def login_google():
-    """Initiate Google OAuth login."""
-    if google_bp:
-        return redirect(url_for('google.login'))
-    flash('Google OAuth is not configured.', 'warning')
-    return redirect(url_for('login'))
 
+# Initiate GitHub OAuth login
 @app.route('/login/github')
 def login_github():
-    """Initiate GitHub OAuth login."""
+    """Redirect user to GitHub for OAuth authorization."""
     if github_bp:
         return redirect(url_for('github.login'))
-    flash('GitHub OAuth is not configured.', 'warning')
+    flash('GitHub login is not configured on this server.', 'warning')
     return redirect(url_for('login'))
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'phishing_model.pkl')
