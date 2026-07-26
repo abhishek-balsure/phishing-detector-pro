@@ -135,12 +135,9 @@ def setup_oauth():
                 client_secret=github_client_secret,
                 scope=['user:email'],
                 redirect_to='github_callback',
-                # Hardcode the callback URL so GitHub always gets the right address
-                # regardless of Docker networking / proxy headers
-                redirect_url=f'{APP_BASE_URL}/auth/github/authorized',
             )
-            app.register_blueprint(github_bp, url_prefix='/auth/github')
-            logger.info(f"✅ GitHub OAuth blueprint registered — callback: {APP_BASE_URL}/auth/github/authorized")
+            app.register_blueprint(github_bp, url_prefix='/auth')
+            logger.info("✅ GitHub OAuth blueprint registered successfully (Callback: /auth/github/authorized)")
         except Exception as e:
             logger.error(f"❌ Failed to setup GitHub OAuth: {e}", exc_info=True)
     else:
