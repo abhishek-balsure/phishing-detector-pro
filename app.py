@@ -837,6 +837,26 @@ def get_feature_importance(features_dict):
     return importance[:5]
 
 def predict_url(url):
+    # Whitelist own domain/IP to prevent self-blocking false positives
+    try:
+        from urllib.parse import urlparse
+        parsed = urlparse(url if '://' in url else 'http://' + url)
+        hostname = parsed.hostname if parsed.hostname else ''
+        if hostname in ('35.154.32.25', 'localhost', '127.0.0.1'):
+            return {
+                'result': 'legitimate',
+                'confidence': 100.0,
+                'features': {},
+                'is_phishing': False,
+                'is_legitimate': True,
+                'probability_phishing': 0.0,
+                'probability_legitimate': 100.0,
+                'severity': 'none',
+                'feature_importance': []
+            }
+    except:
+        pass
+
     if model is None:
         return {
             'error': 'Model not loaded',

@@ -7,6 +7,9 @@ WORKDIR /app
 # Copy requirements first (for better caching)
 COPY requirements.txt .
 
+# Install system dependencies required by pyzbar and others
+RUN apt-get update && apt-get install -y libzbar0 && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
