@@ -960,10 +960,24 @@ def get_user_stats(user_id):
     }
 
 def extract_urls_from_text(text):
+    # Regex to catch http(s)://, www., and bare domains like example.com
     url_pattern = re.compile(
-        r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+        r'(?:(?:https?://)|(?:www\.))[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)|'
+        r'\b[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)'
     )
-    return url_pattern.findall(text)
+    # The regex might return tuples if there are capturing groups, but we used non-capturing (?:...) 
+    # except that standard findall with complex groups can be tricky. Let's just return the raw matches.
+    matches = url_pattern.findall(text)
+    
+    # Ensure they have a scheme so predict_url can parse them easily
+    formatted_urls = []
+    for match in matches:
+        if not str(match).startswith('http'):
+            formatted_urls.append('http://' + str(match))
+        else:
+            formatted_urls.append(str(match))
+            
+    return formatted_urls
 
 def get_whois_info(url):
     if not WHOIS_AVAILABLE:
