@@ -2878,17 +2878,22 @@ def too_large(error):
 
 @app.errorhandler(429)
 def ratelimit_handler(error):
-    response = jsonify({
-        'error': 'Too Many Requests',
-        'message': 'Rate limit exceeded. Please retry later.'
-    })
-    response.status_code = 429
-    if hasattr(error, 'get_response'):
-        default_response = error.get_response()
-        retry_after = default_response.headers.get('Retry-After')
-        if retry_after:
-            response.headers['Retry-After'] = retry_after
-    return response
+    # Check if this is an API request
+    if request.is_json or request.path.startswith('/api/'):
+        response = jsonify({
+            'error': 'Too Many Requests',
+            'message': 'Rate limit exceeded. Please retry later.'
+        })
+        response.status_code = 429
+        if hasattr(error, 'get_response'):
+            default_response = error.get_response()
+            retry_after = default_response.headers.get('Retry-After')
+            if retry_after:
+                response.headers['Retry-After'] = retry_after
+        return response
+    
+    # For normal web requests, show the custom 429 error page
+    return render_template('429.html'), 429
 
 @app.context_processor
 def inject_globals():
