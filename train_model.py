@@ -36,6 +36,10 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split, RandomizedSearchCV
 from sklearn.ensemble import GradientBoostingClassifier
 
+# Force disable slow external lookups for training to finish quickly using lexical features
+import os
+os.environ['ENABLE_EXTERNAL_URL_FEATURES'] = 'false'
+
 from feature_extraction import extract_features, features_to_array, get_feature_names
 
 try:
@@ -116,9 +120,9 @@ def get_model_specs():
     specs = {
         'RandomForest': RandomForestClassifier(
             n_estimators=300,
-            max_depth=None,
-            min_samples_split=3,
-            min_samples_leaf=1,
+            max_depth=12,
+            min_samples_split=4,
+            min_samples_leaf=4,
             max_features='sqrt',
             random_state=42,
             n_jobs=-1,
@@ -136,15 +140,6 @@ def get_model_specs():
             eval_metric='logloss',
             random_state=42,
             n_jobs=-1,
-        ),
-        'GradientBoosting': GradientBoostingClassifier(
-            n_estimators=300,
-            max_depth=6,
-            learning_rate=0.05,
-            subsample=0.8,
-            min_samples_split=4,
-            min_samples_leaf=2,
-            random_state=42,
         ),
     }
     
