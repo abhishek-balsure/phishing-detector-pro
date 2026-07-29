@@ -105,7 +105,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Base URL of this deployment — used to build the exact OAuth callback URL
 # Set APP_BASE_URL in .env to override (e.g. https://yourdomain.com)
-APP_BASE_URL = os.environ.get('APP_BASE_URL', 'http://35.154.32.25:5000').rstrip('/')
+APP_BASE_URL = os.environ.get('APP_BASE_URL', 'https://shieldguard-pro.duckdns.org').rstrip('/')
 
 jwt = JWTManager(app)
 limiter = Limiter(
@@ -859,7 +859,7 @@ def predict_url(url):
         ]
         
         is_whitelisted = False
-        if hostname in ('35.154.32.25', 'localhost', '127.0.0.1'):
+        if hostname in ('shieldguard-pro.duckdns.org', '35.154.32.25', 'localhost', '127.0.0.1'):
             is_whitelisted = True
         else:
             for domain in safe_domains:

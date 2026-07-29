@@ -90,7 +90,7 @@ jobs:
             printf "GITHUB_CLIENT_ID=%s\n"     "$GH_OAUTH_CLIENT_ID"      >> ~/.env
             printf "GITHUB_CLIENT_SECRET=%s\n" "$GH_OAUTH_CLIENT_SECRET"  >> ~/.env
             printf "OAUTHLIB_INSECURE_TRANSPORT=1\n"                       >> ~/.env
-            printf "APP_BASE_URL=http://35.154.32.25:5000\n"               >> ~/.env
+            printf "APP_BASE_URL=https://shieldguard-pro.duckdns.org\n"    >> ~/.env
             printf "MAIL_USERNAME=%s\n"        "$MAIL_USERNAME"            >> ~/.env
             printf "MAIL_PASSWORD=%s\n"        "$MAIL_PASSWORD"            >> ~/.env
             printf "MAIL_SERVER=%s\n"          "${MAIL_SERVER:-smtp.gmail.com}" >> ~/.env
