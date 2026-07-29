@@ -75,7 +75,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           command_timeout: 20m
-          envs: SECRET_KEY,JWT_SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,GH_OAUTH_CLIENT_ID,GH_OAUTH_CLIENT_SECRET,ADMIN_PASSWORD
+          envs: SECRET_KEY,JWT_SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,GH_OAUTH_CLIENT_ID,GH_OAUTH_CLIENT_SECRET,ADMIN_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD,MAIL_SERVER,MAIL_PORT,MAIL_USE_TLS
           script: |
             printf "SECRET_KEY=%s\n"           "$SECRET_KEY"               > ~/.env
             printf "JWT_SECRET_KEY=%s\n"       "$JWT_SECRET_KEY"           >> ~/.env
@@ -91,6 +91,11 @@ jobs:
             printf "GITHUB_CLIENT_SECRET=%s\n" "$GH_OAUTH_CLIENT_SECRET"  >> ~/.env
             printf "OAUTHLIB_INSECURE_TRANSPORT=1\n"                       >> ~/.env
             printf "APP_BASE_URL=http://35.154.32.25:5000\n"               >> ~/.env
+            printf "MAIL_USERNAME=%s\n"        "$MAIL_USERNAME"            >> ~/.env
+            printf "MAIL_PASSWORD=%s\n"        "$MAIL_PASSWORD"            >> ~/.env
+            printf "MAIL_SERVER=%s\n"          "${MAIL_SERVER:-smtp.gmail.com}" >> ~/.env
+            printf "MAIL_PORT=%s\n"            "${MAIL_PORT:-587}"         >> ~/.env
+            printf "MAIL_USE_TLS=%s\n"         "${MAIL_USE_TLS:-True}"     >> ~/.env
 
             mv ~/docker-compose.prod.yml ~/docker-compose.yml
             cd ~
@@ -108,3 +113,8 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           GH_OAUTH_CLIENT_ID: ${{ secrets.GH_OAUTH_CLIENT_ID }}
           GH_OAUTH_CLIENT_SECRET: ${{ secrets.GH_OAUTH_CLIENT_SECRET }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_USE_TLS: ${{ secrets.MAIL_USE_TLS }}
