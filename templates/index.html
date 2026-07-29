@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}ShieldGuard Pro - AI-Powered Phishing Protection{% endblock %}
+{% block title %}ShieldGuard Pro - ML-Powered Phishing Protection{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -577,7 +577,7 @@
     <div class="container">
         <div class="hero-badge">
             <i class="bi bi-shield-check"></i>
-            AI-Powered Phishing Protection
+            ML-Powered Phishing Protection
         </div>
         
         <h1 class="hero-title fw-bold">
@@ -586,7 +586,7 @@
         </h1>
         
         <p class="hero-subtitle mx-auto">
-            Protect yourself from phishing attacks with advanced AI detection. 
+            Protect yourself from phishing attacks with advanced ML detection. 
             Scan URLs, emails, and QR codes instantly.
         </p>
 
@@ -777,7 +777,7 @@
             <div class="col-md-4">
                 <div class="how-card">
                     <div class="step-number">2</div>
-                    <h4>AI Analysis</h4>
+                    <h4>ML Analysis</h4>
                     <p>Our ML model analyzes 25+ features including domain age, SSL, and suspicious patterns.</p>
                 </div>
             </div>
@@ -792,6 +792,7 @@
     </div>
 </section>
 
+{% if not session.user_id %}
 <!-- CTA Section -->
 <section class="cta-section">
     <div class="container">
@@ -804,6 +805,7 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 <!-- Result Popup -->
 <div id="resultPopup" style="display: none;"></div>
@@ -858,9 +860,15 @@ function showResultPopup(url, isPhishing) {
                 <button class="btn btn-primary" onclick="closeResultPopup()">
                     <i class="bi bi-arrow-repeat me-1"></i>Scan Another
                 </button>
+                {% if not session.user_id %}
                 <a href="/login" class="btn btn-outline-primary">
                     <i class="bi bi-box-arrow-in-right me-1"></i>Login for More
                 </a>
+                {% else %}
+                <a href="/dashboard" class="btn btn-outline-primary">
+                    <i class="bi bi-speedometer2 me-1"></i>Go to Dashboard
+                </a>
+                {% endif %}
             </div>
         </div>
     `;

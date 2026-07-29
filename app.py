@@ -45,6 +45,8 @@ except ImportError:
 
 import requests as http_requests
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, g, session, send_file, Response
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -85,6 +87,17 @@ app.config['RATELIMIT_STORAGE_URI'] = os.environ.get('REDIS_URL', 'memory://')
 app.config['RATELIMIT_HEADERS_ENABLED'] = True
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+# Flask-Mail Configuration
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'True').lower() in ['true', '1']
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
+
+mail = Mail(app)
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # Fix Flask so it generates correct external URLs when running behind Docker / reverse proxy
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -373,6 +386,7 @@ def init_db():
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
             is_admin INTEGER DEFAULT 0,
+            is_verified INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             last_login TIMESTAMP,
             oauth_provider TEXT,
@@ -389,6 +403,10 @@ def init_db():
             END IF;
             IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'oauth_provider_id') THEN
                 ALTER TABLE users ADD COLUMN oauth_provider_id TEXT;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'is_verified') THEN
+                ALTER TABLE users ADD COLUMN is_verified INTEGER DEFAULT 1;
+                UPDATE users SET is_verified = 1;
             END IF;
         END $$;
     ''')
@@ -1217,6 +1235,10 @@ def login():
         user = cur.fetchone()
         
         if user and check_password_hash(user['password'], password):
+            if user.get('is_verified', 1) == 0:
+                flash('Please verify your email address first. Check your inbox or <a href="/resend-verification">click here to resend</a>.', 'warning')
+                return render_template('login.html')
+                
             # Successful login - reset attempts and log
             cur.execute('DELETE FROM login_attempts WHERE ip_address = %s', (ip_address,))
             
@@ -1317,14 +1339,114 @@ def signup():
             return render_template('signup.html')
         password_hash = generate_password_hash(password)
         cur.execute('''
-            INSERT INTO users (username, email, password)
-            VALUES (%s, %s, %s)
+            INSERT INTO users (username, email, password, is_verified)
+            VALUES (%s, %s, %s, 0)
         ''', (username, email, password_hash))
         db.commit()
         cur.close()
-        flash('Account created successfully! Please log in.', 'success')
+        
+        # Generate verification token
+        token = serializer.dumps(email, salt='email-confirm')
+        verify_url = url_for('verify_email', token=token, _external=True)
+        
+        # Send verification email
+        try:
+            msg = Message('Verify Your Email Address - ShieldGuard Pro',
+                          recipients=[email])
+            msg.body = f'''Hello {username},
+
+Please click the link below to verify your email address:
+{verify_url}
+
+If you did not request this, please ignore this email.
+
+Stay safe,
+The ShieldGuard Pro Team
+'''
+            mail.send(msg)
+            flash('Account created successfully! Please check your email to verify your account before logging in.', 'success')
+        except Exception as e:
+            logger.error(f"Failed to send verification email: {e}")
+            flash('Account created, but we could not send the verification email. Please contact support.', 'warning')
+            
         return redirect(url_for('login'))
     return render_template('signup.html')
+
+@app.route('/verify-email/<token>')
+def verify_email(token):
+    try:
+        # Token expires in 24 hours (86400 seconds)
+        email = serializer.loads(token, salt='email-confirm', max_age=86400)
+    except Exception:
+        flash('The verification link is invalid or has expired.', 'danger')
+        return redirect(url_for('login'))
+        
+    db = get_db()
+    cur = db.cursor()
+    cur.execute('SELECT id, is_verified FROM users WHERE email = %s', (email,))
+    user = cur.fetchone()
+    
+    if not user:
+        cur.close()
+        flash('User not found.', 'danger')
+        return redirect(url_for('login'))
+        
+    if user['is_verified'] == 1:
+        cur.close()
+        flash('Account is already verified. Please log in.', 'info')
+        return redirect(url_for('login'))
+        
+    cur.execute('UPDATE users SET is_verified = 1 WHERE email = %s', (email,))
+    db.commit()
+    cur.close()
+    
+    flash('Your email has been verified! You can now log in.', 'success')
+    return redirect(url_for('login'))
+
+@app.route('/resend-verification', methods=['GET', 'POST'])
+def resend_verification():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        if not email:
+            flash('Please enter your email.', 'danger')
+            return render_template('resend_verification.html')
+            
+        db = get_db()
+        cur = db.cursor()
+        cur.execute('SELECT id, username, is_verified FROM users WHERE email = %s', (email,))
+        user = cur.fetchone()
+        cur.close()
+        
+        if not user:
+            # Don't reveal if email exists or not
+            flash('If that email is registered, a new verification link has been sent.', 'info')
+            return redirect(url_for('login'))
+            
+        if user['is_verified'] == 1:
+            flash('Account is already verified. Please log in.', 'info')
+            return redirect(url_for('login'))
+            
+        token = serializer.dumps(email, salt='email-confirm')
+        verify_url = url_for('verify_email', token=token, _external=True)
+        
+        try:
+            msg = Message('Verify Your Email Address - ShieldGuard Pro',
+                          recipients=[email])
+            msg.body = f'''Hello {user['username']},
+
+Please click the link below to verify your email address:
+{verify_url}
+
+If you did not request this, please ignore this email.
+'''
+            mail.send(msg)
+            flash('A new verification link has been sent to your email.', 'success')
+        except Exception as e:
+            logger.error(f"Failed to send verification email: {e}")
+            flash('Could not send email. Please try again later.', 'danger')
+            
+        return redirect(url_for('login'))
+    return render_template('resend_verification.html')
 
 @app.route('/logout')
 def logout():
@@ -1363,10 +1485,29 @@ def forgot_password():
             ''', (user['id'], reset_token, expires_at))
             db.commit()
             
-            # In production, send email here
-            # For demo: log token but don't expose to user
-            logger.info(f"Password reset requested for {email}, token: {reset_token[:20]}... (Check server logs in production)")
-            flash(f'Password reset link sent to {email}.', 'success')
+            # Send password reset email
+            reset_url = url_for('reset_password', token=reset_token, _external=True)
+            try:
+                msg = Message('Password Reset - ShieldGuard Pro',
+                              recipients=[email])
+                msg.body = f'''Hello {user['username']},
+
+You recently requested to reset your password for your ShieldGuard Pro account.
+Click the link below to reset it:
+
+{reset_url}
+
+If you did not request a password reset, please ignore this email or contact support if you have questions.
+
+Stay safe,
+The ShieldGuard Pro Team
+'''
+                mail.send(msg)
+                logger.info(f"Password reset email sent for {email}")
+            except Exception as e:
+                logger.error(f"Failed to send password reset email: {e}")
+                
+            flash(f'If that email exists, a reset link has been sent.', 'info')
         else:
             # Don't reveal if email exists for security
             flash('If that email exists, a reset link has been sent.', 'info')
@@ -2148,7 +2289,7 @@ def export_history_pdf():
         ]))
         story.append(t2)
     story.append(Spacer(1, 30))
-    story.append(Paragraph("<i>Generated by ShieldGuard Pro - AI-Powered Phishing Detection</i>", styles['Normal']))
+    story.append(Paragraph("<i>Generated by ShieldGuard Pro - ML-Powered Phishing Detection</i>", styles['Normal']))
     doc.build(story)
     buffer.seek(0)
     return Response(
