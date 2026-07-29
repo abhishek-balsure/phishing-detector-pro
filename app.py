@@ -1231,7 +1231,8 @@ def login():
             flash('Please enter both username and password.', 'danger')
             return render_template('login.html')
         
-        cur.execute('SELECT * FROM users WHERE username = %s OR email = %s', (username, username))
+        # Case-insensitive check for both username and email
+        cur.execute('SELECT * FROM users WHERE LOWER(username) = LOWER(%s) OR email = %s', (username, username.lower()))
         user = cur.fetchone()
         
         if user and check_password_hash(user['password'], password):
