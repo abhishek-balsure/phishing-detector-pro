@@ -837,12 +837,30 @@ def get_feature_importance(features_dict):
     return importance[:5]
 
 def predict_url(url):
-    # Whitelist own domain/IP to prevent self-blocking false positives
+    # Whitelist own domain/IP and major tech platforms to prevent false positives
     try:
         from urllib.parse import urlparse
         parsed = urlparse(url if '://' in url else 'http://' + url)
-        hostname = parsed.hostname if parsed.hostname else ''
+        hostname = parsed.hostname.lower() if parsed.hostname else ''
+        
+        safe_domains = [
+            'google.com', 'youtube.com', 'youtu.be', 'amazon.com', 'aws.amazon.com',
+            'cloudflare.com', 'claude.ai', 'github.com', 'linkedin.com', 'microsoft.com',
+            'apple.com', 'twitter.com', 'x.com', 'facebook.com', 'instagram.com',
+            'onrender.com', 'vercel.app', 'netlify.app', 'chatgpt.com', 'openai.com',
+            'whatsapp.com', 'telegram.org'
+        ]
+        
+        is_whitelisted = False
         if hostname in ('35.154.32.25', 'localhost', '127.0.0.1'):
+            is_whitelisted = True
+        else:
+            for domain in safe_domains:
+                if hostname == domain or hostname.endswith('.' + domain):
+                    is_whitelisted = True
+                    break
+                    
+        if is_whitelisted:
             return {
                 'result': 'legitimate',
                 'confidence': 100.0,
