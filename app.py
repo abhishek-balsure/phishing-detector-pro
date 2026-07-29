@@ -1551,9 +1551,9 @@ def reset_password(token):
             flash(password_error, 'danger')
             return render_template('reset_password.html', token=token)
         
-        # Update password
+        # Update password and implicitly verify email (since they proved they own it)
         password_hash = generate_password_hash(password)
-        cur.execute('UPDATE users SET password = %s WHERE id = %s', (password_hash, reset_request['user_id']))
+        cur.execute('UPDATE users SET password = %s, is_verified = 1 WHERE id = %s', (password_hash, reset_request['user_id']))
         
         # Mark token as used
         cur.execute('UPDATE password_resets SET used = 1 WHERE id = %s', (reset_request['id'],))

@@ -318,7 +318,7 @@
                         {% if category == 'error' or category == 'danger' %}
                         <div class="error-message" id="errorAlert">
                             <i class="bi bi-exclamation-circle-fill"></i>
-                            <span>{{ message }}</span>
+                            <span>{{ message|safe }}</span>
                             <button type="button" class="btn-close p-0 ms-auto" onclick="closeAlert('errorAlert')"></button>
                         </div>
                         {% endif %}
