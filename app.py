@@ -553,17 +553,6 @@ def init_db():
         )
     ''')
 
-    # Create admin user - password MUST be set via ADMIN_PASSWORD env var
-    admin_password = os.environ.get('ADMIN_PASSWORD')
-    if admin_password:
-        admin_hash = generate_password_hash(admin_password)
-        cur.execute('''
-            INSERT INTO users (username, email, password, is_admin)
-            SELECT %s, %s, %s, %s
-            WHERE NOT EXISTS (SELECT 1 FROM users WHERE username = %s)
-        ''', ('admin', 'admin@shieldguard-pro.com', admin_hash, 1, 'admin'))
-    else:
-        logger.warning("ADMIN_PASSWORD not set - admin user not created. Set ADMIN_PASSWORD env var for admin access.")
 
     db.commit()
     cur.close()
@@ -1365,7 +1354,7 @@ Stay safe,
 The ShieldGuard Pro Team
 '''
             mail.send(msg)
-            flash('Account created successfully! Please check your email to verify your account before logging in.', 'success')
+            flash('Verification email sent to your attached email. Please verify your email first, then login.', 'success')
         except Exception as e:
             logger.error(f"Failed to send verification email: {e}")
             flash('Account created, but we could not send the verification email. Please contact support.', 'warning')

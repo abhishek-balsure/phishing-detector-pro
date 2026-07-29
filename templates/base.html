@@ -129,7 +129,7 @@
                         {% else %}
                         <i class="bi bi-info-circle-fill alert-icon info"></i>
                         {% endif %}
-                        <span>{{ message }}</span>
+                        <span>{{ message|safe }}</span>
                     </div>
                     <button type="button" class="alert-close" data-bs-dismiss="alert" aria-label="Close">
                         <i class="bi bi-x"></i>
