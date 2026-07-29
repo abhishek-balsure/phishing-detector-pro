@@ -2595,11 +2595,16 @@ def delete_user(user_id):
         return redirect(url_for('admin'))
     db = get_db()
     cur = db.cursor()
-    # Delete related records first
-    cur.execute('DELETE FROM scans WHERE user_id = %s', (user_id,))
-    cur.execute('DELETE FROM bookmarks WHERE user_id = %s', (user_id,))
-    cur.execute('DELETE FROM achievements WHERE user_id = %s', (user_id,))
-    cur.execute('DELETE FROM login_history WHERE user_id = %s', (user_id,))
+    # Delete related records first (ALL tables with foreign keys to users)
+    tables = [
+        'scans', 'email_scans', 'qr_scans', 'batch_scans', 
+        'message_scans', 'social_scans', 'bookmarks', 
+        'achievements', 'login_history', 'password_resets'
+    ]
+    for table in tables:
+        # Use string formatting for table names (safe because tables list is hardcoded)
+        cur.execute(f'DELETE FROM {table} WHERE user_id = %s', (user_id,))
+        
     cur.execute('DELETE FROM users WHERE id = %s', (user_id,))
     db.commit()
     cur.close()
