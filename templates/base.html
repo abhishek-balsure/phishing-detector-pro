@@ -25,7 +25,7 @@
     
     {% block extra_css %}{% endblock %}
 </head>
-<body style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<body>
     <!-- Dark Mode Toggle -->
     <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
         <i class="bi bi-moon-fill" id="darkModeIcon"></i>
@@ -35,7 +35,7 @@
     <nav class="navbar navbar-expand-lg sticky-top" id="mainNav">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
-                <div class="brand-icon" style="background: linear-gradient(135deg, #6366F1, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                <div class="brand-icon brand-gradient-text">
                     <i class="bi bi-shield-fill-check"></i>
                 </div>
                 <span class="brand-text">ShieldGuard <span class="brand-pro">Pro</span></span>
@@ -53,10 +53,10 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="scannersDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="bi bi-search nav-icon"></i> Scanners
                         </a>
-                        <ul class="dropdown-menu border-0 shadow-sm">
+                        <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="scannersDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('check_url') }}"><i class="bi bi-link-45deg me-2 text-primary"></i>URL Scanner</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('document_scanner') }}"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Document Scanner</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('email_scanner') }}"><i class="bi bi-envelope me-2 text-warning"></i>Email Scanner</a></li>
@@ -81,13 +81,13 @@
                         </li>
                         {% endif %}
                         <li class="nav-item dropdown ms-lg-3">
-                            <a class="nav-link dropdown-toggle user-menu-btn d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle user-menu-btn d-flex align-items-center" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <div class="user-avatar me-2">
                                     {{ session.username[0]|upper }}
                                 </div>
                                 <span class="user-name">{{ session.username }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm">
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="userMenuDropdown">
                                 <li><a class="dropdown-item py-2" href="{{ url_for('profile') }}"><i class="bi bi-person-gear me-2"></i>Profile</a></li>
                                 <li><a class="dropdown-item py-2" href="{{ url_for('bookmarks') }}"><i class="bi bi-bookmark-heart me-2"></i>Bookmarks</a></li>
                                 <li><a class="dropdown-item py-2" href="{{ url_for('history') }}"><i class="bi bi-clock-history me-2"></i>History</a></li>
@@ -97,10 +97,10 @@
                         </li>
                     {% else %}
                         <li class="nav-item dropdown mb-2 mb-lg-0">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="bi bi-translate"></i> {% if current_lang == 'hi' %}हिंदी{% else %}Language{% endif %}
                             </a>
-                            <ul class="dropdown-menu border-0 shadow-sm">
+                            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="languageDropdown">
                                 <li><a class="dropdown-item py-2" href="{{ url_for('set_lang', lang='en') }}">English</a></li>
                                 <li><a class="dropdown-item py-2" href="{{ url_for('set_lang', lang='hi') }}">हिंदी (Hindi)</a></li>
                             </ul>
@@ -129,12 +129,12 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer" style="border-top: 2px solid transparent; border-image: linear-gradient(to right, #6366F1, #06B6D4) 1;">
+    <footer class="footer footer-gradient-border">
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-7">
                     <div class="footer-brand">
-                        <div class="brand-icon-sm" style="background: linear-gradient(135deg, #6366F1, #06B6D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        <div class="brand-icon-sm brand-gradient-text">
                             <i class="bi bi-shield-fill-check"></i>
                         </div>
                         <span>ShieldGuard <span class="gradient-text">Pro</span></span>
@@ -151,17 +151,17 @@
                         <div class="col-sm-6">
                             <h6 class="footer-title">Resources</h6>
                             <ul class="footer-links">
-                                <li><a href="{{ url_for('about') }}">About Us</a></li>
-                                <li><a href="{{ url_for('help_page') }}">Help Center</a></li>
-                                <li><a href="{{ url_for('check_url') }}">Scanner</a></li>
+                                  <li><a href="{{ url_for('about') }}">About Us</a></li>
+                                  <li><a href="{{ url_for('help_page') }}">Help Center</a></li>
+                                  <li><a href="{{ url_for('check_url') }}">Scanner</a></li>
                             </ul>
                         </div>
                         <div class="col-sm-6">
                             <h6 class="footer-title">Security</h6>
                             <ul class="footer-links">
-                                <li><i class="bi bi-patch-check-fill me-2" style="color: var(--success, #10B981);"></i>Verified Patterns</li>
-                                <li><i class="bi bi-cpu-fill me-2" style="color: var(--secondary, #06B6D4);"></i>ML Analysis</li>
-                                <li><i class="bi bi-shield-fill-check text-muted me-2"></i>256-bit Encryption</li>
+                                  <li><i class="bi bi-patch-check-fill me-2 color-success-icon"></i>Verified Patterns</li>
+                                  <li><i class="bi bi-cpu-fill me-2 color-secondary-icon"></i>ML Analysis</li>
+                                  <li><i class="bi bi-shield-fill-check text-muted me-2"></i>256-bit Encryption</li>
                             </ul>
                         </div>
                     </div>

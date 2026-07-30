@@ -456,15 +456,14 @@
                 <p class="text-muted small mb-3">
                     <i class="bi bi-shield-check text-success"></i> This is a secure screenshot of the destination. You can safely view it without visiting the site.
                 </p>
-                <div class="position-relative overflow-hidden rounded border border-secondary" style="background: #0f172a; min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div class="position-relative overflow-hidden rounded border border-secondary preview-container">
                     <img src="https://image.thum.io/get/width/800/crop/800/{{ url }}" 
                          id="visualPreview"
-                         class="img-fluid w-100" 
-                         style="filter: blur(10px); transition: filter 0.3s ease; opacity: 0.8;"
+                         class="img-fluid w-100 preview-img-blur" 
                          alt="Site Preview"
                          onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-muted\'><i class=\'bi bi-image-fill fs-1\'></i><br>Preview not available</div>';">
                     
-                    <button id="revealBtn" class="btn btn-outline-light position-absolute top-50 start-50 translate-middle" style="z-index: 10;">
+                    <button id="revealBtn" class="btn btn-outline-light position-absolute top-50 start-50 translate-middle reveal-btn">
                         <i class="bi bi-eye"></i> Reveal Image
                     </button>
                 </div>
@@ -495,7 +494,7 @@
 <div class="modal fade" id="explainModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content glass-card overflow-hidden">
-            <div class="modal-header border-0" style="background: linear-gradient(135deg, var(--light-blue), var(--ivory));">
+            <div class="modal-header border-0 modal-header-gradient">
                 <h5 class="modal-title fw-bold"><i class="bi bi-robot me-2"></i>ML Engine Analysis Report</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>

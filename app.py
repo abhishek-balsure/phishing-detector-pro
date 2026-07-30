@@ -1261,7 +1261,7 @@ def login():
         
         if user and check_password_hash(user['password'], password):
             if user.get('is_verified', 1) == 0:
-                flash('Please verify your email address first. Check your inbox or <a href="/resend-verification">click here to resend</a>.', 'warning')
+                flash('Please verify your email address first. Check your inbox or <a href="/resend-verification">request a new verification email</a>.', 'warning')
                 return render_template('login.html')
                 
             # Successful login - reset attempts and log
@@ -1380,7 +1380,7 @@ def signup():
                           recipients=[email])
             msg.body = f'''Hello {username},
 
-Please click the link below to verify your email address:
+Please verify your email address by opening the following link:
 {verify_url}
 
 If you did not request this, please ignore this email.
@@ -1459,7 +1459,7 @@ def resend_verification():
                           recipients=[email])
             msg.body = f'''Hello {user['username']},
 
-Please click the link below to verify your email address:
+Please verify your email address by opening the following link:
 {verify_url}
 
 If you did not request this, please ignore this email.
@@ -1518,7 +1518,7 @@ def forgot_password():
                 msg.body = f'''Hello {user['username']},
 
 You recently requested to reset your password for your ShieldGuard Pro account.
-Click the link below to reset it:
+Open the following link to reset your password:
 
 {reset_url}
 

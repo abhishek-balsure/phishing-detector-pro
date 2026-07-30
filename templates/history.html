@@ -142,7 +142,7 @@
                                 <span class="small">{{ "%.0f"|format(scan.confidence) }}%</span>
                             </div>
                         </td>
-                        <td><span class="badge" style="background: var(--light-blue); color: var(--bright-blue); border: 1px solid var(--border-color);">{{ scan.scan_type or 'Web' }}</span>
+                        <td><span class="badge badge-scan-type">{{ scan.scan_type or 'Web' }}</span>
                         </td>
                         <td class="pe-4 text-dim small">{{ scan.created_at.strftime('%Y-%m-%d') }}</td>
                     </tr>
