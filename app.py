@@ -118,6 +118,13 @@ limiter = Limiter(
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# Cache control headers for static assets (css, js, etc.)
+@app.after_request
+def add_static_cache_control_headers(response):
+    if request.path.startswith('/static/'):
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return response
+
 # ===== OAUTH CONFIGURATION =====
 # GitHub OAuth only (Google OAuth requires a public domain, not a bare IP)
 github_bp = None
