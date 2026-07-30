@@ -972,20 +972,86 @@ body.dark-mode ::-webkit-scrollbar-track {
     }
 }
 
-@media (max-width: 768px) {
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.5rem; }
-    .dark-mode-toggle {
-        bottom: 20px;
-        left: 20px;
-        width: 48px;
-        height: 48px;
+/* ===== COMPREHENSIVE MOBILE RESPONSIVENESS ===== */
+@media (max-width: 991px) {
+    /* Offcanvas Menu Styles */
+    .offcanvas {
+        background: var(--bg-surface);
+        border-left: 1px solid var(--border-color);
+        box-shadow: -10px 0 40px rgba(0,0,0,0.1);
+        width: 85% !important;
+        max-width: 350px !important;
     }
-    .user-name { display: none; }
+    body.dark-mode .offcanvas {
+        background: var(--bg-primary);
+        border-left: 1px solid var(--gray-700);
+        box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+    }
+    .offcanvas-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+    .mobile-nav-actions {
+        margin-top: auto;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+    body.dark-mode .mobile-nav-actions {
+        border-color: var(--gray-700);
+    }
+    
+    /* Bigger tap targets for buttons inside offcanvas */
+    .nav-item .nav-link, 
+    .nav-item .dropdown-item {
+        padding: 0.75rem 1rem;
+        font-size: 1.05rem;
+        border-radius: var(--radius-md);
+        margin-bottom: 0.25rem;
+    }
+    .nav-item .btn {
+        min-height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        border-radius: var(--radius-md);
+    }
+}
+
+@media (max-width: 768px) {
+    /* Typography Scaling */
+    h1 { font-size: 2.2rem; line-height: 1.2; }
+    h2 { font-size: 1.75rem; }
+    
+    /* Layout Spacing */
+    .container { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .card-body { padding: 1.5rem !important; }
+    
+    /* Dark Mode Toggle - avoid bottom bar overlaps on mobile browsers */
+    .dark-mode-toggle {
+        bottom: 25px;
+        right: 25px; /* Moved to right for easier thumb access */
+        left: auto;
+        width: 52px;
+        height: 52px;
+    }
+    
+    /* Forms & Buttons */
+    .form-control, .btn {
+        min-height: 48px;
+        font-size: 1rem;
+    }
 }
 
 @media (max-width: 576px) {
-    .container { width: 100%; padding: 0 1rem; }
-    h1 { font-size: 1.75rem; }
-    h2 { font-size: 1.25rem; }
+    h1 { font-size: 1.85rem; }
+    h2 { font-size: 1.4rem; }
+    .card-body { padding: 1.25rem !important; }
+    
+    /* Adjust specific feature cards */
+    .feature-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
 }
