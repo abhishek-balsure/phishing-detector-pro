@@ -5,31 +5,29 @@
 
 /* ===== CSS VARIABLES ===== */
 :root {
-  /* Primary - Indigo/Violet (replaces boring blue) */
+  /* Brand colors */
   --primary: #6366F1;
   --primary-light: #818CF8;
   --primary-dark: #4F46E5;
   --primary-glow: rgba(99, 102, 241, 0.35);
   
-  /* Secondary - Cyan (replaces flat green for tech feel) */
   --secondary: #06B6D4;
   --secondary-light: #22D3EE;
   
-  /* Accent - Rose/Pink for CTAs */
   --accent-pink: #EC4899;
   --accent-pink-light: #F472B6;
   
-  /* Keep these variable names for template compatibility */
-  --bright-blue: #6366F1;  /* NOW INDIGO - templates reference this */
+  /* Legacy compatibility colors */
+  --bright-blue: #6366F1;
   --bright-blue-hover: #4F46E5;
-  --green: #10B981;  /* NOW EMERALD */
+  --green: #10B981;
   --green-light: rgba(16, 185, 129, 0.15);
   --white: #FFFFFF;
   --tangerine: #F59E0B;
-  --ivory: #F8FAFC;  /* NOW COOL SLATE */
-  --light-blue: #EEF2FF;  /* NOW INDIGO TINT */
+  --ivory: #F8FAFC;
+  --light-blue: #EEF2FF;
   
-  /* Status Colors */
+  /* Status colors */
   --success: #10B981;
   --success-light: rgba(16, 185, 129, 0.12);
   --danger: #F43F5E;
@@ -56,7 +54,7 @@
   --bg-secondary: #F1F5F9;
   --bg-card: #FFFFFF;
   --bg-surface: #FFFFFF;
-  --bg-navbar: rgba(255, 255, 255, 0.8);  /* FROSTED GLASS */
+  --bg-navbar: rgba(255, 255, 255, 0.8);
   
   /* Text */
   --text-primary: #0F172A;
@@ -95,13 +93,13 @@
   --radius-full: 9999px;
 }
 
-/* ===== DARK MODE ===== */
+/* Dark mode overrides */
 body.dark-mode {
   --bg-primary: #0B0B14;
   --bg-secondary: #12121E;
-  --bg-card: rgba(26, 26, 46, 0.7);  /* GLASS EFFECT */
+  --bg-card: rgba(26, 26, 46, 0.7);
   --bg-surface: #1A1A2E;
-  --bg-navbar: rgba(11, 11, 20, 0.85);  /* FROSTED DARK */
+  --bg-navbar: rgba(11, 11, 20, 0.85);
   
   --text-primary: #F1F5F9;
   --text-secondary: #94A3B8;
@@ -131,8 +129,8 @@ body.dark-mode {
   --gray-800: #E2E8F0;
   --gray-900: #F1F5F9;
   
-  --bright-blue: #818CF8;  /* Lighter indigo for dark mode */
-  --green: #34D399;  /* Lighter emerald for dark mode */
+  --bright-blue: #818CF8;
+  --green: #34D399;
   --light-blue: rgba(99, 102, 241, 0.15);
   --ivory: #0B0B14;
 }

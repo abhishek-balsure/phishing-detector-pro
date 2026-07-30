@@ -12,12 +12,12 @@ ShieldGuard Pro is an enterprise-grade phishing detection platform powered by ma
 
 ## Live Links
 
-- **Application**: [http://35.154.32.25:5000](http://35.154.32.25:5000)
+- **Application**: [https://shieldguard-pro.duckdns.org](https://shieldguard-pro.duckdns.org)
 - **Docker Hub**: [abhiishek25/shieldguard-pro](https://hub.docker.com/r/abhiishek25/shieldguard-pro)
 
 ## Core Features
 
-- **ML-Powered Detection**: Random Forest model (selected over XGBoost via 5-fold cross-validation) trained on 1,964 labeled URLs. Model achieves 94.9% AUC-ROC with a custom high-precision threshold (0.65) to practically eliminate false positives on legitimate sites.
+- **ML-Powered Detection**: XGBoost model (selected over Random Forest via 5-fold cross-validation) trained on 1,964 labeled URLs. Model achieves 96.4% AUC-ROC with a custom high-precision threshold (0.65) to practically eliminate false positives on legitimate sites.
 - **Premium UI/UX**: High-end Glassmorphism design system featuring animated threat level gauges, real-time scrolling activity feeds, and adaptive Dark Mode.
 - **OAuth Authentication**: Seamless login with Google and GitHub using Flask-Dance.
 - **Multi-Format Analysis**: URL, email, QR code, message, and social media link batch scanning.

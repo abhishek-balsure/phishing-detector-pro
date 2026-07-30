@@ -65,20 +65,12 @@ class FormValidator {
     }
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
-    if (!this.isValid) return;
-
-    this.showLoadingState();
-    this.simulateAPICall();
-  }
-
   showLoadingState() {
     if (this.submitBtn) {
       const originalText = this.submitBtn.textContent;
       this.submitBtn.disabled = true;
       this.submitBtn.innerHTML = `
-        <span class="spinner" style="width: 20px; height: 20px;"></span> 
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
         Loading...
       `;
       this.submitBtn.setAttribute('data-original-text', originalText);
@@ -94,41 +86,73 @@ class FormValidator {
     }
   }
 
-  simulateAPICall() {
-    // Simulate API call delay
-    setTimeout(() => {
+  handleSubmit(e) {
+    e.preventDefault();
+    if (!this.isValid) return;
+
+    this.showLoadingState();
+    
+    const urlValue = this.form.url.value;
+    
+    fetch('/api/quick_check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ url: urlValue })
+    })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => { throw new Error(err.error || 'Server error'); });
+      }
+      return response.json();
+    })
+    .then(data => {
       this.hideLoadingState();
-      this.showResults();
-    }, 2000);
+      this.showResults(data);
+    })
+    .catch(error => {
+      this.hideLoadingState();
+      this.showErrorResults(error.message || 'An error occurred during scan');
+    });
   }
 
-  showResults() {
+  showResults(data) {
     const resultsSection = document.getElementById('resultsSection');
     const resultsContent = document.getElementById('resultsContent');
+    if (!resultsSection || !resultsContent) return;
 
-    // Create result cards
+    const isPhishing = data.is_phishing;
+    const resultClass = isPhishing ? 'text-danger' : 'text-success';
+    const badgeClass = isPhishing ? 'badge-danger' : 'badge-success';
+    const badgeText = isPhishing ? 'Phishing Detected' : 'No Phishing Detected';
+    const resultText = isPhishing ? 'Phishing' : 'Safe';
+    const descriptionText = isPhishing 
+      ? 'This URL shows high probability of being malicious. Do NOT trust it.' 
+      : 'This URL appears to be safe and legitimate.';
+
     const resultCard = document.createElement('div');
     resultCard.className = 'col-lg-6 mx-auto glass-card card-entrance';
     resultCard.innerHTML = `
       <div class="text-center mb-4">
-        <h3>Scan Results for: <span class="gradient-text">${this.form.url.value}</span></h3>
+        <h3>Scan Results for: <span class="gradient-text">${data.url}</span></h3>
       </div>
       <div class="row g-3">
         <div class="col-6">
           <div class="text-center">
-            <div class="h1 text-success mb-2" id="resultStatus">Safe</div>
+            <div class="h1 ${resultClass} mb-2" id="resultStatus">${resultText}</div>
             <small class="text-muted">Status</small>
           </div>
         </div>
         <div class="col-6">
           <div class="text-center">
-            <div class="h1 text-primary mb-2" id="resultScore">95</div>
+            <div class="h1 text-primary mb-2" id="resultScore">${data.confidence}%</div>
             <small class="text-muted">Confidence</small>
           </div>
         </div>
         <div class="col-12">
-          <div class="badge badge-success mb-3">No Phishing Detected</div>
-          <p class="text-muted">This URL appears to be safe and legitimate.</p>
+          <div class="badge ${badgeClass} mb-3">${badgeText}</div>
+          <p class="text-muted">${descriptionText}</p>
         </div>
       </div>
     `;
@@ -137,10 +161,30 @@ class FormValidator {
     resultsContent.appendChild(resultCard);
     resultsSection.style.display = 'block';
 
-    // Animate result card
     setTimeout(() => {
       resultCard.classList.add('card-entrance');
     }, 100);
+  }
+
+  showErrorResults(message) {
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsContent = document.getElementById('resultsContent');
+    if (!resultsSection || !resultsContent) return;
+
+    const resultCard = document.createElement('div');
+    resultCard.className = 'col-lg-6 mx-auto glass-card card-entrance';
+    resultCard.innerHTML = `
+      <div class="text-center mb-4">
+        <h3 class="text-danger">Scan Error</h3>
+      </div>
+      <div class="text-center">
+        <p class="text-muted">${message}</p>
+      </div>
+    `;
+
+    resultsContent.innerHTML = '';
+    resultsContent.appendChild(resultCard);
+    resultsSection.style.display = 'block';
   }
 }
 
@@ -304,21 +348,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Performance monitoring
-if ('performance' in window) {
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      if (window.performance && window.performance.memory) {
-        const memory = window.performance.memory;
-        console.log('Memory usage:', {
-          used: Math.round(memory.usedJSHeapSize / 1048576 * 100) / 100 + 'MB',
-          total: Math.round(memory.totalJSHeapSize / 1048576 * 100) / 100 + 'MB',
-          limit: Math.round(memory.jsHeapSizeLimit / 1048576 * 100) / 100 + 'MB'
-        });
-      }
-    }, 0);
-  });
-}
 
 // Error handling
 window.addEventListener('error', (e) => {
@@ -405,5 +434,3 @@ window.ShieldGuard = {
   accessibilityEnhancer,
   FormValidator
 };
-</script>
-{% endblock %}

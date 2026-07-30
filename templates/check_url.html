@@ -500,7 +500,7 @@
             <div class="modal-body p-4">
                 <div class="alert {% if result.is_phishing %}alert-danger{% else %}alert-success{% endif %} mb-4">
                     <h6 class="fw-bold mb-2">Final Verdict: {% if result.is_phishing %}MALICIOUS{% else %}CLEAN{% endif %}</h6>
-                    <p class="small mb-0">Our Random Forest ensemble model analyzed the pattern and identified it with
+                    <p class="small mb-0">Our XGBoost gradient boosting model analyzed the pattern and identified it with
                         {% if result.confidence and result.confidence > 0 %}{{ result.confidence }}%{% else %}high{% endif %} confidence as {% if result.is_phishing %}phishing content{% else %}legitimate traffic{% endif %}.</p>
                 </div>
 

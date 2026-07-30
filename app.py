@@ -1190,6 +1190,34 @@ def quick_check():
         save_scan(session['user_id'], url, result, 'quick')
     return render_template('check_url.html', result=result, url=url, quick_check=True)
 
+@app.route('/api/quick_check', methods=['POST'])
+def api_quick_check():
+    if request.is_json:
+        data = request.get_json()
+        url = data.get('url', '').strip()
+    else:
+        url = request.form.get('url', '').strip()
+        
+    if not url:
+        return jsonify({'error': 'URL is required'}), 400
+    if not url.startswith(('http://', 'https://')):
+        return jsonify({'error': 'URL must start with http:// or https://'}), 400
+        
+    result = predict_url(url)
+    if not result or 'error' in result:
+        return jsonify({'error': result.get('error', 'Prediction failed')}), 500
+        
+    if 'user_id' in session:
+        save_scan(session['user_id'], url, result, 'quick')
+        
+    return jsonify({
+        'url': url,
+        'result': result['result'],
+        'confidence': result['confidence'],
+        'is_phishing': result['is_phishing'],
+        'is_legitimate': result['is_legitimate']
+    })
+
 @app.route('/login', methods=['GET', 'POST'])
 @login_rate_limit
 def login():

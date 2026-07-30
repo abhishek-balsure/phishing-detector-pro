@@ -612,7 +612,7 @@
             </form>
             <div class="scan-badges">
                 <span><i class="bi bi-lightning-charge-fill text-warning"></i> Instant Results</span>
-                <span><i class="bi bi-shield-check text-success"></i> 95%+ Accuracy</span>
+                <span><i class="bi bi-shield-check text-success"></i> 96%+ Accuracy</span>
                 <span><i class="bi bi-heart text-danger"></i> Free to Use</span>
             </div>
             <div class="demo-buttons">
@@ -719,7 +719,7 @@
         <div class="row">
             <div class="col-6 col-md-3">
                 <div class="stat-box">
-                    <div class="stat-number" data-target="95" data-suffix="%+">0</div>
+                    <div class="stat-number" data-target="96" data-suffix="%+">0</div>
                     <div class="stat-label">Accuracy</div>
                 </div>
             </div>
@@ -814,27 +814,46 @@
 {% block extra_js %}
 <script>
 function demoScan(url) {
-    // Set the URL in the input
     document.getElementById('quickUrlInput').value = url;
     
-    // Show loading
     const btn = document.getElementById('scanBtn');
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
     btn.disabled = true;
     
-    // Simulate analysis (since we're not logged in)
-    setTimeout(() => {
-        btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
-        btn.disabled = false;
-        
-        // Show result popup
-        const isPhishing = url.includes('paypal') || url.includes('login') || url.includes('verify');
-        showResultPopup(url, isPhishing);
-    }, 1500);
+    performScan(url);
 }
 
-function showResultPopup(url, isPhishing) {
+function performScan(url) {
+    const btn = document.getElementById('scanBtn');
+    fetch('/api/quick_check', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url: url })
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.json().then(err => { throw new Error(err.error || 'Scan failed'); });
+        }
+        return res.json();
+    })
+    .then(data => {
+        btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
+        btn.disabled = false;
+        showResultPopup(url, data);
+    })
+    .catch(err => {
+        btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
+        btn.disabled = false;
+        alert(err.message || 'An error occurred during scanning.');
+    });
+}
+
+function showResultPopup(url, data) {
     const popup = document.getElementById('resultPopup');
+    const isPhishing = data.is_phishing;
+    const confidence = data.confidence;
     
     const resultClass = isPhishing ? 'phishing' : 'safe';
     const iconClass = isPhishing ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill';
@@ -842,7 +861,7 @@ function showResultPopup(url, isPhishing) {
     const message = isPhishing 
         ? 'This URL shows signs of being a phishing attempt. Do NOT visit this site!'
         : 'This URL appears to be legitimate and safe to visit.';
-    const score = isPhishing ? '92%' : '98%';
+    const score = confidence + '%';
     
     popup.innerHTML = `
         <div class="result-popup-overlay" onclick="closeResultPopup()"></div>
@@ -880,7 +899,6 @@ function closeResultPopup() {
     document.getElementById('resultPopup').style.display = 'none';
 }
 
-// Original form handling
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('quickCheckForm');
     const urlInput = document.getElementById('quickUrlInput');
@@ -890,18 +908,12 @@ document.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const url = urlInput.value.trim();
-            
             if (!url) return;
             
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
             btn.disabled = true;
             
-            setTimeout(() => {
-                const isPhishing = url.includes('paypal') || url.includes('login') || url.includes('verify') || url.includes('account');
-                showResultPopup(url, isPhishing);
-                btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
-                btn.disabled = false;
-            }, 1500);
+            performScan(url);
         });
     }
 });
