@@ -107,8 +107,8 @@
 
         {% if result %}
         <!-- Results -->
-        <div class="fade-up">
-            <div class="row g-4 mb-5">
+        <div>
+            <div class="row g-4 mb-5 fade-up delay-100">
                 <div class="col-md-4">
                     <div class="stat-widget text-center p-4">
                         <div class="h2 fw-bold mb-0 text-accent">{{ result.urls_found }}</div>
@@ -130,29 +130,31 @@
             </div>
 
             {% if result.url_results %}
-            <h5 class="mb-4">Link Assessment <span class="text-dim small fw-normal ms-2">({{ result.url_results|length
-                    }} items)</span></h5>
-            <div class="mb-5">
-                {% for url_item in result.url_results %}
-                <div class="url-result-pill {% if url_item.result == 'phishing' %}phishing{% else %}safe{% endif %}">
-                    <div class="overflow-hidden">
-                        <code class="text-accent small text-truncate d-block">{{ url_item.url }}</code>
+            <div class="fade-up delay-200">
+                <h5 class="mb-4">Link Assessment <span class="text-dim small fw-normal ms-2">({{ result.url_results|length
+                        }} items)</span></h5>
+                <div class="mb-5">
+                    {% for url_item in result.url_results %}
+                    <div class="url-result-pill {% if url_item.result == 'phishing' %}phishing{% else %}safe{% endif %}">
+                        <div class="overflow-hidden">
+                            <code class="text-accent small text-truncate d-block">{{ url_item.url }}</code>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            {% if url_item.result == 'phishing' %}
+                            <span class="badge badge-phishing">THREAT</span>
+                            {% else %}
+                            <span class="badge badge-safe">SAFE</span>
+                            {% endif %}
+                            <div class="text-dim smaller mt-1">{{ "%.0f"|format(url_item.confidence) }}% Conf.</div>
+                        </div>
                     </div>
-                    <div class="text-end flex-shrink-0">
-                        {% if url_item.result == 'phishing' %}
-                        <span class="badge badge-phishing">THREAT</span>
-                        {% else %}
-                        <span class="badge badge-safe">SAFE</span>
-                        {% endif %}
-                        <div class="text-dim smaller mt-1">{{ "%.0f"|format(url_item.confidence) }}% Conf.</div>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
             {% endif %}
 
             <div
-                class="glass-card p-4 {% if result.overall_result == 'suspicious' %}border-danger{% else %}border-success{% endif %} bg-opacity-10">
+                class="glass-card p-4 {% if result.overall_result == 'suspicious' %}border-danger{% else %}border-success{% endif %} bg-opacity-10 fade-up delay-300">
                 <div class="d-flex align-items-center gap-3">
                     <div
                         class="icon-box-sm {% if result.overall_result == 'suspicious' %}text-danger{% else %}text-success{% endif %}">

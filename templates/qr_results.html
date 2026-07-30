@@ -1,110 +1,140 @@
 {% extends "base.html" %}
 
-{% block title %}QR Scan Results - Phishing Detection{% endblock %}
+{% block title %}QR Scan Results - ShieldGuard Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .stat-widget {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        transition: transform var(--transition-normal), border-color var(--transition-normal);
+    }
+
+    .stat-widget:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+    }
+
+    .decoded-well {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        font-family: 'JetBrains Mono', monospace;
+        word-break: break-all;
+        color: var(--accent);
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card mt-4">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">
-                        <i class="bi bi-qr-code-scan"></i> QR Code Scan Results
-                    </h4>
-                </div>
-                <div class="card-body">
-                    {% if prediction == 'phishing' %}
-                    <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle-fill display-4 d-block mb-3"></i>
-                        <h4 class="alert-heading">Phishing URL Detected in QR Code!</h4>
-                        <p><strong>Warning:</strong> This QR code contains a malicious link. Do not visit this URL!</p>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill display-4 d-block mb-3"></i>
-                        <h4 class="alert-heading">QR Code URL is Safe</h4>
-                        <p>The URL embedded in this QR code appears to be legitimate.</p>
-                    </div>
-                    {% endif %}
+<div class="container py-5">
+    <div class="result-container">
+        <!-- Header -->
+        <div class="text-center mb-5 fade-in">
+            <div class="icon-box-sm mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
+                <i class="bi bi-qr-code-scan text-accent"></i>
+            </div>
+            <h1 class="fw-bold">QR Decryption <span class="gradient-text">Results</span></h1>
+            <p class="text-dim">Comprehensive security assessment of decoded QR resource data.</p>
+        </div>
 
-                    <!-- URL Display -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <strong>URL from QR Code:</strong>
-                        </div>
-                        <div class="card-body">
-                            <code class="h5 user-select-all">{{ url }}</code>
-                            <button class="btn btn-sm btn-outline-secondary ms-2 float-end" 
-                                    onclick="copyToClipboard('{{ url }}')" title="Copy URL">
-                                <i class="bi bi-clipboard"></i> Copy
-                            </button>
-                        </div>
+        {% if url %}
+        <!-- Summary widgets -->
+        <div class="row g-4 mb-5 fade-up delay-100">
+            <div class="col-md-6">
+                <div class="stat-widget">
+                    <div class="h3 fw-bold mb-1 {% if prediction == 'phishing' %}text-danger{% else %}text-success{% endif %}">
+                        {% if prediction == 'phishing' %}MALICIOUS{% else %}LEGITIMATE{% endif %}
                     </div>
-
-                    <!-- Confidence Bar -->
-                    <div class="mb-4">
-                        <label class="form-label">Detection Confidence</label>
-                        <div class="progress" style="height: 35px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated
-                                        {{ 'bg-danger' if prediction == 'phishing' else 'bg-success' }}" 
-                                 role="progressbar" 
-                                 style="width: {{ confidence }}%">
-                                {{ "%.1f"|format(confidence) }}%
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Warning for Phishing -->
-                    {% if prediction == 'phishing' %}
-                    <div class="alert alert-warning">
-                        <h6><i class="bi bi-shield-exclamation"></i> Why is this dangerous?</h6>
-                        <ul class="mb-0">
-                            <li>QR codes can hide malicious destinations</li>
-                            <li>Attackers use QR codes to bypass email filters</li>
-                            <li>The actual URL is hidden until scanned</li>
-                            <li>Mobile users are especially vulnerable</li>
-                        </ul>
-                    </div>
-                    {% endif %}
-
-                    <!-- Action Buttons -->
-                    <div class="text-center mt-4">
-                        <a href="{{ url_for('qr_scanner') }}" class="btn btn-info">
-                            <i class="bi bi-arrow-clockwise"></i> Scan Another QR Code
-                        </a>
-                        <a href="{{ url_for('history') }}" class="btn btn-primary">
-                            <i class="bi bi-clock-history"></i> View History
-                        </a>
-                    </div>
+                    <div class="small text-muted uppercase">Verdict</div>
                 </div>
             </div>
-
-            <!-- QR Code Safety Tips -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <i class="bi bi-lightbulb"></i> QR Code Safety Tips
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <i class="bi bi-check-circle text-success"></i>
-                            Verify the source of the QR code before scanning
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-circle text-success"></i>
-                            Use a QR scanner that shows the URL before opening
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-circle text-success"></i>
-                            Be cautious of QR codes in public places
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-circle text-success"></i>
-                            Never scan QR codes from suspicious emails or messages
-                        </li>
-                    </ul>
+            <div class="col-md-6">
+                <div class="stat-widget">
+                    <div class="h3 fw-bold mb-1 text-accent">{{ "%.0f"|format(confidence) }}%</div>
+                    <div class="small text-muted uppercase">Model Confidence</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Decoded data well -->
+        <div class="glass-card p-4 mb-4 fade-up delay-200">
+            <h6 class="fw-bold mb-3"><i class="bi bi-qr-code me-2"></i>Decoded Payload Resource</h6>
+            <div class="decoded-well mb-3">{{ url }}</div>
+            <button class="btn btn-outline-primary btn-sm" onclick="navigator.clipboard.writeText('{{ url }}'); showToast('success', 'Copied!', 'Decoded URL copied to clipboard', 2000)">
+                <i class="bi bi-clipboard me-1"></i> Copy to Clipboard
+            </button>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="fade-up delay-300 mb-4">
+            {% if prediction == 'phishing' %}
+            <div class="alert alert-danger bg-opacity-10 border border-danger p-4 d-flex gap-3">
+                <i class="bi bi-shield-exclamation display-6 text-danger"></i>
+                <div>
+                    <h6 class="fw-bold text-danger mb-1">Threat Advisory</h6>
+                    <p class="small mb-0">This QR code contains a high-risk phishing destination. Avoid opening it or entering any credentials on the target site.</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-success bg-opacity-10 border border-success p-4 d-flex gap-3">
+                <i class="bi bi-shield-check display-6 text-success"></i>
+                <div>
+                    <h6 class="fw-bold text-success mb-1">Resource Safety Passed</h6>
+                    <p class="small mb-0">No malicious pattern signatures or phishing risks were identified. This resource appears safe to visit.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Warning details or safety advice -->
+        <div class="glass-card p-4 fade-up delay-400">
+            {% if prediction == 'phishing' %}
+            <h6 class="fw-bold text-danger mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Why is QR Phishing (Quishing) dangerous?</h6>
+            <ul class="small text-dim mb-0 ps-3">
+                <li class="mb-2">QR codes hide raw URLs from traditional email gateways and security checkers.</li>
+                <li class="mb-2">Attackers rely on you scanning with a mobile device where security software is often absent.</li>
+                <li>Verify URL domains carefully on your mobile browser toolbar before proceeding.</li>
+            </ul>
+            {% else %}
+            <h6 class="fw-bold text-success mb-3"><i class="bi bi-shield-check me-2"></i>QR Safety Tips:</h6>
+            <ul class="small text-dim mb-0 ps-3">
+                <li class="mb-2">Verify physical stickers or sources before scanning public QR codes.</li>
+                <li class="mb-2">Ensure your scanner displays a text preview of the URL before auto-opening.</li>
+                <li>Avoid processing QR credentials on untrusted shared WiFi networks.</li>
+            </ul>
+            {% endif %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="glass-card text-center py-5 fade-up">
+            <i class="bi bi-qr-code-scan display-1 text-dim opacity-20 mb-3 d-block"></i>
+            <h5 class="text-dim">No QR Data Decoded</h5>
+            <p class="text-muted small">We could not identify or decode any URL data in the uploaded resource file.</p>
+            <a href="{{ url_for('qr_scanner') }}" class="btn btn-glow btn-sm px-4 mt-3">
+                <i class="bi bi-arrow-left me-2"></i>Scan Another QR Code
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="mt-5 text-center fade-up delay-500">
+            <a href="{{ url_for('qr_scanner') }}" class="btn btn-glow px-4 me-3">
+                <i class="bi bi-arrow-clockwise"></i> Scan Another QR Code
+            </a>
+            <a href="{{ url_for('history') }}" class="btn btn-outline-primary px-4">
+                <i class="bi bi-clock-history"></i> Intelligence Log
+            </a>
         </div>
     </div>
 </div>

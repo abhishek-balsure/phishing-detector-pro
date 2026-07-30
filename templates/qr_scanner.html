@@ -129,8 +129,8 @@
         {% endif %}
 
         {% if result %}
-        <div class="qr-result-box fade-up">
-            <div class="text-center mb-5">
+        <div class="qr-result-box">
+            <div class="text-center mb-5 fade-up">
                 <h5 class="text-dim small uppercase tracking-widest mb-3">Decryption Result</h5>
                 <div class="decoded-data-well mb-4">
                     {{ result.qr_data }}
@@ -138,7 +138,7 @@
             </div>
 
             {% if result.is_url %}
-            <div class="row g-4 mb-5">
+            <div class="row g-4 mb-5 fade-up delay-100">
                 <div class="col-md-6">
                     <div class="stat-widget p-4 text-center">
                         <div
@@ -157,7 +157,7 @@
             </div>
 
             <div
-                class="alert {% if result.url_result == 'phishing' %}alert-danger{% else %}alert-success{% endif %} bg-opacity-10 border-0 p-4 mb-4">
+                class="alert {% if result.url_result == 'phishing' %}alert-danger{% else %}alert-success{% endif %} bg-opacity-10 border-0 p-4 mb-4 fade-up delay-200">
                 <div class="d-flex gap-3">
                     <i
                         class="bi {% if result.url_result == 'phishing' %}bi-shield-exclamation{% else %}bi-shield-check{% endif %} display-6"></i>
@@ -174,13 +174,13 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-info bg-opacity-10 border-0 p-4">
+            <div class="alert alert-info bg-opacity-10 border-0 p-4 fade-up delay-200">
                 <i class="bi bi-info-circle-fill me-2"></i>
                 This resource contains raw data and no URL patterns were matched.
             </div>
             {% endif %}
 
-            <div class="text-center mt-5">
+            <div class="text-center mt-5 fade-up delay-300">
                 <a href="{{ url_for('qr_scanner') }}" class="btn btn-outline-primary px-5">
                     Scan New Resource
                 </a>

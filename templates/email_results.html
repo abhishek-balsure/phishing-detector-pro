@@ -1,115 +1,166 @@
 {% extends "base.html" %}
 
-{% block title %}Email Scan Results - Phishing Detection{% endblock %}
+{% block title %}Email Scan Results - ShieldGuard Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .result-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .url-cell {
+        max-width: 400px;
+    }
+
+    .stat-widget {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        text-align: center;
+        transition: transform var(--transition-normal), border-color var(--transition-normal);
+    }
+
+    .stat-widget:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <div class="card mt-4">
-                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="bi bi-envelope-check"></i> Email Scan Results
-                    </h4>
-                    <span class="badge bg-light text-dark">{{ total }} URLs Found</span>
-                </div>
-                <div class="card-body">
-                    {% if results %}
-                    <!-- Summary -->
-                    {% set phishing_count = results | selectattr('prediction', 'equalto', 'phishing') | list | length %}
-                    
-                    {% if phishing_count > 0 %}
-                    <div class="alert alert-danger">
-                        <i class="bi bi-exclamation-triangle-fill display-6 d-block mb-2"></i>
-                        <h5 class="alert-heading">Warning: {{ phishing_count }} Phishing URL(s) Detected!</h5>
-                        <p>This email contains potentially malicious links. Do not click on them!</p>
-                    </div>
-                    {% else %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill display-6 d-block mb-2"></i>
-                        <h5 class="alert-heading">No Phishing URLs Found</h5>
-                        <p>All links in this email appear to be safe.</p>
-                    </div>
-                    {% endif %}
+<div class="container py-5">
+    <div class="result-container">
+        <!-- Header -->
+        <div class="text-center mb-5 fade-in">
+            <div class="icon-box-sm mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
+                <i class="bi bi-envelope-check text-accent"></i>
+            </div>
+            <h1 class="fw-bold">Email Scan <span class="gradient-text">Results</span></h1>
+            <p class="text-dim">Comprehensive security assessment of URLs embedded in your email.</p>
+        </div>
 
-                    <!-- Results Table -->
-                    <h5 class="mt-4 mb-3">URL Analysis</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>#</th>
-                                    <th>URL Found</th>
-                                    <th>Status</th>
-                                    <th>Confidence</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for result in results %}
-                                <tr class="{{ 'table-danger' if result.prediction == 'phishing' else 'table-success' }}">
-                                    <td>{{ loop.index }}</td>
-                                    <td style="max-width: 400px;">
-                                        <code class="user-select-all">{{ result.url }}</code>
-                                        <button class="btn btn-sm btn-outline-secondary ms-2" 
-                                                onclick="copyToClipboard('{{ result.url }}')" title="Copy URL">
-                                            <i class="bi bi-clipboard"></i>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        {% if result.prediction == 'phishing' %}
-                                        <span class="badge bg-danger">
-                                            <i class="bi bi-exclamation-triangle"></i> Phishing
-                                        </span>
-                                        {% else %}
-                                        <span class="badge bg-success">
-                                            <i class="bi bi-check-circle"></i> Safe
-                                        </span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="progress" style="height: 25px;">
-                                            <div class="progress-bar {{ 'bg-danger' if result.prediction == 'phishing' else 'bg-success' }}" 
-                                                 role="progressbar" 
-                                                 style="width: {{ result.confidence }}%">
-                                                {{ "%.1f"|format(result.confidence) }}%
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Recommendations -->
-                    <div class="alert alert-info mt-4">
-                        <h6><i class="bi bi-lightbulb"></i> Recommendations:</h6>
-                        <ul class="mb-0">
-                            <li>Never click on suspicious links in emails</li>
-                            <li>Always verify the sender's email address</li>
-                            <li>Look for spelling errors and urgent language</li>
-                            <li>When in doubt, contact the company directly through their official website</li>
-                        </ul>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-inbox display-1 text-muted"></i>
-                        <h5 class="mt-3">No URLs Found</h5>
-                        <p class="text-muted">No URLs were detected in the provided email content.</p>
-                    </div>
-                    {% endif %}
-
-                    <!-- Action Buttons -->
-                    <div class="mt-4 text-center">
-                        <a href="{{ url_for('email_scanner') }}" class="btn btn-warning">
-                            <i class="bi bi-arrow-clockwise"></i> Scan Another Email
-                        </a>
-                        <a href="{{ url_for('history') }}" class="btn btn-info">
-                            <i class="bi bi-clock-history"></i> View History
-                        </a>
-                    </div>
+        {% if results %}
+        <!-- Summary widgets -->
+        {% set phishing_count = results | selectattr('prediction', 'equalto', 'phishing') | list | length %}
+        <div class="row g-4 mb-5 fade-up delay-100">
+            <div class="col-md-4">
+                <div class="stat-widget">
+                    <div class="h2 fw-bold mb-0 text-accent">{{ total }}</div>
+                    <div class="small text-muted uppercase">Links Detected</div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <div class="stat-widget">
+                    <div class="h2 fw-bold mb-0 text-danger">{{ phishing_count }}</div>
+                    <div class="small text-muted uppercase">Malicious Found</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-widget">
+                    <div class="h2 fw-bold mb-0 text-success">{{ total - phishing_count }}</div>
+                    <div class="small text-muted uppercase">Verified Clean</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="fade-up delay-200 mb-4">
+            {% if phishing_count > 0 %}
+            <div class="alert alert-danger bg-opacity-10 border border-danger p-4 d-flex gap-3">
+                <i class="bi bi-shield-exclamation display-6 text-danger"></i>
+                <div>
+                    <h6 class="fw-bold text-danger mb-1">Threat Advisory</h6>
+                    <p class="small mb-0">We have detected <strong>{{ phishing_count }}</strong> malicious link(s) in this email content. Do not click or interact with these links.</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-success bg-opacity-10 border border-success p-4 d-flex gap-3">
+                <i class="bi bi-shield-check display-6 text-success"></i>
+                <div>
+                    <h6 class="fw-bold text-success mb-1">Email is Legitimate</h6>
+                    <p class="small mb-0">All URLs extracted from the email have passed our neural threat analysis and appear safe.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Results Table -->
+        <div class="glass-card fade-up delay-300 mb-4">
+            <div class="p-3 border-bottom border-secondary border-opacity-10">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-list-check me-2"></i>Link Assessment Details</h5>
+            </div>
+            <div class="table-responsive border-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="bg-white bg-opacity-5">
+                            <th class="ps-4">#</th>
+                            <th>Extracted URL</th>
+                            <th>Assessment</th>
+                            <th class="pe-4">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td class="ps-4">{{ loop.index }}</td>
+                            <td class="url-cell">
+                                <code class="text-accent small text-break d-block" title="{{ result.url }}">{{ result.url }}</code>
+                            </td>
+                            <td>
+                                {% if result.prediction == 'phishing' %}
+                                <span class="badge badge-danger">Malicious</span>
+                                {% else %}
+                                <span class="badge badge-success">Legitimate</span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress w-100" style="height: 6px;">
+                                        <div class="progress-bar-glow {{ 'bg-danger' if result.prediction == 'phishing' else 'bg-success' }}"
+                                            style="width: {{ result.confidence }}%"></div>
+                                    </div>
+                                    <span class="small">{{ "%.0f"|format(result.confidence) }}%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Safety Guidelines -->
+        <div class="glass-card p-4 fade-up delay-400">
+            <h6 class="fw-bold mb-3"><i class="bi bi-lightbulb me-2 text-warning"></i>Email Security Protocol:</h6>
+            <ul class="small text-dim mb-0 ps-3">
+                <li class="mb-2">Never click on links inside unexpected, urgent, or high-stakes emails.</li>
+                <li class="mb-2">Always verify the absolute domain structure of the sender headers.</li>
+                <li class="mb-2">Legitimate institutions will never request credential updates via links in emails.</li>
+                <li>When in doubt, open a separate browser tab and visit the company's official bookmark link directly.</li>
+            </ul>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="glass-card text-center py-5 fade-up">
+            <i class="bi bi-inbox-fill display-1 text-dim opacity-20 mb-3 d-block"></i>
+            <h5 class="text-dim">No URLs Extracted</h5>
+            <p class="text-muted small">We could not identify any clickable URL links inside the email body you provided.</p>
+            <a href="{{ url_for('email_scanner') }}" class="btn btn-glow btn-sm px-4 mt-3">
+                <i class="bi bi-arrow-left me-2"></i>Scan Another Email
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="mt-5 text-center fade-up delay-500">
+            <a href="{{ url_for('email_scanner') }}" class="btn btn-glow px-4 me-3">
+                <i class="bi bi-arrow-clockwise"></i> Scan Another Email
+            </a>
+            <a href="{{ url_for('history') }}" class="btn btn-outline-primary px-4">
+                <i class="bi bi-clock-history"></i> Intelligence Log
+            </a>
         </div>
     </div>
 </div>

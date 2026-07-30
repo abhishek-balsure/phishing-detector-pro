@@ -89,9 +89,9 @@
 
         {% if result %}
         <!-- Results -->
-        <div class="fade-up">
+        <div>
             <!-- Platform Detection -->
-            <div class="mb-5">
+            <div class="mb-5 fade-up delay-100">
                 <h5 class="mb-3">Platform Detection</h5>
                 <div class="platform-card detected">
                     <i class="bi {{ result.platform_info.icon }} platform-icon"></i>
@@ -101,7 +101,7 @@
             </div>
 
             <!-- Impersonation Analysis -->
-            <div class="mb-5">
+            <div class="mb-5 fade-up delay-200">
                 <h5 class="mb-3">Impersonation Analysis</h5>
                 
                 {% if result.is_fake %}
@@ -134,7 +134,7 @@
             </div>
 
             <!-- ML Analysis -->
-            <div class="mb-5">
+            <div class="mb-5 fade-up delay-300">
                 <h5 class="mb-3">ML Safety Analysis</h5>
                 <div class="glass-card p-4 {% if result.prediction.is_phishing %}border-danger{% else %}border-success{% endif %}">
                     <div class="d-flex align-items-center justify-content-between">

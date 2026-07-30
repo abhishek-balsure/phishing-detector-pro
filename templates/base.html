@@ -115,32 +115,7 @@
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Flash Messages -->
-    <div class="container mt-4" id="flashContainer">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert-custom alert-{{ category }} fade-in" role="alert">
-                    <div class="alert-content">
-                        {% if category == 'success' %}
-                        <i class="bi bi-check-circle-fill alert-icon success"></i>
-                        {% elif category == 'error' or category == 'danger' %}
-                        <i class="bi bi-exclamation-triangle-fill alert-icon error"></i>
-                        {% elif category == 'warning' %}
-                        <i class="bi bi-exclamation-circle-fill alert-icon warning"></i>
-                        {% else %}
-                        <i class="bi bi-info-circle-fill alert-icon info"></i>
-                        {% endif %}
-                        <span>{{ message|safe }}</span>
-                    </div>
-                    <button type="button" class="alert-close" data-bs-dismiss="alert" aria-label="Close">
-                        <i class="bi bi-x"></i>
-                    </button>
-                </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
+
 
     <!-- Main Content -->
     <main class="flex-grow-1">
@@ -281,16 +256,134 @@
             });
         }
 
-        // Auto-dismiss flash messages
-        document.querySelectorAll('.alert-custom').forEach(alert => {
-            setTimeout(() => {
-                alert.style.animation = 'fadeOut 0.3s ease forwards';
-                setTimeout(() => alert.remove(), 300);
-            }, 5000);
-        });
-
         // Add smooth page transitions
         document.body.classList.add('page-loaded');
+
+        // Prevent double submits & show loading spinner on all forms
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    return;
+                }
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    setTimeout(() => {
+                        submitBtn.disabled = true;
+                    }, 1);
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing...';
+                }
+            });
+        });
+
+        // Debounce helper
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Inline URL validation as the user types
+        document.querySelectorAll('input[type="url"]').forEach(urlInput => {
+            const form = urlInput.closest('form');
+            if (!form) return;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (!submitBtn) return;
+
+            const validate = () => {
+                const val = urlInput.value.trim();
+                if (!val) {
+                    urlInput.classList.remove('is-valid', 'is-invalid');
+                    urlInput.style.borderColor = '';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                let valid = false;
+                try {
+                    const url = new URL(val);
+                    valid = (url.protocol === 'http:' || url.protocol === 'https:') && url.hostname.length > 0;
+                } catch (_) {
+                    valid = false;
+                }
+
+                if (valid) {
+                    urlInput.classList.remove('is-invalid');
+                    urlInput.classList.add('is-valid');
+                    urlInput.style.borderColor = '#10B981'; // subtle green border
+                    submitBtn.disabled = false;
+                } else {
+                    urlInput.classList.remove('is-valid');
+                    urlInput.classList.add('is-invalid');
+                    urlInput.style.borderColor = '#F43F5E'; // subtle red border
+                    submitBtn.disabled = true;
+                }
+            };
+
+            urlInput.addEventListener('input', debounce(validate, 300));
+        });
+
+        // Instant close collapsed navbar
+        const navBarNav = document.getElementById('navbarNav');
+        if (navBarNav) {
+            // Instantly close on toggler click
+            navBarNav.addEventListener('hide.bs.collapse', function (e) {
+                e.preventDefault();
+                navBarNav.classList.remove('show');
+                const togglers = document.querySelectorAll('[data-bs-target="#navbarNav"]');
+                togglers.forEach(t => {
+                    t.classList.add('collapsed');
+                    t.setAttribute('aria-expanded', 'false');
+                });
+                const bsCollapse = bootstrap.Collapse.getInstance(navBarNav);
+                if (bsCollapse) {
+                    bsCollapse._isTransitioning = false;
+                }
+            });
+
+            // Close menu instantly when any link is clicked inside the collapsed menu
+            navBarNav.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    if (!link.classList.contains('dropdown-toggle')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navBarNav);
+                        if (bsCollapse && navBarNav.classList.contains('show')) {
+                            navBarNav.classList.remove('show');
+                            const togglers = document.querySelectorAll('[data-bs-target="#navbarNav"]');
+                            togglers.forEach(t => {
+                                t.classList.add('collapsed');
+                                t.setAttribute('aria-expanded', 'false');
+                            });
+                            bsCollapse._isTransitioning = false;
+                        }
+                    }
+                });
+            });
+        }
+
+        // Render server-side flash messages as client-side toasts
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    (function() {
+                        let cat = '{{ category }}';
+                        let type = 'info';
+                        let title = 'Notification';
+                        if (cat === 'success') {
+                            type = 'success';
+                            title = 'Success';
+                        } else if (cat === 'error' || cat === 'danger') {
+                            type = 'error';
+                            title = 'Alert';
+                        } else if (cat === 'warning') {
+                            type = 'warning';
+                            title = 'Warning';
+                        }
+                        showToast(type, title, `{{ message|safe }}`, 5000);
+                    })();
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
     </script>
 </body>
 </html>

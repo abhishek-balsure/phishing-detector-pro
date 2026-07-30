@@ -44,7 +44,7 @@
 {% block content %}
 <div class="container py-4">
     <!-- Header -->
-    <div class="row mb-4">
+    <div class="row mb-4 fade-in">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
                 <div>
@@ -63,7 +63,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-4 mb-5">
+    <div class="row g-4 mb-5 fade-up delay-100">
         <div class="col-md-4">
             <div class="stat-card">
                 <div class="stat-number text-accent">{{ total }}</div>
@@ -86,7 +86,7 @@
 
     <!-- Summary Alert -->
     {% if malicious > 0 %}
-    <div class="alert alert-danger d-flex align-items-center mb-4 shadow-sm" role="alert">
+    <div class="alert alert-danger d-flex align-items-center mb-4 shadow-sm fade-up delay-200" role="alert">
         <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
         <div>
             <h5 class="alert-heading mb-1">Warning: Phishing URLs Detected!</h5>
@@ -97,7 +97,7 @@
         </div>
     </div>
     {% else %}
-    <div class="alert alert-success d-flex align-items-center mb-4 shadow-sm" role="alert">
+    <div class="alert alert-success d-flex align-items-center mb-4 shadow-sm fade-up delay-200" role="alert">
         <i class="bi bi-shield-check fs-3 me-3"></i>
         <div>
             <h5 class="alert-heading mb-1">All Clear!</h5>
@@ -109,69 +109,72 @@
     {% endif %}
 
     <!-- Results Table -->
-    <div class="card shadow-lg border-0">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap" style="background: var(--bg-secondary); color: var(--text-primary); border-bottom: 1px solid var(--border-color);">
-            <h4 class="mb-0">
-                <i class="bi bi-list-check"></i> Detailed Results
-            </h4>
-            <button class="btn btn-light btn-sm" onclick="exportToCSV()">
-                <i class="bi bi-download"></i> Export CSV
+    <div class="glass-card fade-up delay-300 mb-4">
+        <div class="p-3 border-bottom border-secondary border-opacity-10 d-flex justify-content-between align-items-center flex-wrap">
+            <h5 class="mb-0 fw-bold">
+                <i class="bi bi-list-check me-2"></i>Detailed Results
+            </h5>
+            <button class="btn btn-outline-primary btn-sm" onclick="exportToCSV()">
+                <i class="bi bi-download me-1"></i> Export CSV
             </button>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" id="resultsTable">
-                    <thead style="background: var(--bg-card);">
-                        <tr>
-                            <th class="ps-4">#</th>
-                            <th>URL</th>
-                            <th>Result</th>
-                            <th>Confidence</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in results %}
-                        <tr class="result-row {{ 'table-danger' if result.result == 'phishing' else 'table-success' }}">
-                            <td class="ps-4 fw-bold">{{ loop.index }}</td>
-                            <td style="max-width: 400px;">
-                                <code class="url-code text-break" title="{{ result.url }}">
-                                    {{ result.url[:70] }}{% if result.url|length > 70 %}...{% endif %}
-                                </code>
-                            </td>
-                            <td>
-                                {% if result.result == 'phishing' %}
-                                <span class="badge bg-danger fs-6 px-3 py-2">
-                                    <i class="bi bi-exclamation-triangle"></i> Phishing
-                                </span>
-                                {% else %}
-                                <span class="badge bg-success fs-6 px-3 py-2">
-                                    <i class="bi bi-check-circle"></i> Safe
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td style="width: 200px;">
-                                <div class="progress confidence-bar">
-                                    <div class="progress-bar progress-bar-striped {{ 'bg-danger' if result.result == 'phishing' else 'bg-success' }}" 
-                                         role="progressbar" 
-                                         style="width: {{ result.confidence }}%">
-                                        {{ "%.1f"|format(result.confidence) }}%
-                                    </div>
+        <div class="table-responsive border-0">
+            <table class="table table-hover align-middle mb-0" id="resultsTable">
+                <thead>
+                    <tr class="bg-white bg-opacity-5">
+                        <th class="ps-4">#</th>
+                        <th>Scan Target URL</th>
+                        <th>Assessment</th>
+                        <th class="pe-4" style="width: 250px;">Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr class="result-row">
+                        <td class="ps-4 fw-bold">{{ loop.index }}</td>
+                        <td style="max-width: 400px;">
+                            <code class="text-accent small text-break d-block" title="{{ result.url }}">
+                                {{ result.url }}
+                            </code>
+                        </td>
+                        <td>
+                            {% if result.result == 'phishing' %}
+                            <span class="badge badge-danger">Malicious</span>
+                            {% else %}
+                            <span class="badge badge-success">Legitimate</span>
+                            {% endif %}
+                        </td>
+                        <td class="pe-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress w-100" style="height: 6px;">
+                                    <div class="progress-bar-glow {{ 'bg-danger' if result.result == 'phishing' else 'bg-success' }}" 
+                                         style="width: {{ result.confidence }}%"></div>
                                 </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                <span class="small">{{ "%.0f"|format(result.confidence) }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <i class="bi bi-folder-x display-1 text-dim opacity-20 mb-3 d-block"></i>
+                            <h5 class="text-dim">No Results Found</h5>
+                            <p class="text-muted small">We couldn't extract any valid URLs from the batch resource.</p>
+                            <a href="{{ url_for('batch_check') }}" class="btn btn-glow btn-sm px-4 mt-2">Scan New Batch</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <div class="card-footer bg-light">
+        <div class="p-3 border-top border-secondary border-opacity-10">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <span class="text-muted">
-                    <i class="bi bi-info-circle"></i> Showing all {{ results|length }} results
+                <span class="text-dim small">
+                    <i class="bi bi-info-circle me-1"></i> Showing all {{ results|length }} results
                 </span>
                 <div class="mt-2 mt-md-0">
                     <a href="{{ url_for('history') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-clock-history"></i> View History
+                        <i class="bi bi-clock-history me-1"></i> View History
                     </a>
                 </div>
             </div>
