@@ -864,7 +864,10 @@ def predict_url(url):
             'cloudflare.com', 'claude.ai', 'github.com', 'linkedin.com', 'microsoft.com',
             'apple.com', 'twitter.com', 'x.com', 'facebook.com', 'instagram.com',
             'onrender.com', 'vercel.app', 'netlify.app', 'chatgpt.com', 'openai.com',
-            'whatsapp.com', 'telegram.org'
+            'whatsapp.com', 'telegram.org', 'paypal.com', 'chase.com', 'bankofamerica.com',
+            'wellsfargo.com', 'americanexpress.com', 'citi.com', 'stripe.com', 'capitalone.com',
+            'spotify.com', 'salesforce.com', 'godaddy.com', 'dropbox.com', 'slack.com',
+            'zoom.us', 'netflix.com', 'adobe.com', 'shopify.com', 'ebay.com', 'walmart.com', 'abc.xyz'
         ]
         
         is_whitelisted = False
@@ -908,18 +911,23 @@ def predict_url(url):
         prediction = model.predict(feature_array)[0]
         try:
             probabilities = model.predict_proba(feature_array)[0]
-            confidence = float(max(probabilities))
             prob_phishing = float(probabilities[1])
             prob_legitimate = float(probabilities[0])
+            
+            # Increase threshold to 0.65 to reduce false positives on safe sites
+            result = 'phishing' if prob_phishing >= 0.65 else 'legitimate'
+            prediction = 1 if result == 'phishing' else 0
+            
+            # Align confidence with the final decision
+            confidence = prob_phishing if result == 'phishing' else prob_legitimate
         except:
-            confidence = 0.85 if prediction == 1 else 0.85
+            # Increase threshold to 0.65 to reduce false positives on safe sites
+            result = 'phishing' if prediction == 1 else 'legitimate'
+            prediction = 1 if result == 'phishing' else 0
+            
+            confidence = 0.85
             prob_phishing = 1.0 if prediction == 1 else 0.0
             prob_legitimate = 0.0 if prediction == 1 else 1.0
-        
-        # Increase threshold to 0.65 to reduce false positives on safe sites
-        result = 'phishing' if prob_phishing >= 0.65 else 'legitimate'
-        # Override binary prediction to match new threshold
-        prediction = 1 if result == 'phishing' else 0
         feature_importance = []
         severity = 'none'
         if prediction == 1:
