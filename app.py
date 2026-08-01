@@ -782,7 +782,8 @@ FEATURE_DESCRIPTIONS = {
     'num_subdomains': 'Excessive subdomains',
     'has_prefix_suffix': 'Hyphen in domain name',
     'suspicious_tld': 'Uses suspicious top-level domain (.tk, .xyz, etc.)',
-    'has_suspicious_keywords': 'Contains suspicious keywords (verify, login, bank, etc.)',
+    'num_suspicious_keywords': 'Contains suspicious keywords (verify, login, password, etc.) in path/query',
+    'has_suspicious_keywords_in_hostname': 'Contains suspicious keywords (verify, login, password, etc.) in hostname/subdomain',
     'is_shortened': 'Uses URL shortener service',
     'url_entropy': 'High URL entropy (random-looking characters)',
     'digit_ratio': 'High digit ratio',
@@ -802,7 +803,8 @@ SUSPICIOUS_FEATURES = {
     'is_shortened': 'medium',
     'brand_in_subdomain': 'high',
     'has_prefix_suffix': 'medium',
-    'has_suspicious_keywords': 'medium'
+    'num_suspicious_keywords': 'medium',
+    'has_suspicious_keywords_in_hostname': 'high'
 }
 
 def get_severity_level(confidence, suspicious_features):

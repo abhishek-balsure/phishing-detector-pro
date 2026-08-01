@@ -40,7 +40,7 @@ BASE_FEATURES = [
     'url_length', 'hostname_length', 'has_https', 'has_ip', 'num_dots',
     'num_hyphens', 'num_underscores', 'num_slashes', 'num_questionmarks',
     'num_at', 'num_digits', 'num_subdomains', 'has_prefix_suffix',
-    'suspicious_tld', 'has_suspicious_keywords', 'is_shortened', 'url_entropy',
+    'suspicious_tld', 'num_suspicious_keywords', 'has_suspicious_keywords_in_hostname', 'is_shortened', 'url_entropy',
     'digit_ratio', 'special_char_ratio', 'path_length', 'query_length',
     'num_equals', 'num_ampersands', 'has_port', 'brand_in_subdomain',
     'has_double_slash_redirect', 'domain_token_count', 'tld_length',
@@ -110,6 +110,17 @@ def _safe_hostname(parsed):
         hostname = hostname.split('@', 1)[-1]
     if ':' in hostname:
         hostname = hostname.split(':', 1)[0]
+    return hostname
+
+
+def get_registered_domain_name(hostname):
+    if not hostname:
+        return ""
+    parts = hostname.split('.')
+    if len(parts) >= 2:
+        if len(parts) >= 3 and parts[-2] in ('co', 'com', 'org', 'net', 'gov', 'edu'):
+            return parts[-3]
+        return parts[-2]
     return hostname
 
 
@@ -305,14 +316,39 @@ def extract_features(url, include_external=None):
         features['num_subdomains'] = 0
 
     features['has_prefix_suffix'] = 1 if '-' in hostname else 0
-    suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.top', '.xyz', '.buzz']
+    suspicious_tlds = ['.tk', '.ml', '.ga', '.cf', '.gq', '.buzz']
     features['suspicious_tld'] = 1 if any(hostname.endswith(tld) for tld in suspicious_tlds) else 0
 
     suspicious_keywords = [
         'verify', 'account', 'login', 'secure', 'update', 'confirm',
         'banking', 'password', 'credential', 'wallet', 'payment'
     ]
-    features['has_suspicious_keywords'] = 1 if any(keyword in url for keyword in suspicious_keywords) else 0
+    brands = [
+        'paypal', 'apple', 'microsoft', 'google', 'facebook', 'amazon', 'netflix',
+        'bank', 'chase', 'wellsfargo', 'citi', 'amex', 'visa', 'mastercard'
+    ]
+    reg_domain = get_registered_domain_name(hostname)
+    is_brand_domain = reg_domain in brands
+
+    # 1. Count of suspicious keywords in path/query (excluding literal registered domain and brand domain paths)
+    num_suspicious = 0
+    if not is_brand_domain:
+        path_query = (path + '?' + parsed.query).lower()
+        for keyword in suspicious_keywords:
+            if reg_domain and keyword == reg_domain:
+                continue
+            num_suspicious += path_query.count(keyword)
+    features['num_suspicious_keywords'] = num_suspicious
+
+    # 2. Hostname check for suspicious keywords (excluding literal registered domain itself)
+    has_suspicious_in_hostname = 0
+    for keyword in suspicious_keywords:
+        if reg_domain and keyword == reg_domain:
+            continue
+        if keyword in hostname:
+            has_suspicious_in_hostname = 1
+            break
+    features['has_suspicious_keywords_in_hostname'] = has_suspicious_in_hostname
 
     shorteners = [
         'bit.ly', 'tinyurl', 't.co', 'goo.gl', 'ow.ly', 'short.link',
@@ -330,10 +366,6 @@ def extract_features(url, include_external=None):
     features['num_ampersands'] = url.count('&')
     features['has_port'] = 1 if ':' in parsed.netloc and not parsed.netloc.endswith(':') else 0
 
-    brands = [
-        'paypal', 'apple', 'microsoft', 'google', 'facebook', 'amazon', 'netflix',
-        'bank', 'chase', 'wellsfargo', 'citi', 'amex', 'visa', 'mastercard'
-    ]
     subdomain = '.'.join(hostname.split('.')[:-2]) if len(hostname.split('.')) > 2 else ""
     features['brand_in_subdomain'] = 1 if any(brand in subdomain for brand in brands) else 0
 

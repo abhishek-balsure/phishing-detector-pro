@@ -2,98 +2,98 @@
   "best_model_name": "XGBoost",
   "comparison": {
     "RandomForest": {
-      "accuracy": 0.928416,
-      "precision": 0.917098,
-      "recall": 0.912371,
-      "f1_score": 0.914729,
-      "roc_auc": 0.958415,
-      "training_time_seconds": 1.1858,
-      "cv_accuracy_mean": 0.9149,
-      "cv_accuracy_std": 0.011132,
-      "cv_precision_mean": 0.900742,
-      "cv_recall_mean": 0.8968,
-      "cv_f1_mean": 0.898388,
-      "cv_roc_auc_mean": 0.968627
+      "accuracy": 0.923913,
+      "precision": 0.915789,
+      "recall": 0.901554,
+      "f1_score": 0.908616,
+      "roc_auc": 0.964216,
+      "training_time_seconds": 2.4226,
+      "cv_accuracy_mean": 0.920803,
+      "cv_accuracy_std": 0.005567,
+      "cv_precision_mean": 0.907412,
+      "cv_recall_mean": 0.903541,
+      "cv_f1_mean": 0.905414,
+      "cv_roc_auc_mean": 0.971102
     },
     "XGBoost": {
-      "accuracy": 0.926247,
-      "precision": 0.916667,
-      "recall": 0.907216,
+      "accuracy": 0.926087,
+      "precision": 0.911917,
+      "recall": 0.911917,
       "f1_score": 0.911917,
-      "roc_auc": 0.963802,
-      "training_time_seconds": 1.6726,
-      "cv_accuracy_mean": 0.927055,
-      "cv_accuracy_std": 0.007809,
-      "cv_precision_mean": 0.922741,
-      "cv_recall_mean": 0.903007,
-      "cv_f1_mean": 0.912327,
-      "cv_roc_auc_mean": 0.975801
+      "roc_auc": 0.968912,
+      "training_time_seconds": 1.6521,
+      "cv_accuracy_mean": 0.928641,
+      "cv_accuracy_std": 0.009715,
+      "cv_precision_mean": 0.925114,
+      "cv_recall_mean": 0.903562,
+      "cv_f1_mean": 0.913972,
+      "cv_roc_auc_mean": 0.976453
     }
   },
   "feature_ranking": [
     {
-      "feature": "tld_length",
-      "importance": 0.094859
-    },
-    {
-      "feature": "suspicious_tld",
-      "importance": 0.0916
-    },
-    {
-      "feature": "has_ip",
-      "importance": 0.087883
-    },
-    {
       "feature": "num_subdomains",
-      "importance": 0.075022
+      "importance": 0.103104
     },
     {
-      "feature": "num_slashes",
-      "importance": 0.068703
-    },
-    {
-      "feature": "has_suspicious_keywords",
-      "importance": 0.059952
-    },
-    {
-      "feature": "has_https",
-      "importance": 0.051072
-    },
-    {
-      "feature": "brand_in_subdomain",
-      "importance": 0.048066
-    },
-    {
-      "feature": "num_digits",
-      "importance": 0.046264
-    },
-    {
-      "feature": "domain_token_count",
-      "importance": 0.044215
+      "feature": "tld_length",
+      "importance": 0.098123
     },
     {
       "feature": "num_equals",
-      "importance": 0.037842
+      "importance": 0.083605
     },
     {
-      "feature": "path_length",
-      "importance": 0.035339
+      "feature": "num_slashes",
+      "importance": 0.079243
+    },
+    {
+      "feature": "num_suspicious_keywords",
+      "importance": 0.058862
+    },
+    {
+      "feature": "has_https",
+      "importance": 0.056032
+    },
+    {
+      "feature": "num_digits",
+      "importance": 0.054884
+    },
+    {
+      "feature": "brand_in_subdomain",
+      "importance": 0.053299
+    },
+    {
+      "feature": "domain_token_count",
+      "importance": 0.04577
     },
     {
       "feature": "digit_ratio",
-      "importance": 0.034386
+      "importance": 0.0416
     },
     {
       "feature": "has_prefix_suffix",
-      "importance": 0.033388
+      "importance": 0.041062
+    },
+    {
+      "feature": "url_length",
+      "importance": 0.038778
     },
     {
       "feature": "num_underscores",
-      "importance": 0.027625
+      "importance": 0.037927
+    },
+    {
+      "feature": "path_length",
+      "importance": 0.035874
+    },
+    {
+      "feature": "has_suspicious_keywords_in_hostname",
+      "importance": 0.035114
     }
   ],
   "reports": {
-    "RandomForest": "              precision    recall  f1-score   support\n\n  Legitimate       0.94      0.94      0.94       267\n    Phishing       0.92      0.91      0.91       194\n\n    accuracy                           0.93       461\n   macro avg       0.93      0.93      0.93       461\nweighted avg       0.93      0.93      0.93       461\n",
-    "XGBoost": "              precision    recall  f1-score   support\n\n  Legitimate       0.93      0.94      0.94       267\n    Phishing       0.92      0.91      0.91       194\n\n    accuracy                           0.93       461\n   macro avg       0.92      0.92      0.92       461\nweighted avg       0.93      0.93      0.93       461\n"
+    "RandomForest": "              precision    recall  f1-score   support\n\n  Legitimate       0.93      0.94      0.93       267\n    Phishing       0.92      0.90      0.91       193\n\n    accuracy                           0.92       460\n   macro avg       0.92      0.92      0.92       460\nweighted avg       0.92      0.92      0.92       460\n",
+    "XGBoost": "              precision    recall  f1-score   support\n\n  Legitimate       0.94      0.94      0.94       267\n    Phishing       0.91      0.91      0.91       193\n\n    accuracy                           0.93       460\n   macro avg       0.92      0.92      0.92       460\nweighted avg       0.93      0.93      0.93       460\n"
   }
 }
