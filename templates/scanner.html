@@ -187,6 +187,7 @@
                         <!-- URL Scanner Tab -->
                         <div class="tab-pane fade show active" id="url-scan">
                             <form method="POST" action="{{ url_for('check_url') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <div class="mb-4">
                                     <label class="form-label fw-semibold">Enter URL to Check</label>
                                     <div class="input-group input-group-lg">
@@ -212,6 +213,7 @@
                                 </p>
                                 <div class="d-flex justify-content-center gap-2 action-btn-group">
                                     <form method="POST" action="{{ url_for('add_bookmark') }}" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                         <input type="hidden" name="url" value="{{ url }}">
                                         <input type="hidden" name="result" value="{{ url_result.result }}">
                                         <input type="hidden" name="confidence" value="{{ url_result.confidence }}">
@@ -233,6 +235,7 @@
                         <!-- Batch Scanner Tab -->
                         <div class="tab-pane fade" id="batch-scan">
                             <form method="POST" action="{{ url_for('batch_check') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Enter URLs (one per line)</label>
                                     <textarea name="urls" class="form-control" rows="8" placeholder="https://example1.com&#10;https://example2.com&#10;https://example3.com"></textarea>
@@ -251,6 +254,7 @@
                         <!-- Email Scanner Tab -->
                         <div class="tab-pane fade" id="email-scan">
                             <form method="POST" action="{{ url_for('email_scanner') }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <div class="mb-3">
                                     <label class="form-label fw-semibold">Sender Email (optional)</label>
                                     <div class="input-group">
@@ -292,6 +296,7 @@
                         <!-- QR Scanner Tab -->
                         <div class="tab-pane fade" id="qr-scan">
                             <form method="POST" action="{{ url_for('qr_scanner') }}" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <div class="upload-zone" id="dropZone">
                                     <i class="bi bi-qr-code display-4 text-muted mb-3 d-block"></i>
                                     <p class="mb-2 fw-semibold">Drop QR code image here</p>

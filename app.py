@@ -46,6 +46,7 @@ except ImportError:
 import requests as http_requests
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, g, session, send_file, Response
 from flask_mail import Mail, Message
+from flask_wtf.csrf import CSRFProtect
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -76,7 +77,13 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'shieldguard-pro-secret-key-2024')
+
+# SECRET_KEY must be set via environment variable. Fallback only for local dev.
+_secret_key = os.environ.get('SECRET_KEY')
+if not _secret_key and os.environ.get('FLASK_ENV') == 'production':
+    raise RuntimeError('SECRET_KEY environment variable must be set in production!')
+app.config['SECRET_KEY'] = _secret_key or 'shieldguard-pro-dev-key-change-me'
+
 app.config['DATABASE_URL'] = os.environ.get(
     'DATABASE_URL',
     'postgresql://phishing_user:phishing_pass@localhost:5432/phishing_db'
@@ -97,6 +104,8 @@ app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', os.environ.get('MAIL_USERNAME'))
 
 mail = Mail(app)
+app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # 1 hour CSRF token validity
+csrf = CSRFProtect(app)
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # Fix Flask so it generates correct external URLs when running behind Docker / reverse proxy
@@ -129,9 +138,10 @@ def add_static_cache_control_headers(response):
 # GitHub OAuth only (Google OAuth requires a public domain, not a bare IP)
 github_bp = None
 
-# Allow OAuth over plain HTTP (needed for bare IP / non-HTTPS deployments)
-# This is safe here because the check is done by the server, not the client
-os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
+# Allow OAuth over plain HTTP for local development only.
+# In production, the OAUTHLIB_INSECURE_TRANSPORT env var should NOT be set.
+if os.environ.get('FLASK_ENV') != 'production':
+    os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
 
 def setup_oauth():
     global github_bp
@@ -1208,6 +1218,7 @@ def quick_check():
     return render_template('check_url.html', result=result, url=url, quick_check=True)
 
 @app.route('/api/quick_check', methods=['POST'])
+@csrf.exempt
 def api_quick_check():
     if request.is_json:
         data = request.get_json()
@@ -1271,7 +1282,7 @@ def login():
         
         if user and check_password_hash(user['password'], password):
             if user.get('is_verified', 1) == 0:
-                flash('Please verify your email address first. Check your inbox or <a href="/resend-verification">request a new verification email</a>.', 'warning')
+                flash('Please verify your email address first. Check your inbox or visit the resend verification page.', 'warning')
                 return render_template('login.html')
                 
             # Successful login - reset attempts and log
@@ -2719,6 +2730,7 @@ def healthz():
     return jsonify({'status': 'ok'}), 200
 
 @app.route('/api/check_url', methods=['POST'])
+@csrf.exempt
 @jwt_required()
 @api_user_rate_limit
 def api_check_url():
@@ -2746,6 +2758,7 @@ def api_check_url():
     })
 
 @app.route('/api/register', methods=['POST'])
+@csrf.exempt
 def api_register():
     data = request.get_json()
     if not data:
@@ -2802,6 +2815,7 @@ def api_register():
     }), 201
 
 @app.route('/api/login', methods=['POST'])
+@csrf.exempt
 @login_rate_limit
 def api_login():
     data = request.get_json()
@@ -2839,6 +2853,7 @@ def api_login():
     })
 
 @app.route('/api/batch_check', methods=['POST'])
+@csrf.exempt
 @jwt_required()
 @api_user_rate_limit
 def api_batch_check():
@@ -2900,16 +2915,20 @@ def api_stats():
 def not_found_error(error):
     if request.is_json:
         return jsonify({'error': 'Not found'}), 404
-    flash('Page not found.', 'warning')
-    return redirect(url_for('index'))
+    return render_template('404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal server error: {error}")
     if request.is_json:
         return jsonify({'error': 'Internal server error'}), 500
-    flash('An internal error occurred. Please try again.', 'danger')
-    return redirect(url_for('index'))
+    return render_template('500.html'), 500
+
+@app.errorhandler(503)
+def service_unavailable_error(error):
+    if request.is_json:
+        return jsonify({'error': 'Service unavailable'}), 503
+    return render_template('503.html'), 503
 
 @app.errorhandler(413)
 def too_large(error):

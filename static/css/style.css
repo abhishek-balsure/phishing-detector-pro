@@ -1244,3 +1244,49 @@ body.dark-mode .footer-gradient-border {
 .feature-card.theme-slate { background: rgba(100, 116, 139, 0.03) !important; }
 .feature-card.theme-slate .feature-icon-wrapper { background: linear-gradient(135deg, #f1f5f9, #e2e8f0) !important; }
 .feature-card.theme-slate .feature-icon-wrapper i { color: #64748B !important; }
+
+/* Dark mode additional overrides */
+body.dark-mode .dropdown-menu {
+    background: #1e1e2e;
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .dropdown-item {
+    color: var(--text-primary);
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+}
+
+body.dark-mode .stat-card-admin {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .form-control::placeholder {
+    color: var(--text-muted);
+}
+
+body.dark-mode .form-control:focus, 
+body.dark-mode .form-select:focus {
+    border-color: var(--accent) !important;
+}
+
+body.dark-mode .form-select {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary);
+}
+
+body.dark-mode .table td,
+body.dark-mode .table th {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode .table tbody tr:hover {
+    background: var(--accent-light);
+}
+

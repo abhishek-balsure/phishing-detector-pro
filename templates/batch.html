@@ -95,6 +95,7 @@
                 </div>
                 <div class="card-body p-4">
                     <form method="POST" action="{{ url_for('batch_check') }}" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <!-- Text Input -->
                         <div class="mb-4">
                             <label for="urls" class="form-label fw-bold">

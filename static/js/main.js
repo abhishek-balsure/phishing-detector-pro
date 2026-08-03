@@ -230,6 +230,32 @@ class AccessibilityEnhancer {
 // Initialize accessibility features
 const accessibilityEnhancer = new AccessibilityEnhancer();
 
+// ===== Global Form Submission Loading States =====
+// Auto-disables submit buttons and shows a spinner when POST forms are submitted
+document.addEventListener('submit', function(e) {
+  const form = e.target;
+  if (form.tagName !== 'FORM') return;
+  
+  // Only handle standard POST forms, skip AJAX-handled forms
+  if (form.dataset.noLoadingState) return;
+  
+  const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+  if (!submitBtn || submitBtn.disabled) return;
+  
+  // Save original content and disable
+  submitBtn.dataset.originalHtml = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+  
+  // Re-enable after 15s as a safety net (in case of network issues)
+  setTimeout(() => {
+    if (submitBtn.disabled) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = submitBtn.dataset.originalHtml;
+    }
+  }, 15000);
+});
+
 // Export ShieldGuard namespaces
 window.ShieldGuard = {
   utils,

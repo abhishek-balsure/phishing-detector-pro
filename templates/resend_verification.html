@@ -236,6 +236,7 @@
             </div>
 
             <form method="POST" action="{{ url_for('resend_verification') }}" id="resendForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="form-group">
                     <label class="form-label">
                         <i class="bi bi-envelope"></i> Email Address

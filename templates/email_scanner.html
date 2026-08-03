@@ -78,6 +78,7 @@
         <!-- Form -->
         <div class="glass-card scanner-form-card fade-up">
             <form method="POST" action="{{ url_for('email_scanner') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="row g-4 mb-4">
                     <div class="col-md-6">
                         <label class="form-label small uppercase tracking-wider text-dim">Sender Header</label>

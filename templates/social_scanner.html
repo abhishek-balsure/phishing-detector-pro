@@ -73,6 +73,7 @@
         <!-- Form -->
         <div class="glass-card scanner-form-card fade-up">
             <form method="POST" action="{{ url_for('social_scanner') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="mb-4">
                     <label class="form-label small uppercase tracking-wider text-dim">Social Media URL</label>
                     <div class="input-group">

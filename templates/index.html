@@ -593,6 +593,7 @@
         <!-- Quick URL Check -->
         <div class="scan-card-home">
             <form action="{{ url_for('quick_check') }}" method="POST" id="quickCheckForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="row g-3 align-items-center">
                     <div class="col-lg-9">
                         <div class="input-group input-group-lg">

@@ -101,6 +101,7 @@
         {% if not result %}
         <div class="glass-card p-4 fade-up">
             <form method="POST" action="{{ url_for('qr_scanner') }}" enctype="multipart/form-data" id="qrForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="qr-drop-zone" id="dropZone">
                     <div id="dropZoneContent">
                         <i class="bi bi-cloud-arrow-up display-5 text-accent mb-3"></i>

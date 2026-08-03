@@ -385,7 +385,7 @@
                             type = 'warning';
                             title = 'Warning';
                         }
-                        showToast(type, title, `{{ message|safe }}`, 5000);
+                        showToast(type, title, {{ message|tojson }}, 5000);
                     })();
                 {% endfor %}
             {% endif %}

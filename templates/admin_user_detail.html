@@ -176,6 +176,7 @@
                 {% if user.id != session.user_id %}
                 <div class="d-inline-flex gap-2">
                     <form action="{{ url_for('admin_toggle_admin', user_id=user.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" class="btn btn-warning action-btn" 
                                 onclick="return confirm('Toggle admin status for {{ user.username }}?')"
                                 title="Toggle Admin">
@@ -183,6 +184,7 @@
                         </button>
                     </form>
                     <form action="{{ url_for('admin_delete_user', user_id=user.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <button type="submit" class="btn btn-danger action-btn"
                                 onclick="return confirm('DELETE user {{ user.username }}? This cannot be undone!')"
                                 title="Delete User">
