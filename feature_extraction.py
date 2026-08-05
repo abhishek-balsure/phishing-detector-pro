@@ -6,10 +6,13 @@ external reputation and page-content signals while keeping the first 25 feature
 positions stable for backward compatibility with the checked-in model artifact.
 """
 
+import datetime
 import logging
 import math
 import os
 import re
+import socket
+import ssl
 from functools import lru_cache
 from urllib.parse import urljoin, urlparse
 
@@ -27,9 +30,6 @@ FEATURE_USER_AGENT = os.environ.get(
     'URL_FEATURE_USER_AGENT',
     'ShieldGuard Pro Feature Extractor/1.0'
 )
-GOOGLE_SEARCH_URL = os.environ.get('GOOGLE_SEARCH_URL', 'https://www.google.com/search')
-ALEXA_RANK_API_URL = os.environ.get('ALEXA_RANK_API_URL', 'https://data.alexa.com/data')
-ALEXA_RANK_API_KEY = os.environ.get('ALEXA_RANK_API_KEY', '')
 OPENPAGERANK_API_URL = os.environ.get(
     'OPENPAGERANK_API_URL',
     'https://openpagerank.com/api/v1.0/getPageRank'
@@ -48,16 +48,19 @@ BASE_FEATURES = [
 ]
 
 EXTERNAL_FEATURES = [
-    'alexa_rank',
-    'alexa_rank_normalized',
-    'google_index',
-    'google_results_count',
     'page_rank',
-    'page_rank_normalized',
+    'page_rank_normalized', 
     'having_anchor_tag',
     'anchor_tag_count',
     'anchor_tag_ratio',
     'links_pointing_to_page',
+    'has_ssl_certificate',
+    'ssl_cert_age_days',
+    'has_login_form',
+    'num_external_links',
+    'has_favicon_mismatch',
+    'domain_age_days',
+    'is_newly_registered',
 ]
 
 
@@ -90,18 +93,6 @@ def _normalize_rank(rank, ceiling):
     if rank is None or rank <= 0:
         return 0.0
     return round(_clamp(1.0 - min(rank, ceiling) / ceiling), 6)
-
-
-def _extract_result_count(text):
-    if not text:
-        return 0
-    match = re.search(r'([0-9][0-9,\.]*)\s+results', text, re.IGNORECASE)
-    if not match:
-        match = re.search(r'About\s+([0-9][0-9,\.]*)', text, re.IGNORECASE)
-    if not match:
-        return 0
-    digits = re.sub(r'[^0-9]', '', match.group(1))
-    return int(digits) if digits else 0
 
 
 def _safe_hostname(parsed):
@@ -142,64 +133,46 @@ def _get_http_response(url):
         return None
 
 
-@lru_cache(maxsize=2048)
-def _lookup_alexa_rank(hostname):
-    if not ENABLE_EXTERNAL_URL_FEATURES or not hostname:
-        return 0.0, 0.0
-
-    headers = {'User-Agent': FEATURE_USER_AGENT}
-    if ALEXA_RANK_API_KEY:
-        headers['Authorization'] = f'Bearer {ALEXA_RANK_API_KEY}'
-
-    try:
-        response = requests.get(
-            ALEXA_RANK_API_URL,
-            params={'cli': '10', 'url': hostname},
-            headers=headers,
-            timeout=DEFAULT_TIMEOUT,
-        )
-        response.raise_for_status()
-        content_type = response.headers.get('Content-Type', '').lower()
-        rank = None
-
-        if 'json' in content_type:
-            rank = _extract_rank_value(response.json())
-        else:
-            match = re.search(r'TEXT="([0-9]+)"', response.text)
-            if match:
-                rank = float(match.group(1))
-
-        if rank is None:
-            return 0.0, 0.0
-        return float(rank), _normalize_rank(rank, 10_000_000)
-    except Exception as exc:
-        logger.debug("Alexa rank lookup failed for %s: %s", hostname, exc)
-        return 0.0, 0.0
-
-
-@lru_cache(maxsize=2048)
-def _lookup_google_index(hostname):
+@lru_cache(maxsize=1024)
+def _check_ssl_certificate(hostname):
     if not ENABLE_EXTERNAL_URL_FEATURES or not hostname:
         return 0, 0
-
     try:
-        response = requests.get(
-            GOOGLE_SEARCH_URL,
-            params={'q': f'site:{hostname}'},
-            headers={'User-Agent': FEATURE_USER_AGENT},
-            timeout=DEFAULT_TIMEOUT,
-        )
-        response.raise_for_status()
-        text = response.text
-        not_found = (
-            'did not match any documents' in text.lower() or
-            'no results found' in text.lower()
-        )
-        count = _extract_result_count(text)
-        indexed = 0 if not_found else int(count > 0 or 'href="/url?q=' in text)
-        return indexed, count
+        context = ssl.create_default_context()
+        with socket.create_connection((hostname, 443), timeout=3) as sock:
+            with context.wrap_socket(sock, server_hostname=hostname) as ssock:
+                cert = ssock.getpeercert()
+                if not cert:
+                    return 0, 0
+                not_before_str = cert.get('notBefore')
+                if not_before_str:
+                    not_before_date = datetime.datetime.strptime(not_before_str, '%b %d %H:%M:%S %Y %Z')
+                    age_days = (datetime.datetime.utcnow() - not_before_date).days
+                    return 1, max(0, age_days)
+                return 1, 0
     except Exception as exc:
-        logger.debug("Google index lookup failed for %s: %s", hostname, exc)
+        logger.debug("SSL check failed for %s: %s", hostname, exc)
+        return 0, 0
+
+
+@lru_cache(maxsize=1024)
+def _get_domain_age(hostname):
+    if not ENABLE_EXTERNAL_URL_FEATURES or not hostname:
+        return 0, 0
+    try:
+        import whois
+        w = whois.whois(hostname)
+        creation_date = w.creation_date
+        if not creation_date:
+            return 0, 0
+        if isinstance(creation_date, list):
+            creation_date = creation_date[0]
+        if isinstance(creation_date, datetime.datetime):
+            age_days = (datetime.datetime.now() - creation_date).days
+            return max(0, age_days), 1 if age_days < 30 else 0
+        return 0, 0
+    except Exception as exc:
+        logger.debug("WHOIS check failed for %s: %s", hostname, exc)
         return 0, 0
 
 
@@ -231,22 +204,22 @@ def _lookup_page_rank(hostname):
 
 @lru_cache(maxsize=1024)
 def _extract_page_content_features(url):
+    default_features = {
+        'having_anchor_tag': 0,
+        'anchor_tag_count': 0,
+        'anchor_tag_ratio': 0.0,
+        'links_pointing_to_page': 0,
+        'has_login_form': 0,
+        'num_external_links': 0,
+        'has_favicon_mismatch': 0,
+    }
+    
     if not ENABLE_EXTERNAL_URL_FEATURES:
-        return {
-            'having_anchor_tag': 0,
-            'anchor_tag_count': 0,
-            'anchor_tag_ratio': 0.0,
-            'links_pointing_to_page': 0,
-        }
+        return default_features
 
     html = _get_http_response(url)
     if not html:
-        return {
-            'having_anchor_tag': 0,
-            'anchor_tag_count': 0,
-            'anchor_tag_ratio': 0.0,
-            'links_pointing_to_page': 0,
-        }
+        return default_features
 
     try:
         soup = BeautifulSoup(html, 'html.parser')
@@ -264,22 +237,36 @@ def _extract_page_content_features(url):
             if target_host and target_host != hostname:
                 external_links += 1
 
+        has_login_form = 0
+        if soup.find('input', type=lambda t: t and t.lower() == 'password'):
+            has_login_form = 1
+        elif soup.find('form', action=lambda a: a and any(kw in a.lower() for kw in ['login', 'signin', 'auth'])):
+            has_login_form = 1
+
+        has_favicon_mismatch = 0
+        favicon_link = soup.find('link', rel=lambda r: r and 'icon' in r.lower())
+        if favicon_link:
+            favicon_href = favicon_link.get('href', '').strip()
+            if favicon_href and not favicon_href.startswith('data:'):
+                favicon_host = _safe_hostname(urlparse(urljoin(url, favicon_href)))
+                if favicon_host and favicon_host != hostname:
+                    has_favicon_mismatch = 1
+
         text_length = len(soup.get_text(" ", strip=True))
         anchor_ratio = anchor_count / max(text_length, 1)
+        
         return {
             'having_anchor_tag': 1 if anchor_count > 0 else 0,
             'anchor_tag_count': anchor_count,
             'anchor_tag_ratio': round(anchor_ratio, 6),
             'links_pointing_to_page': external_links,
+            'has_login_form': has_login_form,
+            'num_external_links': external_links,
+            'has_favicon_mismatch': has_favicon_mismatch,
         }
     except Exception as exc:
-        logger.debug("Anchor parsing failed for %s: %s", url, exc)
-        return {
-            'having_anchor_tag': 0,
-            'anchor_tag_count': 0,
-            'anchor_tag_ratio': 0.0,
-            'links_pointing_to_page': 0,
-        }
+        logger.debug("Page parsing failed for %s: %s", url, exc)
+        return default_features
 
 
 def extract_features(url, include_external=None):
@@ -390,30 +377,33 @@ def extract_features(url, include_external=None):
 
     use_external = ENABLE_EXTERNAL_URL_FEATURES if include_external is None else include_external
     if use_external:
-        alexa_rank, alexa_rank_normalized = _lookup_alexa_rank(hostname)
-        google_index, google_results_count = _lookup_google_index(hostname)
         page_rank, page_rank_normalized = _lookup_page_rank(hostname)
         content_features = _extract_page_content_features(url)
+        has_ssl, ssl_age = _check_ssl_certificate(hostname)
+        domain_age, is_new = _get_domain_age(hostname)
     else:
-        alexa_rank = 0.0
-        alexa_rank_normalized = 0.0
-        google_index = 0
-        google_results_count = 0
         page_rank = 0.0
         page_rank_normalized = 0.0
+        has_ssl = 0
+        ssl_age = 0
+        domain_age = 0
+        is_new = 0
         content_features = {
             'having_anchor_tag': 0,
             'anchor_tag_count': 0,
             'anchor_tag_ratio': 0.0,
             'links_pointing_to_page': 0,
+            'has_login_form': 0,
+            'num_external_links': 0,
+            'has_favicon_mismatch': 0,
         }
 
-    features['alexa_rank'] = alexa_rank
-    features['alexa_rank_normalized'] = alexa_rank_normalized
-    features['google_index'] = google_index
-    features['google_results_count'] = google_results_count
     features['page_rank'] = page_rank
     features['page_rank_normalized'] = page_rank_normalized
+    features['has_ssl_certificate'] = has_ssl
+    features['ssl_cert_age_days'] = ssl_age
+    features['domain_age_days'] = domain_age
+    features['is_newly_registered'] = is_new
     features.update(content_features)
 
     return features

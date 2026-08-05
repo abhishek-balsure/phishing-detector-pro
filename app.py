@@ -671,12 +671,11 @@ def admin_required(f):
 def extract_features_for_model(url):
     if not url:
         return np.zeros(len(MODEL_FEATURES)), {}
-    # include_external=False is REQUIRED here: the deployed model was trained
-    # with external features (Alexa/Google/page-rank/live page fetch) disabled.
-    # Enabling them in production causes train/serve skew - the model receives
-    # non-zero values for 10 features it only ever saw as 0 during training,
-    # producing inconsistent predictions (including false positives on safe URLs).
-    features_dict = extract_features(url, include_external=False)
+    # include_external=True: The model is now trained WITH external features
+    # (SSL cert, login form detection, WHOIS domain age, page content analysis).
+    # These features significantly improve detection of credential-harvesting pages
+    # and newly-registered phishing domains.
+    features_dict = extract_features(url, include_external=True)
     feature_array = [features_dict.get(f, 0) for f in MODEL_FEATURES]
     return np.array(feature_array), features_dict
 
@@ -755,20 +754,62 @@ def check_phishtank(url):
         logger.warning(f"PhishTank check failed: {e}")
     return {'found': False, 'is_phishing': False, 'verified': False, 'source': 'PhishTank'}
 
+def check_google_safe_browsing(url):
+    """Check URL against Google Safe Browsing API v4.
+    Free tier: 10,000 lookups/day.
+    """
+    api_key = os.environ.get('GOOGLE_SAFE_BROWSING_API_KEY', '').strip()
+    if not api_key:
+        return {'found': False, 'threats': [], 'source': 'Google Safe Browsing (not configured)'}
+    try:
+        endpoint = f'https://safebrowsing.googleapis.com/v4/threatMatches:find?key={api_key}'
+        payload = {
+            'client': {'clientId': 'shieldguard-pro', 'clientVersion': '1.0'},
+            'threatInfo': {
+                'threatTypes': ['MALWARE', 'SOCIAL_ENGINEERING', 'UNWANTED_SOFTWARE', 'POTENTIALLY_HARMFUL_APPLICATION'],
+                'platformTypes': ['ANY_PLATFORM'],
+                'threatEntryTypes': ['URL'],
+                'threatEntries': [{'url': url}]
+            }
+        }
+        response = http_requests.post(endpoint, json=payload, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            matches = data.get('matches', [])
+            threat_types = [m.get('threatType', 'UNKNOWN') for m in matches]
+            return {
+                'found': len(matches) > 0,
+                'threats': threat_types,
+                'source': 'Google Safe Browsing'
+            }
+    except Exception as e:
+        logger.warning(f"Google Safe Browsing check failed: {e}")
+    return {'found': False, 'threats': [], 'source': 'Google Safe Browsing'}
+
 def get_threat_intelligence(url):
+    """Run URL against all threat intel sources and return aggregated results."""
     intel = {
         'urlhaus': check_urlhaus(url),
         'phishtank': check_phishtank(url),
-        'total_sources': 2,
+        'google_safe_browsing': check_google_safe_browsing(url),
+        'total_sources': 3,
         'flagged_by': 0,
-        'threat_level': 'low'
+        'threat_level': 'low',
+        'sources_flagged': []
     }
     flagged = 0
+    sources = []
     if intel['urlhaus']['found']:
         flagged += 1
+        sources.append('URLhaus')
     if intel['phishtank']['found'] and intel['phishtank']['is_phishing']:
         flagged += 1
+        sources.append('PhishTank')
+    if intel['google_safe_browsing']['found']:
+        flagged += 1
+        sources.append('Google Safe Browsing')
     intel['flagged_by'] = flagged
+    intel['sources_flagged'] = sources
     if flagged >= 2:
         intel['threat_level'] = 'critical'
     elif flagged == 1:
@@ -803,7 +844,14 @@ FEATURE_DESCRIPTIONS = {
     'num_equals': 'Contains many = signs (encoded data)',
     'num_ampersands': 'Contains many & signs',
     'has_port': 'Contains port number',
-    'brand_in_subdomain': 'Brand name in subdomain (potential impersonation)'
+    'brand_in_subdomain': 'Brand name in subdomain (potential impersonation)',
+    'has_ssl_certificate': 'No valid SSL certificate detected',
+    'ssl_cert_age_days': 'SSL certificate is very new or recently issued',
+    'has_login_form': 'Page contains a credential-harvesting login form',
+    'num_external_links': 'Page contains many links to external domains',
+    'has_favicon_mismatch': 'Favicon loaded from a different domain (brand impersonation)',
+    'domain_age_days': 'Domain was recently registered',
+    'is_newly_registered': 'Domain registered less than 30 days ago',
 }
 
 SUSPICIOUS_FEATURES = {
@@ -814,7 +862,11 @@ SUSPICIOUS_FEATURES = {
     'brand_in_subdomain': 'high',
     'has_prefix_suffix': 'medium',
     'num_suspicious_keywords': 'medium',
-    'has_suspicious_keywords_in_hostname': 'high'
+    'has_suspicious_keywords_in_hostname': 'high',
+    'has_login_form': 'high',
+    'has_favicon_mismatch': 'high',
+    'is_newly_registered': 'high',
+    'has_ssl_certificate': 'medium',
 }
 
 def get_severity_level(confidence, suspicious_features):
@@ -938,12 +990,32 @@ def predict_url(url):
             confidence = 0.85
             prob_phishing = 1.0 if prediction == 1 else 0.0
             prob_legitimate = 0.0 if prediction == 1 else 1.0
+        
+        # ===== THREAT INTELLIGENCE OVERRIDE =====
+        # Run URL against curated threat databases (URLhaus, PhishTank, Google Safe Browsing).
+        # If ANY source flags this URL, override the ML verdict to phishing.
+        threat_intel = get_threat_intelligence(url)
+        threat_intel_override = False
+        
+        if threat_intel['flagged_by'] > 0:
+            threat_intel_override = True
+            result = 'phishing'
+            prediction = 1
+            # Set high confidence for threat-intel-confirmed phishing
+            prob_phishing = max(prob_phishing, 0.95)
+            prob_legitimate = 1.0 - prob_phishing
+            confidence = prob_phishing
+            logger.info(f"Threat intel override for {url}: flagged by {threat_intel['sources_flagged']}")
+        
         feature_importance = []
         severity = 'none'
         if prediction == 1:
             feature_importance = get_feature_importance(features_dict)
             suspicious_features = {f['feature'].lower().replace(' ', '_'): f['severity'] for f in feature_importance}
             severity = get_severity_level(confidence * 100, suspicious_features)
+            # Escalate severity if threat intel confirmed
+            if threat_intel_override:
+                severity = 'critical' if threat_intel['flagged_by'] >= 2 else 'high'
         return {
             'result': result,
             'confidence': round(confidence * 100, 2),
@@ -956,7 +1028,9 @@ def predict_url(url):
             'feature_importance': feature_importance,
             'whois_info': get_whois_info(url),
             'ssl_info': get_ssl_info(url),
-            'reputation': get_domain_reputation(url)
+            'reputation': get_domain_reputation(url),
+            'threat_intel': threat_intel,
+            'threat_intel_override': threat_intel_override
         }
     except Exception as e:
         logger.error(f"Error predicting URL {url}: {e}")

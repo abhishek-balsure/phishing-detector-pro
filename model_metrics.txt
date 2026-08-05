@@ -8,14 +8,14 @@ accuracy: 0.923913
 precision: 0.915789
 recall: 0.901554
 f1_score: 0.908616
-roc_auc: 0.964216
-training_time_seconds: 3.0734
-cv_accuracy_mean: 0.920803
-cv_accuracy_std: 0.005567
-cv_precision_mean: 0.907412
+roc_auc: 0.962508
+training_time_seconds: 1.5387
+cv_accuracy_mean: 0.919502
+cv_accuracy_std: 0.00734
+cv_precision_mean: 0.904509
 cv_recall_mean: 0.903541
-cv_f1_mean: 0.905414
-cv_roc_auc_mean: 0.971102
+cv_f1_mean: 0.903967
+cv_roc_auc_mean: 0.970131
 
               precision    recall  f1-score   support
 
@@ -29,25 +29,25 @@ weighted avg       0.92      0.92      0.92       460
 
 XGBoost
 -------
-accuracy: 0.93913
-precision: 0.936508
-recall: 0.917098
-f1_score: 0.926702
-roc_auc: 0.972017
-training_time_seconds: 0.893
-cv_accuracy_mean: 0.927767
-cv_accuracy_std: 0.01261
-cv_precision_mean: 0.935093
-cv_recall_mean: 0.890069
-cv_f1_mean: 0.911769
-cv_roc_auc_mean: 0.97344
+accuracy: 0.932609
+precision: 0.930851
+recall: 0.906736
+f1_score: 0.918635
+roc_auc: 0.97029
+training_time_seconds: 3.6545
+cv_accuracy_mean: 0.925592
+cv_accuracy_std: 0.010481
+cv_precision_mean: 0.928991
+cv_recall_mean: 0.891105
+cv_f1_mean: 0.909466
+cv_roc_auc_mean: 0.973432
 
               precision    recall  f1-score   support
 
-  Legitimate       0.94      0.96      0.95       267
-    Phishing       0.94      0.92      0.93       193
+  Legitimate       0.93      0.95      0.94       267
+    Phishing       0.93      0.91      0.92       193
 
-    accuracy                           0.94       460
-   macro avg       0.94      0.94      0.94       460
-weighted avg       0.94      0.94      0.94       460
+    accuracy                           0.93       460
+   macro avg       0.93      0.93      0.93       460
+weighted avg       0.93      0.93      0.93       460
 
