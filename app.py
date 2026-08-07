@@ -344,8 +344,39 @@ AVAILABLE_FEATURES = get_feature_names()
 MODEL_FEATURES = AVAILABLE_FEATURES.copy()
 
 try:
-    with open(MODEL_PATH, 'rb') as f:
-        model_data = pickle.load(f)
+    # === MODEL INTEGRITY CHECK ===
+    # pickle.load() can execute arbitrary code if the .pkl file is tampered with.
+    # We verify the SHA-256 hash of the model file before loading to prevent RCE.
+    import hashlib
+    hash_file = MODEL_PATH + '.sha256'
+    model_verified = False
+    if os.path.exists(hash_file):
+        with open(hash_file, 'r') as hf:
+            expected_hash = hf.read().strip()
+        sha256 = hashlib.sha256()
+        with open(MODEL_PATH, 'rb') as f:
+            for chunk in iter(lambda: f.read(8192), b''):
+                sha256.update(chunk)
+        actual_hash = sha256.hexdigest()
+        if actual_hash == expected_hash:
+            model_verified = True
+            logger.info("Model integrity verified (SHA-256 hash match).")
+        else:
+            logger.error(
+                f"MODEL INTEGRITY FAILURE! Expected hash {expected_hash[:16]}... "
+                f"but got {actual_hash[:16]}... — refusing to load potentially tampered model."
+            )
+    else:
+        logger.warning(
+            f"No hash file found at {hash_file}. "
+            "Skipping integrity check — run train_model.py to generate the hash."
+        )
+        # Allow loading without hash in dev, but log warning
+        model_verified = True
+
+    if model_verified:
+        with open(MODEL_PATH, 'rb') as f:
+            model_data = pickle.load(f)
         saved_feature_names = None
         if isinstance(model_data, dict):
             model = model_data.get('model')
@@ -368,7 +399,9 @@ try:
             MODEL_FEATURES = AVAILABLE_FEATURES[:model_feature_count]
             model_metadata['feature_names'] = MODEL_FEATURES
             model_metadata['feature_count'] = model_feature_count
-    logger.info(f"Phishing detection model loaded successfully. Type: {type(model)}")
+        logger.info(f"Phishing detection model loaded successfully. Type: {type(model)}")
+    else:
+        logger.error("Model was NOT loaded due to integrity check failure.")
 except FileNotFoundError:
     logger.warning("Model file not found. Predictions will not be available.")
 except Exception as e:

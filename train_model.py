@@ -383,6 +383,18 @@ def save_model(model, metadata, filename=MODEL_OUTPUT):
         pickle.dump(bundle, model_file)
     print(f"\nBest model saved to: {filename}")
 
+    # Generate SHA-256 hash for integrity verification (prevents RCE via tampered pickle)
+    import hashlib
+    sha256 = hashlib.sha256()
+    with open(filename, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            sha256.update(chunk)
+    hash_value = sha256.hexdigest()
+    hash_file = filename + '.sha256'
+    with open(hash_file, 'w') as f:
+        f.write(hash_value)
+    print(f"Model hash saved to: {hash_file} ({hash_value[:16]}...)")
+
 
 def main():
     print("=" * 80)
