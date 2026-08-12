@@ -1451,15 +1451,18 @@ Please explain these scan results to the user in plain language. Highlight the k
                 }],
                 'generationConfig': {
                     'temperature': 0.7,
-                    'maxOutputTokens': 1024,
-                    'topP': 0.9
+                    'maxOutputTokens': 4096,
+                    'topP': 0.9,
+                    'thinkingConfig': {
+                        'thinkingBudget': 0
+                    }
                 }
             }
 
             gemini_response = requests.post(
                 f'{GEMINI_ENDPOINT}?key={GEMINI_API_KEY}',
                 json=gemini_payload,
-                timeout=15
+                timeout=30
             )
 
             if gemini_response.status_code == 200:
