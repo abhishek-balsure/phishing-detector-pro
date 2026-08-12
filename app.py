@@ -1490,11 +1490,11 @@ Please explain these scan results to the user in plain language. Highlight the k
             lower_msg = user_message.lower()
             
             # 1. Greetings
-            if any(greet in lower_msg for greet in ['hi', 'hello', 'hey', 'yo', 'greetings', 'morning', 'evening', 'afternoon', 'sup']):
+            if any(re.search(rf'\b{greet}\b', lower_msg) for greet in ['hi', 'hello', 'hey', 'yo', 'greetings', 'morning', 'evening', 'afternoon', 'sup']):
                 ai_text = "👋 Hello! I am your **ShieldGuard Co-pilot** security assistant.\n\nI can help you audit links, analyze security configurations, or answer cybersecurity questions. Try pasting a link or ask me something like:\n- *What is phishing?*\n- *How do I check if a link is safe?*\n- *What is an SSL certificate?*"
             
             # 2. Positive feedback / Thanks
-            elif any(thanks in lower_msg for zip_thanks in [['thanks', 'thank you', 'cool', 'awesome', 'great', 'good', 'nice', 'perfect', 'ok', 'okay']] for thanks in zip_thanks):
+            elif any(re.search(rf'\b{thanks}\b', lower_msg) for zip_thanks in [['thanks', 'thank you', 'cool', 'awesome', 'great', 'good', 'nice', 'perfect', 'ok', 'okay']] for thanks in zip_thanks):
                 ai_text = "You're very welcome! Stay safe out there. Let me know if you need another URL scanned or have any other security questions! 🛡️"
                 
             # 3. Phishing details
