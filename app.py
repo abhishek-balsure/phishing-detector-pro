@@ -1356,7 +1356,7 @@ def api_quick_check():
 
 # ===== SHIELDGUARD CO-PILOT (AI SECURITY ASSISTANT) =====
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'
 
 COPILOT_SYSTEM_INSTRUCTION = """You are ShieldGuard Co-pilot, a professional cybersecurity AI assistant built into ShieldGuard Pro.
 
