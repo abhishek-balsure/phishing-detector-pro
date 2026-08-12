@@ -568,6 +568,187 @@
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
     }
+
+    /* Infinite Marquee Scroll */
+    .marquee-container {
+        display: flex;
+        overflow: hidden;
+        user-select: none;
+        gap: 1.5rem;
+        position: relative;
+        padding: 1.5rem 0;
+        width: 100%;
+    }
+    
+    .marquee-container::before,
+    .marquee-container::after {
+        content: "";
+        height: 100%;
+        position: absolute;
+        width: 150px;
+        z-index: 2;
+        pointer-events: none;
+    }
+    
+    .marquee-container::before {
+        left: 0;
+        top: 0;
+        background: linear-gradient(to right, var(--bg-primary) 0%, transparent 100%);
+    }
+    
+    .marquee-container::after {
+        right: 0;
+        top: 0;
+        background: linear-gradient(to left, var(--bg-primary) 0%, transparent 100%);
+    }
+
+    .marquee-content {
+        display: flex;
+        flex-shrink: 0;
+        gap: 1.5rem;
+        animation: marqueeScroll 30s linear infinite;
+        align-items: center;
+        justify-content: space-around;
+        min-width: 100%;
+    }
+
+    @keyframes marqueeScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-100%); }
+    }
+
+    .marquee-container:hover .marquee-content {
+        animation-play-state: paused;
+    }
+
+    /* Interactive Live Console Styling */
+    .scan-console {
+        margin-top: 2rem;
+        background: #0f172a;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: var(--radius-md);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+        text-align: left;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        transition: all 0.3s ease;
+    }
+
+    body.dark-mode .scan-console {
+        background: #070a13;
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .console-header {
+        background: rgba(15, 23, 42, 0.8);
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .console-dots {
+        display: flex;
+        gap: 6px;
+    }
+
+    .console-dots .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .console-dots .dot.red { background: #ef4444; }
+    .console-dots .dot.yellow { background: #eab308; }
+    .console-dots .dot.green { background: #22c55e; }
+
+    .console-title {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .console-timer {
+        font-size: 0.85rem;
+        color: #6366f1;
+        font-weight: 700;
+    }
+
+    .console-body {
+        padding: 1.25rem;
+        height: 250px;
+        overflow-y: auto;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #38bdf8;
+    }
+
+    /* Scrollbar styling */
+    .console-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    .console-body::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+    }
+    .console-body::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+
+    .console-line {
+        margin-bottom: 0.5rem;
+        opacity: 0;
+        transform: translateY(5px);
+        animation: consoleLineFade 0.2s ease forwards;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    @keyframes consoleLineFade {
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .console-line .prefix {
+        color: #a855f7;
+        margin-right: 0.75rem;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .console-line.success { color: #4ade80; }
+    .console-line.working { color: #f43f5e; }
+    .console-line.info { color: #38bdf8; }
+    .console-line.warning { color: #fbbf24; }
+
+    .console-line .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15em;
+        margin-right: 0.5rem;
+        align-self: center;
+    }
+
+    .terminal-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 15px;
+        background: #38bdf8;
+        animation: blink 1s step-end infinite;
+        vertical-align: middle;
+        margin-left: 4px;
+    }
+
+    @keyframes blink {
+        from, to { background-color: transparent }
+        50% { background-color: #38bdf8; }
+    }
 </style>
 {% endblock %}
 
@@ -624,6 +805,20 @@
                 <button type="button" class="demo-btn phish" onclick="demoScan('http://paypal-verify-login.com/account')">
                     <i class="bi bi-exclamation-triangle me-1"></i>Phishing URL
                 </button>
+            </div>
+
+            <!-- Interactive Diagnostic HUD Console -->
+            <div class="scan-console" id="scanConsole" style="display: none;">
+                <div class="console-header">
+                    <div class="console-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="console-title">ShieldGuard Pro Diagnostic HUD</div>
+                    <div class="console-timer" id="consoleTimer">0.0s</div>
+                </div>
+                <div class="console-body" id="consoleBody"></div>
             </div>
         </div>
     </div>
@@ -747,17 +942,26 @@
 </section>
 
 <!-- Trust Badges -->
-<!-- <section class="trust-badges-section">
-    <div class="container">
-        <div class="trust-badges-scroll">
-            <div class="trust-badge">🛡️ Trusted by 10,000+ Users</div>
-            <div class="trust-badge">⭐ 4.9/5 Average Rating</div>
-            <div class="trust-badge">🔒 256-bit SSL Encryption</div>
-            <div class="trust-badge">🏆 #1 Phishing Detector 2026</div>
-            <div class="trust-badge">✅ 99.9% Uptime Guarantee</div>
+<section class="trust-badges-section">
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <span class="trust-badge"><i class="bi bi-shield-fill-check text-primary"></i> Trusted by 10,000+ Users</span>
+            <span class="trust-badge"><i class="bi bi-star-fill text-warning"></i> 4.9/5 Average Rating</span>
+            <span class="trust-badge"><i class="bi bi-cpu text-info"></i> 44 Feature XGBoost Model</span>
+            <span class="trust-badge"><i class="bi bi-patch-check-fill text-success"></i> Google Safe Browsing Enabled</span>
+            <span class="trust-badge"><i class="bi bi-activity text-danger"></i> Real-time Threat Intelligence</span>
+            <span class="trust-badge"><i class="bi bi-clock-history text-secondary"></i> WHOIS & SSL Validation</span>
+        </div>
+        <div class="marquee-content" aria-hidden="true">
+            <span class="trust-badge"><i class="bi bi-shield-fill-check text-primary"></i> Trusted by 10,000+ Users</span>
+            <span class="trust-badge"><i class="bi bi-star-fill text-warning"></i> 4.9/5 Average Rating</span>
+            <span class="trust-badge"><i class="bi bi-cpu text-info"></i> 44 Feature XGBoost Model</span>
+            <span class="trust-badge"><i class="bi bi-patch-check-fill text-success"></i> Google Safe Browsing Enabled</span>
+            <span class="trust-badge"><i class="bi bi-activity text-danger"></i> Real-time Threat Intelligence</span>
+            <span class="trust-badge"><i class="bi bi-clock-history text-secondary"></i> WHOIS & SSL Validation</span>
         </div>
     </div>
-</section> -->
+</section>
 
 <!-- How It Works -->
 <section class="how-section">
@@ -816,39 +1020,119 @@
 <script>
 function demoScan(url) {
     document.getElementById('quickUrlInput').value = url;
-    
-    const btn = document.getElementById('scanBtn');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
-    btn.disabled = true;
-    
-    performScan(url);
+    triggerConsoleScan(url);
 }
 
-function performScan(url) {
+let scanTimerInterval = null;
+
+function triggerConsoleScan(url) {
+    const scanConsole = document.getElementById('scanConsole');
+    const consoleBody = document.getElementById('consoleBody');
+    const timerVal = document.getElementById('consoleTimer');
     const btn = document.getElementById('scanBtn');
-    fetch('/api/quick_check', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ url: url })
-    })
-    .then(res => {
-        if (!res.ok) {
-            return res.json().then(err => { throw new Error(err.error || 'Scan failed'); });
+    
+    // Reset UI
+    scanConsole.style.display = 'block';
+    consoleBody.innerHTML = '';
+    btn.disabled = true;
+    
+    // Hide badges/demo during scan
+    document.querySelector('.scan-badges').style.opacity = '0.3';
+    document.querySelector('.demo-buttons').style.opacity = '0.3';
+    
+    let startTime = Date.now();
+    timerVal.innerText = '0.0s';
+    if (scanTimerInterval) clearInterval(scanTimerInterval);
+    scanTimerInterval = setInterval(() => {
+        let diff = ((Date.now() - startTime) / 1000).toFixed(1);
+        timerVal.innerText = diff + 's';
+    }, 100);
+    
+    const lines = [
+        { text: 'Initializing connection parameters...', type: 'prefix', label: 'SYSTEM' },
+        { text: `Sending request payload to: ${url}`, type: 'info', label: 'NETWORK' },
+        { text: 'Fetching HTML & parsing DOM structure...', type: 'info', label: 'HTML' },
+        { text: 'Analyzing SSL/TLS handshake certificate...', type: 'prefix', label: 'SSL' },
+        { text: 'Requesting WHOIS registry records (domain age)...', type: 'prefix', label: 'WHOIS' },
+        { text: 'Scanning for credential forms & password inputs...', type: 'info', label: 'PARSER' },
+        { text: 'Validating external resources & favicon sources...', type: 'info', label: 'DOM' },
+        { text: 'Consulting Google Safe Browsing API database...', type: 'warning', label: 'GSB' },
+        { text: 'Checking PhishTank & URLhaus threat indicators...', type: 'warning', label: 'INTEL' },
+        { text: 'Running 44-feature XGBoost ML Inference Engine...', type: 'working', label: 'XGBOOST' }
+    ];
+
+    let currentLine = 0;
+    
+    function printNextLine() {
+        if (currentLine < lines.length) {
+            const line = lines[currentLine];
+            const div = document.createElement('div');
+            div.className = 'console-line animate-fade';
+            
+            let colorClass = 'info';
+            if (line.label === 'SYSTEM') colorClass = 'success';
+            if (line.label === 'SSL' || line.label === 'WHOIS') colorClass = 'info';
+            if (line.label === 'GSB' || line.label === 'INTEL') colorClass = 'warning';
+            if (line.label === 'XGBOOST') colorClass = 'working';
+            
+            div.innerHTML = `
+                <span class="prefix">[${line.label}]</span>
+                <span class="${colorClass}">${line.text}</span>
+            `;
+            consoleBody.appendChild(div);
+            consoleBody.scrollTop = consoleBody.scrollHeight;
+            
+            currentLine++;
+            setTimeout(printNextLine, 350 + Math.random() * 200);
+        } else {
+            // Initiate API request
+            fetch('/api/quick_check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(err => { throw new Error(err.error || 'Scan failed'); });
+                }
+                return res.json();
+            })
+            .then(data => {
+                clearInterval(scanTimerInterval);
+                const finalDiv = document.createElement('div');
+                finalDiv.className = 'console-line success';
+                finalDiv.innerHTML = `<span class="prefix">[VERDICT]</span> <strong>SUCCESS: Verdict reached at ${timerVal.innerText}!</strong>`;
+                consoleBody.appendChild(finalDiv);
+                consoleBody.scrollTop = consoleBody.scrollHeight;
+                
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
+                    btn.disabled = false;
+                    document.querySelector('.scan-badges').style.opacity = '1';
+                    document.querySelector('.demo-buttons').style.opacity = '1';
+                    showResultPopup(url, data);
+                }, 800);
+            })
+            .catch(err => {
+                clearInterval(scanTimerInterval);
+                const errDiv = document.createElement('div');
+                errDiv.className = 'console-line working';
+                errDiv.innerHTML = `<span class="prefix">[ERROR]</span> Fail: ${err.message || 'Diagnostic failed'}`;
+                consoleBody.appendChild(errDiv);
+                consoleBody.scrollTop = consoleBody.scrollHeight;
+                
+                btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
+                btn.disabled = false;
+                document.querySelector('.scan-badges').style.opacity = '1';
+                document.querySelector('.demo-buttons').style.opacity = '1';
+                alert(err.message || 'An error occurred during scanning.');
+            });
         }
-        return res.json();
-    })
-    .then(data => {
-        btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
-        btn.disabled = false;
-        showResultPopup(url, data);
-    })
-    .catch(err => {
-        btn.innerHTML = '<i class="bi bi-search me-2"></i>Scan URL';
-        btn.disabled = false;
-        alert(err.message || 'An error occurred during scanning.');
-    });
+    }
+    
+    printNextLine();
 }
 
 function showResultPopup(url, data) {
@@ -898,6 +1182,7 @@ function showResultPopup(url, data) {
 
 function closeResultPopup() {
     document.getElementById('resultPopup').style.display = 'none';
+    document.getElementById('scanConsole').style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -910,11 +1195,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             const url = urlInput.value.trim();
             if (!url) return;
-            
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing...';
-            btn.disabled = true;
-            
-            performScan(url);
+            triggerConsoleScan(url);
         });
     }
 });
