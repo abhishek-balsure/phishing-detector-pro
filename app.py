@@ -1488,14 +1488,42 @@ Please explain these scan results to the user in plain language. Highlight the k
         else:
             # General knowledge fallback
             lower_msg = user_message.lower()
-            if 'phishing' in lower_msg:
-                ai_text = "**Phishing** is a cyberattack where criminals impersonate trusted organizations to steal sensitive data.\n\n**Key signs of phishing:**\n- Urgency or threatening language\n- Misspelled domain names (e.g., paypa1.com)\n- Requests for passwords or financial info\n- Suspicious email sender addresses\n\nUse our URL Scanner to check any suspicious links!"
-            elif 'ssl' in lower_msg or 'certificate' in lower_msg:
-                ai_text = "**SSL/TLS Certificates** encrypt data between your browser and a website.\n\n**How to verify:**\n- Look for the 🔒 padlock icon in your browser\n- Click it to view certificate details\n- Check that the certificate is issued by a trusted authority\n- Verify the domain name matches\n\n⚠️ Note: Phishing sites can also have SSL! SSL alone doesn't guarantee safety."
-            elif 'safe' in lower_msg or 'verify' in lower_msg or 'check' in lower_msg:
-                ai_text = "**How to verify if a link is safe:**\n\n1. **Paste it here!** I can scan any URL for you right in this chat\n2. Check the domain carefully for typos\n3. Hover over links before clicking to preview the real URL\n4. Use our URL Scanner for a detailed 44-feature ML analysis\n5. Check if the site uses HTTPS with a valid certificate"
+            
+            # 1. Greetings
+            if any(greet in lower_msg for greet in ['hi', 'hello', 'hey', 'yo', 'greetings', 'morning', 'evening', 'afternoon', 'sup']):
+                ai_text = "👋 Hello! I am your **ShieldGuard Co-pilot** security assistant.\n\nI can help you audit links, analyze security configurations, or answer cybersecurity questions. Try pasting a link or ask me something like:\n- *What is phishing?*\n- *How do I check if a link is safe?*\n- *What is an SSL certificate?*"
+            
+            # 2. Positive feedback / Thanks
+            elif any(thanks in lower_msg for zip_thanks in [['thanks', 'thank you', 'cool', 'awesome', 'great', 'good', 'nice', 'perfect', 'ok', 'okay']] for thanks in zip_thanks):
+                ai_text = "You're very welcome! Stay safe out there. Let me know if you need another URL scanned or have any other security questions! 🛡️"
+                
+            # 3. Phishing details
+            elif any(phish in lower_msg for phish in ['phish', 'scam', 'fake', 'fraud', 'spoof', 'mimic']):
+                ai_text = "🎣 **Phishing** is a deceptive attack where hackers impersonate popular brands (like Google, PayPal, or Netflix) to steal credentials.\n\n**Common vectors:**\n- **Subdomain spoofing:** `paypal.verify-accounts.com` instead of `paypal.com`.\n- **SSL misuse:** Having HTTPS does *not* mean a site is safe; hackers get free SSL certs too.\n- **Urgency tactics:** Prompts like *\"Your account will be suspended in 24 hours!\"*"
+            
+            # 4. SSL details
+            elif any(ssl in lower_msg for ssl in ['ssl', 'tls', 'https', 'certificate', 'padlock', 'encrypt']):
+                ai_text = "🔒 **SSL/TLS Certificates** encrypt connection traffic, protecting data from eavesdropping. However, modern hackers also install SSL certificates on phishing pages.\n\n**What to look for:**\n- Ensure the domain in the certificate matches the exact address bar.\n- Look for certificate age: very newly-created certs (<7 days) are highly suspicious."
+            
+            # 5. WHOIS details
+            elif any(whois in lower_msg for whois in ['whois', 'domain', 'age', 'registrar', 'creation']):
+                ai_text = "📅 **WHOIS Information** reveals domain ownership and registration dates. Newly registered domains (<30 days old) are extremely high-risk for phishing because malicious domains are often taken down quickly and re-registered under new names."
+            
+            # 6. Passwords / 2FA
+            elif any(pw in lower_msg for pw in ['password', 'credential', '2fa', 'mfa', 'auth', 'login', 'harvest']):
+                ai_text = "🔐 **Credential Protection Best Practices:**\n\n1. **Use Multi-Factor Authentication (MFA):** Even if a phishing site steals your password, MFA blocks unauthorized access.\n2. **Check Password Forms:** Never type passwords on pages that don't have a valid domain matching the provider (e.g., typing Microsoft credentials on a `.xyz` domain)."
+            
+            # 7. Other Malware/Threats
+            elif any(threat in lower_msg for threat in ['malware', 'virus', 'trojan', 'ransomware', 'spyware', 'adware']):
+                ai_text = "🦠 **Malware** includes software designed to infect your machine.\n\nShieldGuard Pro protects you by checks against **URLhaus** and **PhishTank** databases, which track active malware hubs and distribution domains globally in real-time."
+            
+            # 8. How to verify links
+            elif any(v in lower_msg for v in ['safe', 'verify', 'check', 'url', 'link', 'analyze', 'scan']):
+                ai_text = "🔍 **How to verify link safety with ShieldGuard Pro:**\n\n1. **Paste it in this chat!** Any message containing a URL starting with `http` or `https` will trigger a direct ML audit.\n2. Check the **Domain Age** — fresh domains are risky.\n3. Make sure it doesn't trigger **Google Safe Browsing** warnings."
+            
+            # 9. Default onboarding / Help
             else:
-                ai_text = "I'm your **ShieldGuard Co-pilot** — your AI security assistant!\n\n**I can help you with:**\n- 🔍 **Scan URLs** — paste any link and I'll analyze it\n- 🛡️ **Explain threats** — phishing, malware, social engineering\n- 🔒 **Security tips** — SSL, passwords, safe browsing\n\nTry pasting a URL to scan, or ask me a security question!"
+                ai_text = "I'm your **ShieldGuard Co-pilot** — your AI security assistant!\n\n**Here's what I can do for you:**\n- 🔍 **Scan links:** Paste a URL directly here to run a 44-feature ML threat diagnostic.\n- 🛡️ **Explain threats:** Ask about phishing, spoofing, or SSL safety.\n- ⚙️ **AI Co-pilot Status:** I am currently running on local fallback instructions. Setup your `GEMINI_API_KEY` to unlock vertex AI conversational answers!"
 
     # --- Build response ---
     response_payload = {'response': ai_text}
