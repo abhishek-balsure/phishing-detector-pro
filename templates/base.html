@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="ShieldGuard Pro - ML-powered phishing detection system with 95%+ accuracy. Scan URLs, emails, and QR codes instantly.">
+    <meta name="description"
+        content="ShieldGuard Pro - ML-powered phishing detection system with 95%+ accuracy. Scan URLs, emails, and QR codes instantly.">
     <title>{% block title %}ShieldGuard Pro - Premium Phishing Protection{% endblock %}</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -14,17 +16,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     <!-- Animations CSS -->
     <link href="{{ url_for('static', filename='css/animations.css') }}" rel="stylesheet">
-    
+
     <!-- Main JS -->
     <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
     <!-- Dark Mode Toggle -->
     <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
@@ -40,10 +45,11 @@
                 </div>
                 <span class="brand-text">ShieldGuard <span class="brand-pro">Pro</span></span>
             </a>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="bi bi-list fs-1 text-primary"></i>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     {% if session.user_id %}
@@ -53,68 +59,90 @@
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="scannersDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="scannersDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="bi bi-search nav-icon"></i> Scanners
                         </a>
                         <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="scannersDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('check_url') }}"><i class="bi bi-link-45deg me-2 text-primary"></i>URL Scanner</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('document_scanner') }}"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Document Scanner</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('email_scanner') }}"><i class="bi bi-envelope me-2 text-warning"></i>Email Scanner</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('message_scanner') }}"><i class="bi bi-chat-dots me-2 text-info"></i>Message Scanner</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('social_scanner') }}"><i class="bi bi-people me-2 text-success"></i>Social Media</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('qr_scanner') }}"><i class="bi bi-qr-code me-2 text-secondary"></i>QR Scanner</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('batch_check') }}"><i class="bi bi-files me-2 text-primary"></i>Batch Check</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('check_url') }}"><i
+                                        class="bi bi-link-45deg me-2 text-primary"></i>URL Scanner</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('document_scanner') }}"><i
+                                        class="bi bi-file-earmark-pdf me-2 text-danger"></i>Document Scanner</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('email_scanner') }}"><i
+                                        class="bi bi-envelope me-2 text-warning"></i>Email Scanner</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('message_scanner') }}"><i
+                                        class="bi bi-chat-dots me-2 text-info"></i>Message Scanner</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('social_scanner') }}"><i
+                                        class="bi bi-people me-2 text-success"></i>Social Media</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('qr_scanner') }}"><i
+                                        class="bi bi-qr-code me-2 text-secondary"></i>QR Scanner</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('batch_check') }}"><i
+                                        class="bi bi-files me-2 text-primary"></i>Batch Check</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('history') }}"><i class="bi bi-clock-history nav-icon"></i> History</a>
+                        <a class="nav-link" href="{{ url_for('history') }}"><i class="bi bi-clock-history nav-icon"></i>
+                            History</a>
                     </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav align-items-center mobile-nav-actions">
                     {% if session.user_id %}
-                        {% if session.is_admin %}
-                        <li class="nav-item mb-2 mb-lg-0">
-                            <a class="nav-link text-warning fw-bold" href="{{ url_for('admin') }}">
-                                <i class="bi bi-shield-lock-fill"></i> Admin Panel
-                            </a>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item dropdown ms-lg-3">
-                            <a class="nav-link dropdown-toggle user-menu-btn d-flex align-items-center" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <div class="user-avatar me-2">
-                                    {{ session.username[0]|upper }}
-                                </div>
-                                <span class="user-name">{{ session.username }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="userMenuDropdown">
-                                <li><a class="dropdown-item py-2" href="{{ url_for('profile') }}"><i class="bi bi-person-gear me-2"></i>Profile</a></li>
-                                <li><a class="dropdown-item py-2" href="{{ url_for('bookmarks') }}"><i class="bi bi-bookmark-heart me-2"></i>Bookmarks</a></li>
-                                <li><a class="dropdown-item py-2" href="{{ url_for('history') }}"><i class="bi bi-clock-history me-2"></i>History</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger py-2" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                            </ul>
-                        </li>
+                    {% if session.is_admin %}
+                    <li class="nav-item mb-2 mb-lg-0">
+                        <a class="nav-link text-warning fw-bold" href="{{ url_for('admin') }}">
+                            <i class="bi bi-shield-lock-fill"></i> Admin Panel
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown ms-lg-3">
+                        <a class="nav-link dropdown-toggle user-menu-btn d-flex align-items-center" href="#"
+                            id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
+                            aria-expanded="false">
+                            <div class="user-avatar me-2">
+                                {{ session.username[0]|upper }}
+                            </div>
+                            <span class="user-name">{{ session.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm"
+                            aria-labelledby="userMenuDropdown">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('profile') }}"><i
+                                        class="bi bi-person-gear me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('bookmarks') }}"><i
+                                        class="bi bi-bookmark-heart me-2"></i>Bookmarks</a></li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('history') }}"><i
+                                        class="bi bi-clock-history me-2"></i>History</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger py-2" href="{{ url_for('logout') }}"><i
+                                        class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <li class="nav-item dropdown mb-2 mb-lg-0">
-                            <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bi bi-translate"></i> {% if current_lang == 'hi' %}हिंदी{% else %}Language{% endif %}
-                            </a>
-                            <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="languageDropdown">
-                                <li><a class="dropdown-item py-2" href="{{ url_for('set_lang', lang='en') }}">English</a></li>
-                                <li><a class="dropdown-item py-2" href="{{ url_for('set_lang', lang='hi') }}">हिंदी (Hindi)</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item mb-2 mb-lg-0">
-                            <a class="nav-link fw-bold" href="{{ url_for('login') }}">Login</a>
-                        </li>
-                        <li class="nav-item ms-lg-2">
-                            <a class="btn btn-glow" href="{{ url_for('signup') }}">Get Started</a>
-                        </li>
+                    <li class="nav-item dropdown mb-2 mb-lg-0">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="bi bi-translate"></i> {% if current_lang == 'hi' %}हिंदी{% else %}Language{% endif
+                            %}
+                        </a>
+                        <ul class="dropdown-menu border-0 shadow-sm" aria-labelledby="languageDropdown">
+                            <li><a class="dropdown-item py-2" href="{{ url_for('set_lang', lang='en') }}">English</a>
+                            </li>
+                            <li><a class="dropdown-item py-2" href="{{ url_for('set_lang', lang='hi') }}">हिंदी
+                                    (Hindi)</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item mb-2 mb-lg-0">
+                        <a class="nav-link fw-bold" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-glow" href="{{ url_for('signup') }}">Get Started</a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
-            </div>
+        </div>
         </div>
     </nav>
 
@@ -139,10 +167,13 @@
                         </div>
                         <span>ShieldGuard <span class="gradient-text">Pro</span></span>
                     </div>
-                    <p class="footer-desc">Empowering users with ML-driven threat detection. Our mission is to make the internet a safer place for everyone.</p>
+                    <p class="footer-desc">Empowering users with ML-driven threat detection. Our mission is to make the
+                        internet a safer place for everyone.</p>
                     <div class="footer-social">
-                        <a href="https://github.com/abhishek-balsure" target="_blank" class="social-link"><i class="bi bi-github"></i></a>
-                        <a href="https://www.linkedin.com/in/abhishek-balsure-61a389313/" target="_blank" class="social-link"><i class="bi bi-linkedin"></i></a>
+                        <a href="https://github.com/abhishek-balsure" target="_blank" class="social-link"><i
+                                class="bi bi-github"></i></a>
+                        <a href="https://www.linkedin.com/in/abhishek-balsure-61a389313/" target="_blank"
+                            class="social-link"><i class="bi bi-linkedin"></i></a>
                         <a href="#" class="social-link"><i class="bi bi-twitter-x"></i></a>
                     </div>
                 </div>
@@ -151,17 +182,17 @@
                         <div class="col-sm-6">
                             <h6 class="footer-title">Resources</h6>
                             <ul class="footer-links">
-                                  <li><a href="{{ url_for('about') }}">About Us</a></li>
-                                  <li><a href="{{ url_for('help_page') }}">Help Center</a></li>
-                                  <li><a href="{{ url_for('check_url') }}">Scanner</a></li>
+                                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                                <li><a href="{{ url_for('help_page') }}">Help Center</a></li>
+                                <li><a href="{{ url_for('check_url') }}">Scanner</a></li>
                             </ul>
                         </div>
                         <div class="col-sm-6">
                             <h6 class="footer-title">Security</h6>
                             <ul class="footer-links">
-                                  <li><i class="bi bi-patch-check-fill me-2 color-success-icon"></i>Verified Patterns</li>
-                                  <li><i class="bi bi-cpu-fill me-2 color-secondary-icon"></i>ML Analysis</li>
-                                  <li><i class="bi bi-shield-fill-check text-muted me-2"></i>256-bit Encryption</li>
+                                <li><i class="bi bi-patch-check-fill me-2 color-success-icon"></i>Verified Patterns</li>
+                                <li><i class="bi bi-cpu-fill me-2 color-secondary-icon"></i>ML Analysis</li>
+                                <li><i class="bi bi-shield-fill-check text-muted me-2"></i>256-bit Encryption</li>
                             </ul>
                         </div>
                     </div>
@@ -181,7 +212,7 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     {% block extra_js %}{% endblock %}
 
     <!-- Global JavaScript -->
@@ -190,7 +221,7 @@
         function showToast(type, title, message, duration = 5000) {
             const container = document.getElementById('toastContainer');
             if (!container) return;
-            
+
             const icons = {
                 success: 'bi-check-circle-fill',
                 error: 'bi-x-circle-fill',
@@ -236,11 +267,11 @@
         // Dark Mode Toggle
         const darkModeToggle = document.getElementById('darkModeToggle');
         const darkModeIcon = document.getElementById('darkModeIcon');
-        
+
         // Check for saved preference or system preference
         const savedTheme = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
+
         if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
             document.body.classList.add('dark-mode');
             darkModeIcon.className = 'bi bi-sun-fill';
@@ -252,9 +283,9 @@
                 const isDark = document.body.classList.contains('dark-mode');
                 darkModeIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
                 localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                
+
                 showToast(
-                    'info', 
+                    'info',
                     isDark ? 'Dark Mode Enabled' : 'Light Mode Enabled',
                     isDark ? 'Switched to dark theme' : 'Switched to light theme',
                     2000
@@ -267,7 +298,7 @@
 
         // Prevent double submits & show loading spinner on all forms
         document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 if (!form.checkValidity()) {
                     return;
                 }
@@ -284,7 +315,7 @@
         // Debounce helper
         function debounce(func, wait) {
             let timeout;
-            return function(...args) {
+            return function (...args) {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => func.apply(this, args), wait);
             };
@@ -350,7 +381,7 @@
 
             // Close menu instantly when any link is clicked inside the collapsed menu
             navBarNav.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', function(e) {
+                link.addEventListener('click', function (e) {
                     if (!link.classList.contains('dropdown-toggle')) {
                         const bsCollapse = bootstrap.Collapse.getInstance(navBarNav);
                         if (bsCollapse && navBarNav.classList.contains('show')) {
@@ -368,499 +399,557 @@
         }
 
         // Render server-side flash messages as client-side toasts
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    (function() {
-                        let cat = '{{ category }}';
-                        let type = 'info';
-                        let title = 'Notification';
-                        if (cat === 'success') {
-                            type = 'success';
-                            title = 'Success';
-                        } else if (cat === 'error' || cat === 'danger') {
-                            type = 'error';
-                            title = 'Alert';
-                        } else if (cat === 'warning') {
-                            type = 'warning';
-                            title = 'Warning';
-                        }
-                        showToast(type, title, {{ message|tojson }}, 5000);
-                    })();
-                {% endfor %}
-            {% endif %}
+        {% with messages = get_flashed_messages(with_categories = true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        (function () {
+            let cat = '{{ category }}';
+            let type = 'info';
+            let title = 'Notification';
+            if (cat === 'success') {
+                type = 'success';
+                title = 'Success';
+            } else if (cat === 'error' || cat === 'danger') {
+                type = 'error';
+                title = 'Alert';
+            } else if (cat === 'warning') {
+                type = 'warning';
+                title = 'Warning';
+            }
+            showToast(type, title, {{ message| tojson }}, 5000);
+                    }) ();
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </script>
-<style>
-/* ShieldGuard Co-pilot Chat Widget */
-.sg-chat-fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-    z-index: 9990;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.sg-chat-fab:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
-}
-.sg-chat-fab-dot {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 12px;
-    height: 12px;
-    background-color: var(--green);
-    border-radius: 50%;
-    border: 2px solid white;
-    animation: sg-pulse 2s infinite;
-}
-body.dark-mode .sg-chat-fab-dot {
-    border-color: #000;
-}
-@keyframes sg-pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
+    <style>
+        /* ShieldGuard Co-pilot Chat Widget */
+        .sg-chat-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            z-index: 9990;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
 
-.sg-chat-window {
-    position: fixed;
-    bottom: 90px;
-    right: 24px;
-    width: 420px;
-    height: 580px;
-    border-radius: var(--radius-lg);
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    flex-direction: column;
-    z-index: 9991;
-    opacity: 0;
-    transform: translateY(20px) scale(0.95);
-    pointer-events: none;
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-}
-.sg-chat-window.active {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-}
+        .sg-chat-fab:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+        }
 
-.sg-chat-header {
-    padding: 16px 20px;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.sg-chat-header-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.sg-chat-status-dot {
-    width: 10px;
-    height: 10px;
-    background-color: var(--green);
-    border-radius: 50%;
-    animation: sg-pulse 2s infinite;
-}
-.sg-chat-header-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-    line-height: 1.2;
-}
-.sg-chat-header-sub {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-.sg-chat-header-actions {
-    display: flex;
-    gap: 8px;
-}
-.sg-chat-header-btn {
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 4px;
-    font-size: 1.2rem;
-    opacity: 0.8;
-    transition: opacity 0.2s;
-}
-.sg-chat-header-btn:hover {
-    opacity: 1;
-}
+        .sg-chat-fab-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--green);
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: sg-pulse 2s infinite;
+        }
 
-.sg-chat-messages {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-.sg-chat-messages::-webkit-scrollbar {
-    width: 6px;
-}
-.sg-chat-messages::-webkit-scrollbar-thumb {
-    background: rgba(150, 150, 150, 0.3);
-    border-radius: 10px;
-}
+        body.dark-mode .sg-chat-fab-dot {
+            border-color: #000;
+        }
 
-.sg-chat-msg {
-    display: flex;
-    max-width: 85%;
-}
-.sg-chat-msg.user {
-    align-self: flex-end;
-}
-.sg-chat-msg.assistant {
-    align-self: flex-start;
-}
-.sg-chat-msg-content {
-    padding: 12px 16px;
-    border-radius: 16px;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    word-break: break-word;
-}
-.sg-chat-msg.user .sg-chat-msg-content {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-.sg-chat-msg.assistant .sg-chat-msg-content {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    border-bottom-left-radius: 4px;
-    border: 1px solid rgba(150, 150, 150, 0.1);
-}
+        @keyframes sg-pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
 
-.sg-chat-msg .scan-card {
-    margin-top: 8px;
-    padding: 12px;
-    border-radius: var(--radius-sm);
-    background: var(--bg-card);
-    border: 1px solid rgba(150, 150, 150, 0.2);
-    border-left: 4px solid var(--green);
-}
-.sg-chat-msg .scan-card.phishing {
-    border-left-color: var(--danger);
-}
-.scan-card-header {
-    font-weight: 600;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.scan-card-confidence {
-    font-size: 0.9rem;
-    margin-bottom: 4px;
-}
-.scan-card-detail {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
 
-.sg-chat-typing {
-    display: flex;
-    gap: 4px;
-    padding: 12px 16px;
-    background: var(--bg-primary);
-    border-radius: 16px;
-    border-bottom-left-radius: 4px;
-    align-self: flex-start;
-    width: fit-content;
-}
-.sg-chat-typing span {
-    width: 6px;
-    height: 6px;
-    background-color: var(--text-muted);
-    border-radius: 50%;
-    animation: sg-bounce 1.4s infinite ease-in-out both;
-}
-.sg-chat-typing span:nth-child(1) { animation-delay: -0.32s; }
-.sg-chat-typing span:nth-child(2) { animation-delay: -0.16s; }
-@keyframes sg-bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
-}
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
 
-.sg-chat-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-}
-.sg-chat-chip {
-    padding: 8px 12px;
-    border-radius: 20px;
-    background: var(--bg-card);
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-.sg-chat-chip:hover {
-    background: var(--primary);
-    color: white;
-}
+        .sg-chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            width: 420px;
+            height: 580px;
+            border-radius: var(--radius-lg);
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            z-index: 9991;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
 
-.sg-chat-input-area {
-    padding: 16px;
-    border-top: 1px solid rgba(150, 150, 150, 0.1);
-    display: flex;
-    gap: 12px;
-    background: var(--bg-card);
-}
-.sg-chat-input {
-    flex-grow: 1;
-    padding: 12px 16px;
-    border-radius: 24px;
-    border: 1px solid rgba(150, 150, 150, 0.3);
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    outline: none;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
-}
-.sg-chat-input:focus {
-    border-color: var(--primary);
-}
-.sg-chat-send-btn {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.sg-chat-send-btn:hover {
-    background: var(--secondary);
-}
+        .sg-chat-window.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
 
-@media (max-width: 576px) {
-    .sg-chat-window {
-        bottom: 0;
-        right: 0;
-        width: 100%;
-        height: 100%;
-        border-radius: 0;
-    }
-}
-</style>
+        .sg-chat-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-<!-- ShieldGuard Co-pilot Chat Widget -->
-<div id="sgChatFab" class="sg-chat-fab" onclick="sgChatToggle()">
-    <i class="bi bi-shield-fill-check"></i>
-    <span class="sg-chat-fab-dot"></span>
-</div>
+        .sg-chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-<div id="sgChatWindow" class="sg-chat-window">
-    <div class="sg-chat-header">
-        <div class="sg-chat-header-info">
-            <span class="sg-chat-status-dot"></span>
-            <div>
-                <div class="sg-chat-header-title">ShieldGuard Co-pilot</div>
-                <div class="sg-chat-header-sub">AI Security Assistant</div>
-            </div>
-        </div>
-        <div class="sg-chat-header-actions">
-            <button onclick="sgChatToggle()" class="sg-chat-header-btn"><i class="bi bi-dash-lg"></i></button>
-            <button onclick="sgChatClose()" class="sg-chat-header-btn"><i class="bi bi-x-lg"></i></button>
-        </div>
+        .sg-chat-status-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--green);
+            border-radius: 50%;
+            animation: sg-pulse 2s infinite;
+        }
+
+        .sg-chat-header-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+
+        .sg-chat-header-sub {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .sg-chat-header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sg-chat-header-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .sg-chat-header-btn:hover {
+            opacity: 1;
+        }
+
+        .sg-chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sg-chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sg-chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(150, 150, 150, 0.3);
+            border-radius: 10px;
+        }
+
+        .sg-chat-msg {
+            display: flex;
+            max-width: 85%;
+        }
+
+        .sg-chat-msg.user {
+            align-self: flex-end;
+        }
+
+        .sg-chat-msg.assistant {
+            align-self: flex-start;
+        }
+
+        .sg-chat-msg-content {
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .sg-chat-msg.user .sg-chat-msg-content {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .sg-chat-msg.assistant .sg-chat-msg-content {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(150, 150, 150, 0.1);
+        }
+
+        .sg-chat-msg .scan-card {
+            margin-top: 8px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-card);
+            border: 1px solid rgba(150, 150, 150, 0.2);
+            border-left: 4px solid var(--green);
+        }
+
+        .sg-chat-msg .scan-card.phishing {
+            border-left-color: var(--danger);
+        }
+
+        .scan-card-header {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .scan-card-confidence {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .scan-card-detail {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .sg-chat-typing {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+            width: fit-content;
+        }
+
+        .sg-chat-typing span {
+            width: 6px;
+            height: 6px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            animation: sg-bounce 1.4s infinite ease-in-out both;
+        }
+
+        .sg-chat-typing span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .sg-chat-typing span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes sg-bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: scale(0);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        .sg-chat-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .sg-chat-chip {
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sg-chat-chip:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sg-chat-input-area {
+            padding: 16px;
+            border-top: 1px solid rgba(150, 150, 150, 0.1);
+            display: flex;
+            gap: 12px;
+            background: var(--bg-card);
+        }
+
+        .sg-chat-input {
+            flex-grow: 1;
+            padding: 12px 16px;
+            border-radius: 24px;
+            border: 1px solid rgba(150, 150, 150, 0.3);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .sg-chat-input:focus {
+            border-color: var(--primary);
+        }
+
+        .sg-chat-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sg-chat-send-btn:hover {
+            background: var(--secondary);
+        }
+
+        @media (max-width: 576px) {
+            .sg-chat-window {
+                bottom: 0;
+                right: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: 0;
+            }
+        }
+    </style>
+
+    <!-- ShieldGuard Co-pilot Chat Widget -->
+    <div id="sgChatFab" class="sg-chat-fab" onclick="sgChatToggle()">
+        <i class="bi bi-shield-fill-check"></i>
+        <span class="sg-chat-fab-dot"></span>
     </div>
-    <div class="sg-chat-messages" id="sgChatMessages">
-        <!-- Welcome message -->
-        <div class="sg-chat-msg assistant">
-            <div class="sg-chat-msg-content">
-                👋 Hi! I'm your <strong>ShieldGuard Co-pilot</strong>. I can help you with:
-                <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem;">
-                    <li>Scanning URLs for threats</li>
-                    <li>Explaining phishing techniques</li>
-                    <li>Security best practices</li>
-                </ul>
-                Just paste a link or ask me anything!
-            </div>
-        </div>
-        <div class="sg-chat-chips" id="sgChatChips">
-            <button class="sg-chat-chip" onclick="sgSendChip(this)">What is phishing?</button>
-            <button class="sg-chat-chip" onclick="sgSendChip(this)">How to verify a link is safe?</button>
-            <button class="sg-chat-chip" onclick="sgSendChip(this)">Explain SSL certificates</button>
-        </div>
-    </div>
-    <div class="sg-chat-input-area">
-        <input type="text" id="sgChatInput" class="sg-chat-input" placeholder="Ask a security question or paste a URL..." autocomplete="off">
-        <button id="sgChatSendBtn" class="sg-chat-send-btn" onclick="sgChatSend()">
-            <i class="bi bi-send-fill"></i>
-        </button>
-    </div>
-</div>
 
-<script>
-// Toggle chat window visibility
-function sgChatToggle() {
-    const win = document.getElementById('sgChatWindow');
-    if (win) win.classList.toggle('active');
-}
-
-// Close chat completely
-function sgChatClose() {
-    const win = document.getElementById('sgChatWindow');
-    if (win) win.classList.remove('active');
-}
-
-// Send a suggestion chip as a message
-function sgSendChip(btn) {
-    const text = btn.textContent;
-    // Hide chips after first use
-    document.getElementById('sgChatChips').style.display = 'none';
-    sgChatSendMessage(text);
-}
-
-// Send message from input
-function sgChatSend() {
-    const input = document.getElementById('sgChatInput');
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    // Hide chips after first user message
-    const chips = document.getElementById('sgChatChips');
-    if (chips) chips.style.display = 'none';
-    sgChatSendMessage(text);
-}
-
-// Core send function
-function sgChatSendMessage(text) {
-    const messages = document.getElementById('sgChatMessages');
-    
-    // Add user bubble
-    const userMsg = document.createElement('div');
-    userMsg.className = 'sg-chat-msg user';
-    userMsg.innerHTML = `<div class="sg-chat-msg-content">${escapeHtml(text)}</div>`;
-    messages.appendChild(userMsg);
-    
-    // Add typing indicator
-    const typing = document.createElement('div');
-    typing.className = 'sg-chat-typing';
-    typing.id = 'sgTyping';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    messages.appendChild(typing);
-    messages.scrollTop = messages.scrollHeight;
-    
-    // Call API
-    fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text })
-    })
-    .then(r => r.json())
-    .then(data => {
-        // Remove typing indicator
-        const t = document.getElementById('sgTyping');
-        if (t) t.remove();
-        
-        // If scan result present, render diagnostic card
-        if (data.scan_result) {
-            const sr = data.scan_result;
-            const isPhishing = sr.is_phishing;
-            const cardClass = isPhishing ? 'phishing' : 'safe';
-            const icon = isPhishing ? '🚨' : '✅';
-            const verdict = isPhishing ? 'PHISHING DETECTED' : 'URL IS SAFE';
-            
-            const scanCard = document.createElement('div');
-            scanCard.className = 'sg-chat-msg assistant';
-            scanCard.innerHTML = \`
-                <div class="sg-chat-msg-content" style="background: transparent; border: none; padding: 0;">
-                    <div class="scan-card \${cardClass}">
-                        <div class="scan-card-header">\${icon} \${verdict}</div>
-                        <div class="scan-card-confidence">Confidence: <strong>\${sr.confidence}%</strong></div>
-                        \${sr.ssl_info ? \`<div class="scan-card-detail">🔒 SSL: \${sr.ssl_info.has_ssl ? 'Valid' : 'Missing'}</div>\` : ''}
-                        \${sr.whois_info && sr.whois_info.domain_age_days ? \`<div class="scan-card-detail">📅 Domain Age: \${sr.whois_info.domain_age_days} days</div>\` : ''}
-                        \${sr.threat_intel && sr.threat_intel.flagged_by > 0 ? \`<div class="scan-card-detail">⚠️ Flagged by \${sr.threat_intel.flagged_by} threat source(s)</div>\` : ''}
-                    </div>
+    <div id="sgChatWindow" class="sg-chat-window">
+        <div class="sg-chat-header">
+            <div class="sg-chat-header-info">
+                <span class="sg-chat-status-dot"></span>
+                <div>
+                    <div class="sg-chat-header-title">ShieldGuard Co-pilot</div>
+                    <div class="sg-chat-header-sub">AI Security Assistant</div>
                 </div>
-            \`;
-            messages.appendChild(scanCard);
+            </div>
+            <div class="sg-chat-header-actions">
+                <button onclick="sgChatToggle()" class="sg-chat-header-btn"><i class="bi bi-dash-lg"></i></button>
+                <button onclick="sgChatClose()" class="sg-chat-header-btn"><i class="bi bi-x-lg"></i></button>
+            </div>
+        </div>
+        <div class="sg-chat-messages" id="sgChatMessages">
+            <!-- Welcome message -->
+            <div class="sg-chat-msg assistant">
+                <div class="sg-chat-msg-content">
+                    👋 Hi! I'm your <strong>ShieldGuard Co-pilot</strong>. I can help you with:
+                    <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem;">
+                        <li>Scanning URLs for threats</li>
+                        <li>Explaining phishing techniques</li>
+                        <li>Security best practices</li>
+                    </ul>
+                    Just paste a link or ask me anything!
+                </div>
+            </div>
+            <div class="sg-chat-chips" id="sgChatChips">
+                <button class="sg-chat-chip" onclick="sgSendChip(this)">What is phishing?</button>
+                <button class="sg-chat-chip" onclick="sgSendChip(this)">How to verify a link is safe?</button>
+                <button class="sg-chat-chip" onclick="sgSendChip(this)">Explain SSL certificates</button>
+            </div>
+        </div>
+        <div class="sg-chat-input-area">
+            <input type="text" id="sgChatInput" class="sg-chat-input"
+                placeholder="Ask a security question or paste a URL..." autocomplete="off">
+            <button id="sgChatSendBtn" class="sg-chat-send-btn" onclick="sgChatSend()">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle chat window visibility
+        function sgChatToggle() {
+            const win = document.getElementById('sgChatWindow');
+            if (win) win.classList.toggle('active');
         }
-        
-        // Add assistant text response
-        if (data.response) {
-            const assistantMsg = document.createElement('div');
-            assistantMsg.className = 'sg-chat-msg assistant';
-            assistantMsg.innerHTML = \`<div class="sg-chat-msg-content">\${formatResponse(data.response)}</div>\`;
-            messages.appendChild(assistantMsg);
+
+        // Close chat completely
+        function sgChatClose() {
+            const win = document.getElementById('sgChatWindow');
+            if (win) win.classList.remove('active');
         }
-        messages.scrollTop = messages.scrollHeight;
-    })
-    .catch(err => {
-        const t = document.getElementById('sgTyping');
-        if (t) t.remove();
-        const errMsg = document.createElement('div');
-        errMsg.className = 'sg-chat-msg assistant';
-        errMsg.innerHTML = \`<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Connection error. Please try again.</div>\`;
-        messages.appendChild(errMsg);
-        messages.scrollTop = messages.scrollHeight;
-    });
-}
 
-// Format markdown-like response to HTML
-function formatResponse(text) {
-    if (!text) return '';
-    // Convert **bold** to <strong>
-    // Convert \n to <br>
-    // Convert \`code\` to <code>
-    // Convert - list items to <li>
-    return text
-        .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
-        .replace(/\`(.*?)\`/g, '<code>$1</code>')
-        .replace(/\\n/g, '<br>');
-}
+        // Send a suggestion chip as a message
+        function sgSendChip(btn) {
+            const text = btn.textContent;
+            // Hide chips after first use
+            const chips = document.getElementById('sgChatChips');
+            if (chips) chips.style.display = 'none';
+            sgChatSendMessage(text);
+        }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+        // Send message from input
+        function sgChatSend() {
+            const input = document.getElementById('sgChatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            // Hide chips after first user message
+            const chips = document.getElementById('sgChatChips');
+            if (chips) chips.style.display = 'none';
+            sgChatSendMessage(text);
+        }
 
-// Enter key to send
-document.addEventListener('DOMContentLoaded', function() {
-    const input = document.getElementById('sgChatInput');
-    if (input) {
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sgChatSend();
+        // Core send function
+        function sgChatSendMessage(text) {
+            const messages = document.getElementById('sgChatMessages');
+
+            // Add user bubble
+            const userMsg = document.createElement('div');
+            userMsg.className = 'sg-chat-msg user';
+            userMsg.innerHTML = `<div class="sg-chat-msg-content">${escapeHtml(text)}</div>`;
+            messages.appendChild(userMsg);
+
+            // Add typing indicator
+            const typing = document.createElement('div');
+            typing.className = 'sg-chat-typing';
+            typing.id = 'sgTyping';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
+
+            // Call API
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            })
+            .then(r => r.json())
+            .then(data => {
+                // Remove typing indicator
+                const t = document.getElementById('sgTyping');
+                if (t) t.remove();
+
+                // If scan result present, render diagnostic card
+                if (data.scan_result) {
+                    const sr = data.scan_result;
+                    const isPhishing = sr.is_phishing;
+                    const cardClass = isPhishing ? 'phishing' : 'safe';
+                    const icon = isPhishing ? '🚨' : '✅';
+                    const verdict = isPhishing ? 'PHISHING DETECTED' : 'URL IS SAFE';
+
+                    const scanCard = document.createElement('div');
+                    scanCard.className = 'sg-chat-msg assistant';
+                    scanCard.innerHTML = `
+                        <div class="sg-chat-msg-content" style="background: transparent; border: none; padding: 0;">
+                            <div class="scan-card ${cardClass}">
+                                <div class="scan-card-header">${icon} ${verdict}</div>
+                                <div class="scan-card-confidence">Confidence: <strong>${sr.confidence}%</strong></div>
+                                ${sr.ssl_info ? `<div class="scan-card-detail">🔒 SSL: ${sr.ssl_info.has_ssl ? 'Valid' : 'Missing'}</div>` : ''}
+                                ${sr.whois_info && sr.whois_info.domain_age_days ? `<div class="scan-card-detail">📅 Domain Age: ${sr.whois_info.domain_age_days} days</div>` : ''}
+                                ${sr.threat_intel && sr.threat_intel.flagged_by > 0 ? `<div class="scan-card-detail">⚠️ Flagged by ${sr.threat_intel.flagged_by} threat source(s)</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    messages.appendChild(scanCard);
+                }
+                
+                // Add assistant text response
+                if (data.response) {
+                    const assistantMsg = document.createElement('div');
+                    assistantMsg.className = 'sg-chat-msg assistant';
+                    assistantMsg.innerHTML = `<div class="sg-chat-msg-content">${formatResponse(data.response)}</div>`;
+                    messages.appendChild(assistantMsg);
+                }
+                messages.scrollTop = messages.scrollHeight;
+            })
+            .catch(err => {
+                const t = document.getElementById('sgTyping');
+                if (t) t.remove();
+                const errMsg = document.createElement('div');
+                errMsg.className = 'sg-chat-msg assistant';
+                errMsg.innerHTML = `<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Connection error. Please try again.</div>`;
+                messages.appendChild(errMsg);
+                messages.scrollTop = messages.scrollHeight;
+            });
+        }
+
+        // Format markdown-like response to HTML
+        function formatResponse(text) {
+            if (!text) return '';
+            // Convert **bold** to <strong>
+            // Convert \n to <br>
+            // Convert `code` to <code>
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enter key to send
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('sgChatInput');
+            if (input) {
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sgChatSend();
+                    }
+                });
             }
         });
-    }
-});
-</script>
+    </script>
 </body>
+
 </html>
