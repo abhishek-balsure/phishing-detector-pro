@@ -391,5 +391,476 @@
             {% endif %}
         {% endwith %}
     </script>
+<style>
+/* ShieldGuard Co-pilot Chat Widget */
+.sg-chat-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    z-index: 9990;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.sg-chat-fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.6);
+}
+.sg-chat-fab-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--green);
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: sg-pulse 2s infinite;
+}
+body.dark-mode .sg-chat-fab-dot {
+    border-color: #000;
+}
+@keyframes sg-pulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.sg-chat-window {
+    position: fixed;
+    bottom: 90px;
+    right: 24px;
+    width: 420px;
+    height: 580px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    z-index: 9991;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+.sg-chat-window.active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.sg-chat-header {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.sg-chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.sg-chat-status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--green);
+    border-radius: 50%;
+    animation: sg-pulse 2s infinite;
+}
+.sg-chat-header-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    line-height: 1.2;
+}
+.sg-chat-header-sub {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+.sg-chat-header-actions {
+    display: flex;
+    gap: 8px;
+}
+.sg-chat-header-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 1.2rem;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+.sg-chat-header-btn:hover {
+    opacity: 1;
+}
+
+.sg-chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.sg-chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+.sg-chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(150, 150, 150, 0.3);
+    border-radius: 10px;
+}
+
+.sg-chat-msg {
+    display: flex;
+    max-width: 85%;
+}
+.sg-chat-msg.user {
+    align-self: flex-end;
+}
+.sg-chat-msg.assistant {
+    align-self: flex-start;
+}
+.sg-chat-msg-content {
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+.sg-chat-msg.user .sg-chat-msg-content {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+.sg-chat-msg.assistant .sg-chat-msg-content {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+    border: 1px solid rgba(150, 150, 150, 0.1);
+}
+
+.sg-chat-msg .scan-card {
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    border: 1px solid rgba(150, 150, 150, 0.2);
+    border-left: 4px solid var(--green);
+}
+.sg-chat-msg .scan-card.phishing {
+    border-left-color: var(--danger);
+}
+.scan-card-header {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.scan-card-confidence {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+.scan-card-detail {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.sg-chat-typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    width: fit-content;
+}
+.sg-chat-typing span {
+    width: 6px;
+    height: 6px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    animation: sg-bounce 1.4s infinite ease-in-out both;
+}
+.sg-chat-typing span:nth-child(1) { animation-delay: -0.32s; }
+.sg-chat-typing span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes sg-bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+.sg-chat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+.sg-chat-chip {
+    padding: 8px 12px;
+    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.sg-chat-chip:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.sg-chat-input-area {
+    padding: 16px;
+    border-top: 1px solid rgba(150, 150, 150, 0.1);
+    display: flex;
+    gap: 12px;
+    background: var(--bg-card);
+}
+.sg-chat-input {
+    flex-grow: 1;
+    padding: 12px 16px;
+    border-radius: 24px;
+    border: 1px solid rgba(150, 150, 150, 0.3);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    outline: none;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+.sg-chat-input:focus {
+    border-color: var(--primary);
+}
+.sg-chat-send-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.sg-chat-send-btn:hover {
+    background: var(--secondary);
+}
+
+@media (max-width: 576px) {
+    .sg-chat-window {
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+    }
+}
+</style>
+
+<!-- ShieldGuard Co-pilot Chat Widget -->
+<div id="sgChatFab" class="sg-chat-fab" onclick="sgChatToggle()">
+    <i class="bi bi-shield-fill-check"></i>
+    <span class="sg-chat-fab-dot"></span>
+</div>
+
+<div id="sgChatWindow" class="sg-chat-window">
+    <div class="sg-chat-header">
+        <div class="sg-chat-header-info">
+            <span class="sg-chat-status-dot"></span>
+            <div>
+                <div class="sg-chat-header-title">ShieldGuard Co-pilot</div>
+                <div class="sg-chat-header-sub">AI Security Assistant</div>
+            </div>
+        </div>
+        <div class="sg-chat-header-actions">
+            <button onclick="sgChatToggle()" class="sg-chat-header-btn"><i class="bi bi-dash-lg"></i></button>
+            <button onclick="sgChatClose()" class="sg-chat-header-btn"><i class="bi bi-x-lg"></i></button>
+        </div>
+    </div>
+    <div class="sg-chat-messages" id="sgChatMessages">
+        <!-- Welcome message -->
+        <div class="sg-chat-msg assistant">
+            <div class="sg-chat-msg-content">
+                👋 Hi! I'm your <strong>ShieldGuard Co-pilot</strong>. I can help you with:
+                <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem;">
+                    <li>Scanning URLs for threats</li>
+                    <li>Explaining phishing techniques</li>
+                    <li>Security best practices</li>
+                </ul>
+                Just paste a link or ask me anything!
+            </div>
+        </div>
+        <div class="sg-chat-chips" id="sgChatChips">
+            <button class="sg-chat-chip" onclick="sgSendChip(this)">What is phishing?</button>
+            <button class="sg-chat-chip" onclick="sgSendChip(this)">How to verify a link is safe?</button>
+            <button class="sg-chat-chip" onclick="sgSendChip(this)">Explain SSL certificates</button>
+        </div>
+    </div>
+    <div class="sg-chat-input-area">
+        <input type="text" id="sgChatInput" class="sg-chat-input" placeholder="Ask a security question or paste a URL..." autocomplete="off">
+        <button id="sgChatSendBtn" class="sg-chat-send-btn" onclick="sgChatSend()">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+// Toggle chat window visibility
+function sgChatToggle() {
+    const win = document.getElementById('sgChatWindow');
+    if (win) win.classList.toggle('active');
+}
+
+// Close chat completely
+function sgChatClose() {
+    const win = document.getElementById('sgChatWindow');
+    if (win) win.classList.remove('active');
+}
+
+// Send a suggestion chip as a message
+function sgSendChip(btn) {
+    const text = btn.textContent;
+    // Hide chips after first use
+    document.getElementById('sgChatChips').style.display = 'none';
+    sgChatSendMessage(text);
+}
+
+// Send message from input
+function sgChatSend() {
+    const input = document.getElementById('sgChatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    // Hide chips after first user message
+    const chips = document.getElementById('sgChatChips');
+    if (chips) chips.style.display = 'none';
+    sgChatSendMessage(text);
+}
+
+// Core send function
+function sgChatSendMessage(text) {
+    const messages = document.getElementById('sgChatMessages');
+    
+    // Add user bubble
+    const userMsg = document.createElement('div');
+    userMsg.className = 'sg-chat-msg user';
+    userMsg.innerHTML = `<div class="sg-chat-msg-content">${escapeHtml(text)}</div>`;
+    messages.appendChild(userMsg);
+    
+    // Add typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'sg-chat-typing';
+    typing.id = 'sgTyping';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    messages.appendChild(typing);
+    messages.scrollTop = messages.scrollHeight;
+    
+    // Call API
+    fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+    })
+    .then(r => r.json())
+    .then(data => {
+        // Remove typing indicator
+        const t = document.getElementById('sgTyping');
+        if (t) t.remove();
+        
+        // If scan result present, render diagnostic card
+        if (data.scan_result) {
+            const sr = data.scan_result;
+            const isPhishing = sr.is_phishing;
+            const cardClass = isPhishing ? 'phishing' : 'safe';
+            const icon = isPhishing ? '🚨' : '✅';
+            const verdict = isPhishing ? 'PHISHING DETECTED' : 'URL IS SAFE';
+            
+            const scanCard = document.createElement('div');
+            scanCard.className = 'sg-chat-msg assistant';
+            scanCard.innerHTML = \`
+                <div class="sg-chat-msg-content" style="background: transparent; border: none; padding: 0;">
+                    <div class="scan-card \${cardClass}">
+                        <div class="scan-card-header">\${icon} \${verdict}</div>
+                        <div class="scan-card-confidence">Confidence: <strong>\${sr.confidence}%</strong></div>
+                        \${sr.ssl_info ? \`<div class="scan-card-detail">🔒 SSL: \${sr.ssl_info.has_ssl ? 'Valid' : 'Missing'}</div>\` : ''}
+                        \${sr.whois_info && sr.whois_info.domain_age_days ? \`<div class="scan-card-detail">📅 Domain Age: \${sr.whois_info.domain_age_days} days</div>\` : ''}
+                        \${sr.threat_intel && sr.threat_intel.flagged_by > 0 ? \`<div class="scan-card-detail">⚠️ Flagged by \${sr.threat_intel.flagged_by} threat source(s)</div>\` : ''}
+                    </div>
+                </div>
+            \`;
+            messages.appendChild(scanCard);
+        }
+        
+        // Add assistant text response
+        if (data.response) {
+            const assistantMsg = document.createElement('div');
+            assistantMsg.className = 'sg-chat-msg assistant';
+            assistantMsg.innerHTML = \`<div class="sg-chat-msg-content">\${formatResponse(data.response)}</div>\`;
+            messages.appendChild(assistantMsg);
+        }
+        messages.scrollTop = messages.scrollHeight;
+    })
+    .catch(err => {
+        const t = document.getElementById('sgTyping');
+        if (t) t.remove();
+        const errMsg = document.createElement('div');
+        errMsg.className = 'sg-chat-msg assistant';
+        errMsg.innerHTML = \`<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Connection error. Please try again.</div>\`;
+        messages.appendChild(errMsg);
+        messages.scrollTop = messages.scrollHeight;
+    });
+}
+
+// Format markdown-like response to HTML
+function formatResponse(text) {
+    if (!text) return '';
+    // Convert **bold** to <strong>
+    // Convert \n to <br>
+    // Convert \`code\` to <code>
+    // Convert - list items to <li>
+    return text
+        .replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>')
+        .replace(/\`(.*?)\`/g, '<code>$1</code>')
+        .replace(/\\n/g, '<br>');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Enter key to send
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('sgChatInput');
+    if (input) {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sgChatSend();
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>

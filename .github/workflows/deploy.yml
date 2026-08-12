@@ -75,7 +75,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script_stop: true
           command_timeout: 20m
-          envs: SECRET_KEY,JWT_SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,GH_OAUTH_CLIENT_ID,GH_OAUTH_CLIENT_SECRET,ADMIN_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD,MAIL_SERVER,MAIL_PORT,MAIL_USE_TLS,GOOGLE_SAFE_BROWSING_API_KEY
+          envs: SECRET_KEY,JWT_SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_PASSWORD,GH_OAUTH_CLIENT_ID,GH_OAUTH_CLIENT_SECRET,ADMIN_PASSWORD,MAIL_USERNAME,MAIL_PASSWORD,MAIL_SERVER,MAIL_PORT,MAIL_USE_TLS,GOOGLE_SAFE_BROWSING_API_KEY,GEMINI_API_KEY
           script: |
             printf "SECRET_KEY=%s\n"           "$SECRET_KEY"               > ~/.env
             printf "JWT_SECRET_KEY=%s\n"       "$JWT_SECRET_KEY"           >> ~/.env
@@ -96,6 +96,7 @@ jobs:
             printf "MAIL_PORT=%s\n"            "${MAIL_PORT:-587}"         >> ~/.env
             printf "MAIL_USE_TLS=%s\n"         "${MAIL_USE_TLS:-True}"     >> ~/.env
             printf "GOOGLE_SAFE_BROWSING_API_KEY=%s\n" "$GOOGLE_SAFE_BROWSING_API_KEY" >> ~/.env
+            printf "GEMINI_API_KEY=%s\n"               "$GEMINI_API_KEY"               >> ~/.env
             printf "ENABLE_EXTERNAL_URL_FEATURES=true\n"                   >> ~/.env
 
             mv ~/docker-compose.prod.yml ~/docker-compose.yml
@@ -120,3 +121,4 @@ jobs:
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
           MAIL_USE_TLS: ${{ secrets.MAIL_USE_TLS }}
           GOOGLE_SAFE_BROWSING_API_KEY: ${{ secrets.GOOGLE_SAFE_BROWSING_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
