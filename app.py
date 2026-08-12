@@ -1377,7 +1377,6 @@ Rules:
 
 @app.route('/api/chat', methods=['POST'])
 @csrf.exempt
-@limiter.limit("15 per minute")
 def api_chat():
     """ShieldGuard Co-pilot chat endpoint."""
     import requests
