@@ -1380,6 +1380,7 @@ Rules:
 @limiter.limit("15 per minute")
 def api_chat():
     """ShieldGuard Co-pilot chat endpoint."""
+    import requests
     if not request.is_json:
         return jsonify({'error': 'JSON required'}), 400
 
