@@ -761,6 +761,25 @@
                 border-radius: 0;
             }
         }
+
+        /* Staggered slide-in list animation */
+        @keyframes sgFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .sg-animate-item {
+            opacity: 0;
+            animation: sgFadeInUp 0.4s ease forwards;
+        }
+        .sg-animate-item:nth-child(1) { animation-delay: 0.2s; }
+        .sg-animate-item:nth-child(2) { animation-delay: 0.4s; }
+        .sg-animate-item:nth-child(3) { animation-delay: 0.6s; }
     </style>
 
     <!-- ShieldGuard Co-pilot Chat Widget -->
@@ -788,11 +807,11 @@
             <!-- Welcome message -->
             <div class="sg-chat-msg assistant">
                 <div class="sg-chat-msg-content">
-                    👋 Hi! I'm your <strong>ShieldGuard Co-pilot</strong>. I can help you with:
+                    <span id="sgWelcomeText">👋 Hi <strong>{{ session.username|title }}</strong>! I'm your <strong>ShieldGuard Co-pilot</strong>.</span> I can help you with:
                     <ul style="margin: 0.5rem 0 0; padding-left: 1.2rem;">
-                        <li>Scanning URLs for threats</li>
-                        <li>Explaining phishing techniques</li>
-                        <li>Security best practices</li>
+                        <li class="sg-animate-item">Scanning URLs for threats</li>
+                        <li class="sg-animate-item">Explaining phishing techniques</li>
+                        <li class="sg-animate-item">Security best practices</li>
                     </ul>
                     Just paste a link or ask me anything!
                 </div>
@@ -978,8 +997,20 @@
             return div.innerHTML;
         }
 
-        // Enter key to send
+        // Enter key to send & dynamic personalized greetings
         document.addEventListener('DOMContentLoaded', function() {
+            // Set dynamic greeting based on time of day
+            const welcomeTextEl = document.getElementById('sgWelcomeText');
+            if (welcomeTextEl) {
+                const hrs = new Date().getHours();
+                let timeGreet = "Good morning";
+                if (hrs >= 12 && hrs < 17) timeGreet = "Good afternoon";
+                else if (hrs >= 17) timeGreet = "Good evening";
+                
+                const username = "{{ session.username|title }}";
+                welcomeTextEl.innerHTML = `👋 ${timeGreet}, <strong>${username}</strong>! I'm your <strong>ShieldGuard Co-pilot</strong>.`;
+            }
+
             const input = document.getElementById('sgChatInput');
             if (input) {
                 input.addEventListener('keydown', function(e) {
