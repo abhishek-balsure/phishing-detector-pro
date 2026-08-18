@@ -1379,6 +1379,9 @@ Rules:
 @csrf.exempt
 def api_chat():
     """ShieldGuard Co-pilot chat endpoint."""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Authentication required. Please log in.'}), 401
+
     import requests
     if not request.is_json:
         return jsonify({'error': 'JSON required'}), 400

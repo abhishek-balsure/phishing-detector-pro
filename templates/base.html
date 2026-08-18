@@ -769,6 +769,7 @@
         <span class="sg-chat-fab-dot"></span>
     </div>
 
+    {% if session.user_id %}
     <div id="sgChatWindow" class="sg-chat-window">
         <div class="sg-chat-header">
             <div class="sg-chat-header-info">
@@ -810,14 +811,54 @@
             </button>
         </div>
     </div>
+    {% else %}
+    <!-- Login Required Modal -->
+    <div class="modal fade" id="sgChatLoginModal" tabindex="-1" aria-labelledby="sgChatLoginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content glass-card overflow-hidden" style="background: var(--bg-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-primary" id="sgChatLoginModalLabel">
+                        <i class="bi bi-shield-lock-fill me-2"></i>Access Restricted
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter, none);"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="brand-icon-sm brand-gradient-text mb-3" style="font-size: 3rem; display: inline-block;">
+                        <i class="bi bi-shield-fill-check"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">ShieldGuard Co-pilot</h4>
+                    <p class="text-secondary px-3">Log in or sign up to chat with your personal AI security assistant and analyze threats in real-time.</p>
+                    <div class="d-grid gap-2 col-10 mx-auto mt-4">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-glow py-2 fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Log In
+                        </a>
+                        <a href="{{ url_for('signup') }}" class="btn btn-outline-secondary py-2 fw-semibold">
+                            <i class="bi bi-person-plus-fill me-2"></i>Sign Up
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <script>
         // Toggle chat window visibility
         function sgChatToggle() {
+            {% if session.user_id %}
             const win = document.getElementById('sgChatWindow');
             if (win) win.classList.toggle('active');
+            {% else %}
+            // Show login required modal
+            const loginModalEl = document.getElementById('sgChatLoginModal');
+            if (loginModalEl) {
+                const modal = new bootstrap.Modal(loginModalEl);
+                modal.show();
+            }
+            {% endif %}
         }
 
+        {% if session.user_id %}
         // Close chat completely
         function sgChatClose() {
             const win = document.getElementById('sgChatWindow');
@@ -949,6 +990,7 @@
                 });
             }
         });
+        {% endif %}
     </script>
 </body>
 
