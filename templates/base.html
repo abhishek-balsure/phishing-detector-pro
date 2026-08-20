@@ -780,6 +780,92 @@
         .sg-animate-item:nth-child(1) { animation-delay: 0.2s; }
         .sg-animate-item:nth-child(2) { animation-delay: 0.4s; }
         .sg-animate-item:nth-child(3) { animation-delay: 0.6s; }
+
+        /* Accordion collapsible diagnostics card */
+        .scan-card-toggle {
+            font-size: 0.82rem;
+            color: var(--secondary, #06B6D4);
+            cursor: pointer;
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .scan-card-toggle:hover {
+            color: var(--primary);
+        }
+        .scan-card-details {
+            max-height: 300px;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 8px;
+            border-top: 1px solid rgba(150, 150, 150, 0.15);
+            padding-top: 8px;
+        }
+        .scan-card-details.collapsed {
+            max-height: 0;
+            padding-top: 0;
+            border-top: none;
+            margin-top: 0;
+        }
+
+        /* File Upload triggers inside input bar */
+        .sg-chat-file-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid rgba(150, 150, 150, 0.3);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .sg-chat-file-btn:hover {
+            background: var(--bg-primary);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Drag and drop overlay */
+        .sg-chat-drop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 11, 20, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+        .sg-chat-drop-box {
+            border: 2px dashed var(--primary);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            background: var(--bg-card);
+            padding: 16px;
+            text-align: center;
+        }
     </style>
 
     <!-- ShieldGuard Co-pilot Chat Widget -->
@@ -790,6 +876,15 @@
 
     {% if session.user_id %}
     <div id="sgChatWindow" class="sg-chat-window">
+        <!-- Drag and drop overlay -->
+        <div class="sg-chat-drop-overlay" id="sgChatDropOverlay">
+            <div class="sg-chat-drop-box">
+                <i class="bi bi-cloud-arrow-up-fill" style="font-size: 3rem; color: var(--primary);"></i>
+                <div class="fw-bold mt-2">Drop files here to scan</div>
+                <div class="text-muted" style="font-size: 0.8rem;">Text, EML, HTML files, or QR code images</div>
+            </div>
+        </div>
+
         <div class="sg-chat-header">
             <div class="sg-chat-header-info">
                 <span class="sg-chat-status-dot"></span>
@@ -820,11 +915,16 @@
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">What is phishing?</button>
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">How to verify a link is safe?</button>
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">Explain SSL certificates</button>
+                <button class="sg-chat-chip" onclick="sgSendChip(this)">🎮 Play Sandbox Game</button>
             </div>
         </div>
         <div class="sg-chat-input-area">
+            <button type="button" class="sg-chat-file-btn" onclick="document.getElementById('sgChatFile').click()" title="Upload File or QR Code">
+                <i class="bi bi-paperclip"></i>
+            </button>
+            <input type="file" id="sgChatFile" style="display: none;" onchange="sgChatUploadFile(this)">
             <input type="text" id="sgChatInput" class="sg-chat-input"
-                placeholder="Ask a security question or paste a URL..." autocomplete="off">
+                placeholder="Ask a question, paste URL, or drag files..." autocomplete="off">
             <button id="sgChatSendBtn" class="sg-chat-send-btn" onclick="sgChatSend()">
                 <i class="bi bi-send-fill"></i>
             </button>
@@ -866,7 +966,12 @@
         function sgChatToggle() {
             {% if session.user_id %}
             const win = document.getElementById('sgChatWindow');
-            if (win) win.classList.toggle('active');
+            if (win) {
+                win.classList.toggle('active');
+                if (win.classList.contains('active')) {
+                    sgLoadChatHistory();
+                }
+            }
             {% else %}
             // Show login required modal
             const loginModalEl = document.getElementById('sgChatLoginModal');
@@ -878,6 +983,8 @@
         }
 
         {% if session.user_id %}
+        let sgHistoryLoaded = false;
+
         // Close chat completely
         function sgChatClose() {
             const win = document.getElementById('sgChatWindow');
@@ -903,6 +1010,156 @@
             const chips = document.getElementById('sgChatChips');
             if (chips) chips.style.display = 'none';
             sgChatSendMessage(text);
+        }
+
+        // Load chat history from backend database
+        function sgLoadChatHistory() {
+            if (sgHistoryLoaded) return;
+            const messages = document.getElementById('sgChatMessages');
+            
+            fetch('/api/chat/history')
+            .then(r => r.json())
+            .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                    messages.innerHTML = '';
+                    
+                    data.messages.forEach(msg => {
+                        const bubble = document.createElement('div');
+                        bubble.className = `sg-chat-msg ${msg.sender}`;
+                        
+                        if (msg.sender === 'user') {
+                            bubble.innerHTML = `<div class="sg-chat-msg-content">${escapeHtml(msg.message)}</div>`;
+                            messages.appendChild(bubble);
+                        } else {
+                            if (msg.scan_result) {
+                                const cardBubble = document.createElement('div');
+                                cardBubble.className = 'sg-chat-msg assistant';
+                                cardBubble.innerHTML = `
+                                    <div class="sg-chat-msg-content" style="background: transparent; border: none; padding: 0;">
+                                        ${sgCreateDiagnosticCardHTML(msg.scan_result)}
+                                    </div>
+                                `;
+                                messages.appendChild(cardBubble);
+                            }
+                            const textBubble = document.createElement('div');
+                            textBubble.className = 'sg-chat-msg assistant';
+                            textBubble.innerHTML = `<div class="sg-chat-msg-content">${formatResponse(msg.message)}</div>`;
+                            messages.appendChild(textBubble);
+                        }
+                    });
+                    
+                    const chips = document.getElementById('sgChatChips');
+                    if (chips) chips.style.display = 'none';
+                    
+                    messages.scrollTop = messages.scrollHeight;
+                }
+                sgHistoryLoaded = true;
+            })
+            .catch(err => {
+                console.error("Failed to load chat history:", err);
+            });
+        }
+
+        // Core dynamic HTML builder for diagnostics card
+        function sgCreateDiagnosticCardHTML(sr) {
+            const isPhishing = sr.result === 'phishing' || sr.is_phishing;
+            const cardClass = isPhishing ? 'phishing' : 'safe';
+            const icon = isPhishing ? '🚨' : '✅';
+            const verdict = isPhishing ? 'PHISHING DETECTED' : 'URL IS SAFE';
+            const detailsId = 'details-' + Math.random().toString(36).substr(2, 9);
+            
+            let sourcesStr = '';
+            if (sr.threat_intel && sr.threat_intel.sources_flagged) {
+                sourcesStr = sr.threat_intel.sources_flagged.join(', ');
+            }
+
+            return `
+                <div class="scan-card ${cardClass}">
+                    <div class="scan-card-header">${icon} ${verdict}</div>
+                    <div class="scan-card-confidence">Confidence: <strong>${sr.confidence}%</strong></div>
+                    <div class="scan-card-toggle" onclick="document.getElementById('${detailsId}').classList.toggle('collapsed')">
+                        <i class="bi bi-chevron-down"></i> Technical Details
+                    </div>
+                    <div class="scan-card-details collapsed" id="${detailsId}">
+                        ${sr.ssl_info ? `<div class="scan-card-detail">🔒 SSL Certificate: <strong>${sr.ssl_info.has_ssl ? 'Valid' : 'Missing/Invalid'}</strong></div>` : ''}
+                        ${sr.whois_info && sr.whois_info.domain_age_days ? `<div class="scan-card-detail">📅 Domain Age: <strong>${sr.whois_info.domain_age_days} days</strong></div>` : ''}
+                        ${sr.threat_intel && sr.threat_intel.flagged_by > 0 ? `<div class="scan-card-detail">⚠️ Threat Sources: <strong class="text-danger">${sr.threat_intel.flagged_by} flagged</strong> (${sourcesStr})</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Handle in-chat file uploads
+        function sgChatUploadFile(input) {
+            if (input.files && input.files.length > 0) {
+                sgChatPerformUpload(input.files[0]);
+                input.value = ''; // Reset input
+            }
+        }
+
+        function sgChatPerformUpload(file) {
+            const messages = document.getElementById('sgChatMessages');
+            
+            const userMsg = document.createElement('div');
+            userMsg.className = 'sg-chat-msg user';
+            userMsg.innerHTML = `<div class="sg-chat-msg-content">📎 Uploaded: <strong>${escapeHtml(file.name)}</strong></div>`;
+            messages.appendChild(userMsg);
+            
+            const chips = document.getElementById('sgChatChips');
+            if (chips) chips.style.display = 'none';
+
+            const typing = document.createElement('div');
+            typing.className = 'sg-chat-typing';
+            typing.id = 'sgTyping';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/api/chat/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => {
+                if (!r.ok) {
+                    return r.json().then(err => { throw new Error(err.error || 'Failed to scan document') });
+                }
+                return r.json();
+            })
+            .then(data => {
+                const t = document.getElementById('sgTyping');
+                if (t) t.remove();
+
+                if (data.scan_result) {
+                    const scanCard = document.createElement('div');
+                    scanCard.className = 'sg-chat-msg assistant';
+                    scanCard.innerHTML = `
+                        <div class="sg-chat-msg-content" style="background: transparent; border: none; padding: 0;">
+                            ${sgCreateDiagnosticCardHTML(data.scan_result)}
+                        </div>
+                    `;
+                    messages.appendChild(scanCard);
+                }
+
+                if (data.response) {
+                    const assistantMsg = document.createElement('div');
+                    assistantMsg.className = 'sg-chat-msg assistant';
+                    assistantMsg.innerHTML = `<div class="sg-chat-msg-content">${formatResponse(data.response)}</div>`;
+                    messages.appendChild(assistantMsg);
+                }
+                messages.scrollTop = messages.scrollHeight;
+            })
+            .catch(err => {
+                const t = document.getElementById('sgTyping');
+                if (t) t.remove();
+                const errMsg = document.createElement('div');
+                errMsg.className = 'sg-chat-msg assistant';
+                errMsg.innerHTML = `<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Scan Failed: ${escapeHtml(err.message)}</div>`;
+                messages.appendChild(errMsg);
+                messages.scrollTop = messages.scrollHeight;
+            });
         }
 
         // Core send function
@@ -937,23 +1194,11 @@
 
                 // If scan result present, render diagnostic card
                 if (data.scan_result) {
-                    const sr = data.scan_result;
-                    const isPhishing = sr.is_phishing;
-                    const cardClass = isPhishing ? 'phishing' : 'safe';
-                    const icon = isPhishing ? '🚨' : '✅';
-                    const verdict = isPhishing ? 'PHISHING DETECTED' : 'URL IS SAFE';
-
                     const scanCard = document.createElement('div');
                     scanCard.className = 'sg-chat-msg assistant';
                     scanCard.innerHTML = `
                         <div class="sg-chat-msg-content" style="background: transparent; border: none; padding: 0;">
-                            <div class="scan-card ${cardClass}">
-                                <div class="scan-card-header">${icon} ${verdict}</div>
-                                <div class="scan-card-confidence">Confidence: <strong>${sr.confidence}%</strong></div>
-                                ${sr.ssl_info ? `<div class="scan-card-detail">🔒 SSL: ${sr.ssl_info.has_ssl ? 'Valid' : 'Missing'}</div>` : ''}
-                                ${sr.whois_info && sr.whois_info.domain_age_days ? `<div class="scan-card-detail">📅 Domain Age: ${sr.whois_info.domain_age_days} days</div>` : ''}
-                                ${sr.threat_intel && sr.threat_intel.flagged_by > 0 ? `<div class="scan-card-detail">⚠️ Flagged by ${sr.threat_intel.flagged_by} threat source(s)</div>` : ''}
-                            </div>
+                            ${sgCreateDiagnosticCardHTML(data.scan_result)}
                         </div>
                     `;
                     messages.appendChild(scanCard);
@@ -982,9 +1227,6 @@
         // Format markdown-like response to HTML
         function formatResponse(text) {
             if (!text) return '';
-            // Convert **bold** to <strong>
-            // Convert \n to <br>
-            // Convert `code` to <code>
             return text
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/`(.*?)`/g, '<code>$1</code>')
@@ -1017,6 +1259,34 @@
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         sgChatSend();
+                    }
+                });
+            }
+
+            // Setup File Drag and Drop events
+            const chatWin = document.getElementById('sgChatWindow');
+            const dropOverlay = document.getElementById('sgChatDropOverlay');
+            if (chatWin && dropOverlay) {
+                chatWin.addEventListener('dragenter', (e) => {
+                    e.preventDefault();
+                    dropOverlay.style.display = 'flex';
+                });
+                dropOverlay.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    // Hide only if dragged out of overlay
+                    if (e.relatedTarget === null || !dropOverlay.contains(e.relatedTarget)) {
+                        dropOverlay.style.display = 'none';
+                    }
+                });
+                dropOverlay.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                });
+                dropOverlay.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropOverlay.style.display = 'none';
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        sgChatPerformUpload(files[0]);
                     }
                 });
             }

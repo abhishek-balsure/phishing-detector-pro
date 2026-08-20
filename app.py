@@ -561,6 +561,17 @@ def init_db():
     ''')
 
     cur.execute('''
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+            sender TEXT NOT NULL,
+            message TEXT NOT NULL,
+            scan_result TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    cur.execute('''
         CREATE TABLE IF NOT EXISTS login_history (
             id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users(id),
@@ -1365,6 +1376,7 @@ Your responsibilities:
 - Explain scan results (SSL status, domain age, threat intelligence verdicts, ML confidence scores)
 - Provide actionable security advice and best practices
 - Answer questions about how ShieldGuard Pro works (44-feature XGBoost model, Google Safe Browsing, URLhaus, PhishTank integration)
+- Run an interactive "Phishing Simulator Sandbox Game" if the user mentions "play game", "sandbox", "simulate phishing", or starts a training challenge. Generate a realistic mock phishing email with 2-3 red flags (typosquatting, urgency, suspicious link) and challenge them to find the red flags. Walk them through the answers interactively!
 
 Rules:
 - Be concise and structured. Use bullet points and bold text for clarity.
@@ -1548,7 +1560,186 @@ Please explain these scan results to the user in plain language. Highlight the k
             'threat_intel': scan_result.get('threat_intel')
         }
 
+    # --- Save conversation to database ---
+    try:
+        db = get_db()
+        cur = db.cursor()
+        # Save user message
+        cur.execute('''
+            INSERT INTO chat_messages (user_id, sender, message)
+            VALUES (%s, 'user', %s)
+        ''', (session['user_id'], user_message))
+        # Save assistant message and optional scan results
+        sr_json = json.dumps(response_payload.get('scan_result')) if response_payload.get('scan_result') else None
+        cur.execute('''
+            INSERT INTO chat_messages (user_id, sender, message, scan_result)
+            VALUES (%s, 'assistant', %s, %s)
+        ''', (session['user_id'], ai_text, sr_json))
+        db.commit()
+        cur.close()
+    except Exception as db_err:
+        logger.error(f"Error saving chat messages to database: {db_err}")
+
     return jsonify(response_payload)
+
+
+@app.route('/api/chat/history', methods=['GET'])
+@login_required
+def api_chat_history():
+    """Retrieve chat history for the logged-in user."""
+    try:
+        db = get_db()
+        cur = db.cursor(cursor_factory=RealDictCursor)
+        cur.execute('''
+            SELECT sender, message, scan_result, created_at FROM chat_messages
+            WHERE user_id = %s
+            ORDER BY created_at ASC
+            LIMIT 50
+        ''', (session['user_id'],))
+        messages = cur.fetchall()
+        cur.close()
+        
+        # Convert scan_result JSON strings back to dict objects
+        for msg in messages:
+            if msg.get('scan_result'):
+                try:
+                    msg['scan_result'] = json.loads(msg['scan_result'])
+                except:
+                    msg['scan_result'] = None
+            if msg.get('created_at'):
+                msg['created_at'] = msg['created_at'].isoformat()
+                
+        return jsonify({'messages': messages})
+    except Exception as e:
+        logger.error(f"Error fetching chat history: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/chat/upload', methods=['POST'])
+@csrf.exempt
+@login_required
+def api_chat_upload():
+    """Handle in-chat document or image (QR code) uploads."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    filename = secure_filename(file.filename)
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    
+    scan_result = None
+    extracted_content = ''
+    
+    # 1. Image Files -> Decode QR code
+    if ext in ['png', 'jpg', 'jpeg', 'gif', 'bmp']:
+        if not QRCODE_AVAILABLE:
+            return jsonify({'error': 'QR Code scanner dependencies (pyzbar) are not available on the server.'}), 500
+        try:
+            from PIL import Image
+            from pyzbar.pyzbar import decode
+            image = Image.open(file.stream)
+            decoded_objects = decode(image)
+            if not decoded_objects:
+                return jsonify({'error': 'No QR code found in the image.'}), 400
+                
+            qr_data = decoded_objects[0].data.decode('utf-8')
+            is_url = qr_data.startswith(('http://', 'https://'))
+            if is_url:
+                scan_result = predict_url(qr_data)
+                extracted_content = f"Decoded QR Code URL: {qr_data}"
+            else:
+                extracted_content = f"Decoded QR Code Text: {qr_data}"
+        except Exception as e:
+            logger.error(f"Error parsing QR image in chat: {e}")
+            return jsonify({'error': f"Failed to parse QR code: {str(e)}"}), 500
+            
+    # 2. Text / Document Files -> Read and scan URLs
+    elif ext in ['txt', 'html', 'eml', 'csv', 'md', 'json']:
+        try:
+            file_bytes = file.read()
+            content = file_bytes.decode('utf-8', errors='ignore')
+            from feature_extraction import extract_urls_from_text
+            urls = extract_urls_from_text(content)
+            
+            if not urls:
+                return jsonify({'error': 'No URLs found in the text document.'}), 400
+                
+            target_url = urls[0]
+            scan_result = predict_url(target_url)
+            extracted_content = f"Extracted URL from {filename}: {target_url} (Found {len(urls)} URLs in total)"
+        except Exception as e:
+            logger.error(f"Error parsing text file in chat: {e}")
+            return jsonify({'error': f"Failed to parse document: {str(e)}"}), 500
+    else:
+        return jsonify({'error': f"Unsupported file type .{ext}. Please upload a text file, email (.eml), or an image containing a QR code."}), 400
+        
+    ai_text = ''
+    if scan_result:
+        verdict = scan_result.get('result', 'unknown')
+        confidence = scan_result.get('confidence', 0.0)
+        
+        prompt = f"Explain the scan results of this file-extracted URL. {extracted_content}. Verdict is {verdict.upper()} with {confidence}% confidence."
+        
+        if GEMINI_API_KEY:
+            try:
+                gemini_payload = {
+                    'system_instruction': {
+                        'parts': [{'text': COPILOT_SYSTEM_INSTRUCTION}]
+                    },
+                    'contents': [{
+                        'parts': [{'text': prompt}]
+                      }],
+                    'generationConfig': {
+                        'temperature': 0.7,
+                        'maxOutputTokens': 4096,
+                        'topP': 0.9,
+                        'thinkingConfig': {'thinkingBudget': 0}
+                    }
+                }
+                gemini_response = requests.post(
+                    f'{GEMINI_ENDPOINT}?key={GEMINI_API_KEY}',
+                    json=gemini_payload,
+                    timeout=30
+                )
+                if gemini_response.status_code == 200:
+                    resp_data = gemini_response.json()
+                    ai_text = resp_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+            except Exception as ai_err:
+                logger.error(f"Error calling Gemini in upload: {ai_err}")
+                
+        if not ai_text:
+            if verdict == 'phishing':
+                ai_text = f"🚨 **Phishing Detected in Document!**\n\nI scanned the link `{scan_result.get('url')}` extracted from your uploaded file and flagged it with {confidence}% confidence.\n\n**Recommendations:**\n- Do NOT click this link or distribute this file.\n- Delete this document/image safely."
+            else:
+                ai_text = f"✅ **URL is Safe!**\n\nThe link `{scan_result.get('url')}` found in your uploaded file appears to be legitimate with {confidence}% confidence."
+    else:
+        ai_text = f"Parsed text successfully:\n\n`{extracted_content}`"
+        
+    try:
+        db = get_db()
+        cur = db.cursor()
+        cur.execute('''
+            INSERT INTO chat_messages (user_id, sender, message)
+            VALUES (%s, 'user', %s)
+        ''', (session['user_id'], f"Uploaded file: {filename}"))
+        sr_json = json.dumps(scan_result) if scan_result else None
+        cur.execute('''
+            INSERT INTO chat_messages (user_id, sender, message, scan_result)
+            VALUES (%s, 'assistant', %s, %s)
+        ''', (session['user_id'], ai_text, sr_json))
+        db.commit()
+        cur.close()
+    except Exception as db_err:
+        logger.error(f"Error saving file-upload messages: {db_err}")
+        
+    payload = {'response': ai_text}
+    if scan_result:
+        payload['scan_result'] = scan_result
+        
+    return jsonify(payload)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @login_rate_limit
