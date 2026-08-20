@@ -1584,9 +1584,10 @@ Please explain these scan results to the user in plain language. Highlight the k
 
 
 @app.route('/api/chat/history', methods=['GET'])
-@login_required
 def api_chat_history():
     """Retrieve chat history for the logged-in user."""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Authentication required. Please log in.'}), 401
     try:
         db = get_db()
         cur = db.cursor(cursor_factory=RealDictCursor)
@@ -1617,9 +1618,10 @@ def api_chat_history():
 
 @app.route('/api/chat/upload', methods=['POST'])
 @csrf.exempt
-@login_required
 def api_chat_upload():
     """Handle in-chat document or image (QR code) uploads."""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Authentication required. Please log in.'}), 401
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
