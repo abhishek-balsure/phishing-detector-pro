@@ -595,11 +595,37 @@
         }
 
         .sg-chat-msg-content {
+            position: relative;
             padding: 12px 16px;
             border-radius: 16px;
             font-size: 0.95rem;
             line-height: 1.5;
             word-break: break-word;
+        }
+
+        .sg-copy-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            padding: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            z-index: 10;
+            line-height: 1;
+        }
+
+        .sg-chat-msg-content:hover .sg-copy-btn {
+            opacity: 0.7;
+        }
+
+        .sg-chat-msg-content .sg-copy-btn:hover {
+            opacity: 1;
+            color: var(--accent);
         }
 
         .sg-chat-msg.user .sg-chat-msg-content {
@@ -914,6 +940,8 @@
             <div class="sg-chat-chips" id="sgChatChips">
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">What is phishing?</button>
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">How to verify a link is safe?</button>
+                <button class="sg-chat-chip" onclick="sgSendChip(this)">Draft a phishing warning email</button>
+                <button class="sg-chat-chip" onclick="sgSendChip(this)">How does SQL injection work?</button>
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">Explain SSL certificates</button>
                 <button class="sg-chat-chip" onclick="sgSendChip(this)">🎮 Play Sandbox Game</button>
             </div>
@@ -1040,7 +1068,7 @@
                         bubble.className = `sg-chat-msg ${msg.sender}`;
                         
                         if (msg.sender === 'user') {
-                            bubble.innerHTML = `<div class="sg-chat-msg-content">${escapeHtml(msg.message)}</div>`;
+                            bubble.innerHTML = `<div class="sg-chat-msg-content"><span class="sg-msg-text">${escapeHtml(msg.message)}</span><button class="sg-copy-btn" onclick="sgCopyMessageText(this)" title="Copy message"><i class="bi bi-clipboard"></i></button></div>`;
                             messages.appendChild(bubble);
                         } else {
                             if (msg.scan_result) {
@@ -1055,7 +1083,7 @@
                             }
                             const textBubble = document.createElement('div');
                             textBubble.className = 'sg-chat-msg assistant';
-                            textBubble.innerHTML = `<div class="sg-chat-msg-content">${formatResponse(msg.message)}</div>`;
+                            textBubble.innerHTML = `<div class="sg-chat-msg-content"><span class="sg-msg-text">${formatResponse(msg.message)}</span><button class="sg-copy-btn" onclick="sgCopyMessageText(this)" title="Copy message"><i class="bi bi-clipboard"></i></button></div>`;
                             messages.appendChild(textBubble);
                         }
                     });
@@ -1114,7 +1142,7 @@
             
             const userMsg = document.createElement('div');
             userMsg.className = 'sg-chat-msg user';
-            userMsg.innerHTML = `<div class="sg-chat-msg-content">📎 Uploaded: <strong>${escapeHtml(file.name)}</strong></div>`;
+            userMsg.innerHTML = `<div class="sg-chat-msg-content"><span class="sg-msg-text">📎 Uploaded: <strong>${escapeHtml(file.name)}</strong></span><button class="sg-copy-btn" onclick="sgCopyMessageText(this)" title="Copy message"><i class="bi bi-clipboard"></i></button></div>`;
             messages.appendChild(userMsg);
             
             const chips = document.getElementById('sgChatChips');
@@ -1165,7 +1193,7 @@
                 if (data.response) {
                     const assistantMsg = document.createElement('div');
                     assistantMsg.className = 'sg-chat-msg assistant';
-                    assistantMsg.innerHTML = `<div class="sg-chat-msg-content">${formatResponse(data.response)}</div>`;
+                    assistantMsg.innerHTML = `<div class="sg-chat-msg-content"><span class="sg-msg-text">${formatResponse(data.response)}</span><button class="sg-copy-btn" onclick="sgCopyMessageText(this)" title="Copy message"><i class="bi bi-clipboard"></i></button></div>`;
                     messages.appendChild(assistantMsg);
                 }
                 messages.scrollTop = messages.scrollHeight;
@@ -1188,7 +1216,7 @@
             // Add user bubble
             const userMsg = document.createElement('div');
             userMsg.className = 'sg-chat-msg user';
-            userMsg.innerHTML = `<div class="sg-chat-msg-content">${escapeHtml(text)}</div>`;
+            userMsg.innerHTML = `<div class="sg-chat-msg-content"><span class="sg-msg-text">${escapeHtml(text)}</span><button class="sg-copy-btn" onclick="sgCopyMessageText(this)" title="Copy message"><i class="bi bi-clipboard"></i></button></div>`;
             messages.appendChild(userMsg);
 
             // Add typing indicator
@@ -1239,7 +1267,7 @@
                 if (data.response) {
                     const assistantMsg = document.createElement('div');
                     assistantMsg.className = 'sg-chat-msg assistant';
-                    assistantMsg.innerHTML = `<div class="sg-chat-msg-content">${formatResponse(data.response)}</div>`;
+                    assistantMsg.innerHTML = `<div class="sg-chat-msg-content"><span class="sg-msg-text">${formatResponse(data.response)}</span><button class="sg-copy-btn" onclick="sgCopyMessageText(this)" title="Copy message"><i class="bi bi-clipboard"></i></button></div>`;
                     messages.appendChild(assistantMsg);
                 }
                 messages.scrollTop = messages.scrollHeight;
@@ -1270,8 +1298,52 @@
             return div.innerHTML;
         }
 
+        function sgCopyMessageText(btn) {
+            const textSpan = btn.parentElement.querySelector('.sg-msg-text');
+            if (!textSpan) return;
+            const textToCopy = textSpan.innerText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const icon = btn.querySelector('i');
+                icon.className = 'bi bi-check-lg text-success';
+                setTimeout(() => {
+                    icon.className = 'bi bi-clipboard';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
         // Enter key to send & dynamic personalized greetings
         document.addEventListener('DOMContentLoaded', function() {
+            // Intercept form submissions to show loading state
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const btn = form.querySelector('button[type="submit"]');
+                    if (btn) {
+                        let loadingText = 'Processing Scan...';
+                        if (window.location.pathname.includes('check_url')) {
+                            loadingText = 'Analyzing URL...';
+                        } else if (window.location.pathname.includes('email_scanner')) {
+                            loadingText = 'Parsing Email...';
+                        } else if (window.location.pathname.includes('batch')) {
+                            loadingText = 'Processing Batch File...';
+                        } else if (window.location.pathname.includes('message_scanner')) {
+                            loadingText = 'Analyzing Message...';
+                        } else if (window.location.pathname.includes('qr_scanner')) {
+                            loadingText = 'Decoding Image...';
+                        } else if (window.location.pathname.includes('profile')) {
+                            loadingText = 'Updating...';
+                        }
+                        
+                        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>${loadingText}`;
+                        
+                        // Disable button after a tiny delay so the submit action proceeds uninterrupted
+                        setTimeout(() => {
+                            btn.disabled = true;
+                        }, 10);
+                    }
+                });
+            });
             // Set dynamic greeting based on time of day
             const welcomeTextEl = document.getElementById('sgWelcomeText');
             if (welcomeTextEl) {
