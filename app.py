@@ -2728,6 +2728,197 @@ def history():
         total=total
     )
 
+
+LOCAL_QUIZ_SCENARIOS = [
+    {
+        "title": "Netflix Account Suspension Alert",
+        "sender": "support@netflix-billing-update.com",
+        "subject": "Urgent: Update your payment details",
+        "content": "Dear Customer, we were unable to process your monthly subscription payment. To avoid immediate account suspension, please verify your payment information using the link below.",
+        "url": "http://netflix-billing-payment-update.net/login",
+        "is_phishing": True,
+        "explanation": "The sender domain 'netflix-billing-update.com' and the target URL domain 'netflix-billing-payment-update.net' are not owned by Netflix. Real Netflix alerts come from netflix.com, and security-sensitive portals will always use secure HTTPS protocols, not plain HTTP."
+    },
+    {
+        "title": "Official GitHub Security Warning",
+        "sender": "noreply@github.com",
+        "subject": "[GitHub] Security Alert: New SSH key added",
+        "content": "Hey there! We wanted to let you know that a new SSH public key was added to your account. If you recognize this key, no action is needed. If this wasn't you, please review your account activity and remove the key immediately.",
+        "url": "https://github.com/settings/keys",
+        "is_phishing": False,
+        "explanation": "This email is legitimate. The sender domain is official ('github.com'), and the action link points directly to the real, HTTPS-secured GitHub website."
+    },
+    {
+        "title": "Direct Deposit Notice Update",
+        "sender": "hr-alerts@company-payroll-portal.org",
+        "subject": "Action Required: Complete Direct Deposit Details",
+        "content": "Attention Employee, please confirm your direct deposit details for the upcoming pay cycle. Due to a payroll system upgrade, all employees are required to verify their bank routing and account numbers to prevent payment delays.",
+        "url": "https://company-payroll-portal.org/auth/direct-deposit",
+        "is_phishing": True,
+        "explanation": "Although payroll scams often look official, the domain 'company-payroll-portal.org' is a generic typosquatted registrar designed to impersonate your company's actual payroll system (which typically runs on internal secure HR networks or platforms like ADP)."
+    },
+    {
+        "title": "Amazon Order Invoice Receipt",
+        "sender": "shipment-tracking@amazon.com",
+        "subject": "Your Amazon.com order confirmation #408-2895471",
+        "content": "Thank you for shopping with us! We're preparing your order for shipment. Details, order total, and delivery estimation are listed below. Click to track your package or manage order details.",
+        "url": "https://www.amazon.com/gp/css/homepage.html",
+        "is_phishing": False,
+        "explanation": "This email is legitimate. It matches Amazon's official tracking domains, links to the genuine HTTPS Amazon portal, and doesn't ask you to enter credentials to view standard invoice documents."
+    },
+    {
+        "title": "Missed Package Delivery Alert",
+        "sender": "notification@ups-delivery-status.info",
+        "subject": "Delivery Alert: Missed UPS delivery - action required",
+        "content": "UPS parcel #98234509789 could not be delivered because no recipient was present. To reschedule delivery, download your shipping label and pay the standard $1.50 service fee using the portal below.",
+        "url": "http://ups-delivery-reschedule-portal.com/tracking",
+        "is_phishing": True,
+        "explanation": "This is a delivery phishing scam. The sender domain 'ups-delivery-status.info' is fake, and the reschedule site uses an insecure HTTP protocol on an unofficial domain."
+    },
+    {
+        "title": "Google Security Checklist Alert",
+        "sender": "no-reply@accounts.google.com",
+        "subject": "Critical Security Alert: Suspicious login blocked",
+        "content": "Google just blocked a login attempt from an unrecognized device in Germany. If this was you, you can ignore this email. If this wasn't you, click below to secure your Google Account immediately.",
+        "url": "https://myaccount.google.com/secure",
+        "is_phishing": False,
+        "explanation": "This is a legitimate Google Security alert. The sender 'accounts.google.com' is Google's genuine account domain, and the URL points directly to Google's official, secure HTTPS settings page."
+    },
+    {
+        "title": "Urgent Microsoft Teams Invitation",
+        "sender": "admin@microsoft-teams-meeting.live",
+        "subject": "Urgent: You have been invited to join a Teams meeting",
+        "content": "You have been invited to a critical company-wide Microsoft Teams meeting regarding restructuring. Click the invite link to join the chat session. You may be asked to log in using your Microsoft credentials.",
+        "url": "https://microsoft-teams-meeting.live/join/682940",
+        "is_phishing": True,
+        "explanation": "This is a malicious phishing campaign targeting enterprise logins. The domain 'microsoft-teams-meeting.live' is fake. Microsoft Teams URLs always reside on official microsoft.com or office.com domains."
+    },
+    {
+        "title": "PayPal Account Limited Notice",
+        "sender": "service@paypal-security-alert.net",
+        "subject": "Notice: Your PayPal account has been limited",
+        "content": "Dear customer, we detected unusual activity on credit card linked to your PayPal account. As a security measure, we have temporarily restricted access to your account. To lift this limitation, upload your identity documents now.",
+        "url": "http://paypal-verification-resolve.net/compliance",
+        "is_phishing": True,
+        "explanation": "This is a classic credential-harvesting scam. PayPal's official site uses paypal.com with HTTPS. This message uses an unofficial '.net' domain over plain HTTP."
+    },
+    {
+        "title": "Zoom Account Invitation",
+        "sender": "no-reply@zoom.us",
+        "subject": "Zoom Meeting Invite: Weekly Sync",
+        "content": "Hi there, you are invited to a scheduled Zoom meeting. Join from PC, Mac, Linux, iOS or Android by clicking the secure meeting URL below.",
+        "url": "https://zoom.us/j/908234857",
+        "is_phishing": False,
+        "explanation": "This Zoom invitation is legitimate. The sender and link point to the official HTTPS 'zoom.us' domain."
+    },
+    {
+        "title": "Docusign Document Review Request",
+        "sender": "docusign@document-review-portal.net",
+        "subject": "Please DocuSign: HR Policy Agreement 2026.pdf",
+        "content": "Hello, please review and sign the attached 2026 Policy Agreement document. Access code is not required. Click below to verify your digital signature.",
+        "url": "https://document-review-portal.net/docusign/verify",
+        "is_phishing": True,
+        "explanation": "DocuSign impersonation is highly common. The legitimate DocuSign link always points to docusign.com or docusign.net, not 'document-review-portal.net' which is a typosquatted domain."
+    },
+    {
+        "title": "Spotify Premium Receipt",
+        "sender": "no-reply@spotify.com",
+        "subject": "Your receipt for Spotify Premium subscription",
+        "content": "Thanks for subscribing to Spotify Premium! Your renewal receipt is ready. If you have questions about billing, check your account settings or contact support.",
+        "url": "https://www.spotify.com/account",
+        "is_phishing": False,
+        "explanation": "This receipt is legitimate. The links point to Spotify's official HTTPS domain 'spotify.com'."
+    },
+    {
+        "title": "Meta Business Support Warning",
+        "sender": "meta-support-business@facebook-security-compliance.com",
+        "subject": "[Urgent] Page Violation Warning: Deactivation scheduled",
+        "content": "Attention Page Admin, we received multiple reports that your business page violates Meta Intellectual Property terms. If you do not appeal this decision within 24 hours, your page will be deactivated permanently.",
+        "url": "http://facebook-security-compliance.com/appeal/case-98234",
+        "is_phishing": True,
+        "explanation": "This is a social engineering attack impersonating Facebook support. Facebook support communications will never be delivered from third-party domains like 'facebook-security-compliance.com' or use insecure HTTP appeal URLs."
+    }
+]
+
+
+@app.route('/quiz')
+@login_required
+def quiz():
+    """Render the AI Phishing Quiz page."""
+    return render_template('quiz.html')
+
+
+@app.route('/api/quiz/generate')
+@login_required
+def api_quiz_generate():
+    import random, requests
+    scenarios = []
+    
+    if GEMINI_API_KEY:
+        try:
+            prompt_text = (
+                "Generate exactly 5 highly-realistic phishing or legitimate email/web scenarios for a security quiz.\n"
+                "Provide a mix of phishing cases (fake domains, typosquatted sender, HTTP, urgency) and legitimate cases.\n"
+                "Provide 2 or 3 phishing scenarios and 2 or 3 legitimate scenarios.\n"
+                "Return them strictly matching the JSON array structure defined in the response schema."
+            )
+            
+            gemini_payload = {
+                'system_instruction': {
+                    'parts': [{'text': 'You are a cybersecurity training engine. Your goal is to generate extremely realistic phishing and legitimate scenarios to train employees.'}]
+                },
+                'contents': [{
+                    'parts': [{'text': prompt_text}]
+                }],
+                'generationConfig': {
+                    'temperature': 0.8,
+                    'maxOutputTokens': 4096,
+                    'topP': 0.9,
+                    'responseMimeType': 'application/json',
+                    'responseSchema': {
+                        'type': 'ARRAY',
+                        'items': {
+                            'type': 'OBJECT',
+                            'properties': {
+                                'title': {'type': 'STRING'},
+                                'sender': {'type': 'STRING'},
+                                'subject': {'type': 'STRING'},
+                                'content': {'type': 'STRING'},
+                                'url': {'type': 'STRING'},
+                                'is_phishing': {'type': 'BOOLEAN'},
+                                'explanation': {'type': 'STRING'}
+                            },
+                            'required': ['title', 'sender', 'subject', 'content', 'url', 'is_phishing', 'explanation']
+                        }
+                    }
+                }
+            }
+            
+            gemini_response = requests.post(
+                f'{GEMINI_ENDPOINT}?key={GEMINI_API_KEY}',
+                json=gemini_payload,
+                timeout=30
+            )
+            
+            if gemini_response.status_code == 200:
+                resp_data = gemini_response.json()
+                ai_text = resp_data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+                if ai_text:
+                    scenarios = json.loads(ai_text)
+                    logger.info("Successfully generated dynamic quiz via Gemini")
+            else:
+                logger.error(f"Gemini Quiz generate error {gemini_response.status_code}: {gemini_response.text[:500]}")
+        except Exception as e:
+            logger.error(f"Failed to generate dynamic quiz via Gemini: {e}")
+            
+    # Fallback to local scenarios pool if Gemini was not available or failed
+    if not scenarios or len(scenarios) < 5:
+        logger.info("Using local fallback scenarios pool for quiz")
+        scenarios = random.sample(LOCAL_QUIZ_SCENARIOS, 5)
+        
+    return jsonify({'scenarios': scenarios})
+
+
 @app.route('/history/export/csv')
 @login_required
 def export_history_csv():

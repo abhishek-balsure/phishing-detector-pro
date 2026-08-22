@@ -1,0 +1,531 @@
+{% extends "base.html" %}
+
+{% block title %}Phishing Awareness Quiz - ShieldGuard Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    /* Radar Loading Animation */
+    .radar-wrapper {
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .radar-circle {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        border: 2px solid var(--border-color);
+        border-radius: 50%;
+        margin: 0 auto 2rem;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+        overflow: hidden;
+    }
+
+    .radar-circle::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, var(--accent) 0deg, transparent 180deg);
+        animation: spin 2s linear infinite;
+        opacity: 0.15;
+    }
+
+    .radar-circle::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 15px var(--accent);
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Scenario Card Styles */
+    .scenario-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-xl);
+        padding: 2.5rem;
+        margin-top: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Mock Email Header look */
+    .email-client-header {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .email-meta-row {
+        display: flex;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .email-meta-label {
+        width: 70px;
+        font-weight: 700;
+        color: var(--text-secondary);
+    }
+
+    .email-meta-value {
+        color: var(--text-primary);
+        font-family: monospace;
+    }
+
+    .email-body-content {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 1rem;
+        white-space: pre-wrap;
+    }
+
+    .email-url-box {
+        background: rgba(16, 185, 129, 0.05);
+        border: 1px dashed var(--green);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .email-url-box.phishing-url {
+        background: rgba(239, 68, 68, 0.05);
+        border-color: var(--danger);
+    }
+
+    .quiz-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    .btn-action {
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: var(--radius-lg);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all var(--transition-normal);
+    }
+
+    .btn-action-safe {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+        color: var(--success);
+        border: 2px solid var(--success);
+    }
+
+    .btn-action-safe:hover:not(:disabled) {
+        background: var(--success);
+        color: white;
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-action-phish {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+        color: var(--danger);
+        border: 2px solid var(--danger);
+    }
+
+    .btn-action-phish:hover:not(:disabled) {
+        background: var(--danger);
+        color: white;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .feedback-box {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .feedback-success {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: var(--success);
+        color: var(--success);
+    }
+
+    .feedback-danger {
+        background: rgba(239, 68, 68, 0.1);
+        border-color: var(--danger);
+        color: var(--danger);
+    }
+
+    /* Score Progress Ring */
+    .score-ring-container {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        margin: 0 auto 2rem;
+    }
+
+    .score-svg {
+        transform: rotate(-90deg);
+    }
+
+    .score-circle-bg {
+        fill: none;
+        stroke: var(--border-color);
+        stroke-width: 12;
+    }
+
+    .score-circle-progress {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 12;
+        stroke-linecap: round;
+        stroke-dasharray: 502.4;
+        stroke-dashoffset: 502.4;
+        transition: stroke-dashoffset 1.5s ease-in-out;
+    }
+
+    .score-text {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-weight: 800;
+    }
+
+    .score-number {
+        font-size: 2.5rem;
+        line-height: 1;
+        color: var(--text-primary);
+    }
+
+    .score-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="quiz-container">
+        
+        <!-- Welcome Screen -->
+        <div id="quiz-welcome" class="text-center fade-in">
+            <div class="brand-icon mb-4 text-accent" style="font-size: 4rem; animation: float 3s ease-in-out infinite; display: inline-block;">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <h1 class="fw-bold mb-2">Dynamic <span class="gradient-text">Phishing Quiz</span></h1>
+            <p class="text-dim mb-4 mx-auto" style="max-width: 600px;">
+                Test your security intuition in real-time. Every quiz generates a fresh set of realistic communication scenarios using Gemini AI. Can you spot the hooks?
+            </p>
+            <button class="btn btn-glow btn-lg px-5 py-3" onclick="startQuiz()">
+                <i class="bi bi-controller me-2"></i>Generate fresh quiz
+            </button>
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="quiz-loading" class="radar-wrapper" style="display: none;">
+            <div class="radar-circle"></div>
+            <h4 class="fw-bold">Contacting AI Training Engine...</h4>
+            <p class="text-dim">Generating custom, highly-realistic phishing scenarios on demand.</p>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="quiz-game" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-light text-dark border px-3 py-2" id="question-index-badge">Scenario 1 of 5</span>
+                <span class="badge bg-success px-3 py-2" id="score-live-badge">Score: 0/0</span>
+            </div>
+            <div class="progress mb-4" style="height: 6px;">
+                <div class="progress-bar-glow bg-accent" id="quiz-progress-bar" style="width: 20%;"></div>
+            </div>
+
+            <!-- Email Display Board -->
+            <div class="scenario-card fade-up" id="scenario-card">
+                <div class="email-client-header">
+                    <h3 class="fw-bold mb-3 text-primary" id="scenario-title">Loading title...</h3>
+                    <div class="email-meta-row">
+                        <span class="email-meta-label">From:</span>
+                        <span class="email-meta-value" id="scenario-sender">loading...</span>
+                    </div>
+                    <div class="email-meta-row">
+                        <span class="email-meta-label">Subject:</span>
+                        <span class="email-meta-value" id="scenario-subject">loading...</span>
+                    </div>
+                </div>
+
+                <div class="email-body-content" id="scenario-content">
+                    Loading content...
+                </div>
+
+                <div class="email-url-box" id="scenario-url-box">
+                    <i class="bi bi-link-45deg text-accent fs-4"></i>
+                    <div>
+                        <div class="text-dim small uppercase tracking-wider">Embedded hyperlink target</div>
+                        <code class="text-primary small" id="scenario-url">http://loading-link.com</code>
+                    </div>
+                </div>
+
+                <!-- Input buttons -->
+                <div class="quiz-actions" id="quiz-actions-container">
+                    <button class="btn btn-action btn-action-safe" onclick="submitAnswer(false)">
+                        <i class="bi bi-patch-check"></i> Mark as Safe
+                    </button>
+                    <button class="btn btn-action btn-action-phish" onclick="submitAnswer(true)">
+                        <i class="bi bi-bug"></i> Flag as Phishing
+                    </button>
+                </div>
+
+                <!-- Dynamic Feedback Box -->
+                <div class="feedback-box" id="feedback-box" style="display: none;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <h4 class="fw-bold mb-0" id="feedback-verdict">Correct!</h4>
+                    </div>
+                    <p class="mb-4 text-dim" id="feedback-explanation">Explanation text goes here...</p>
+                    <button class="btn btn-glow w-100 py-3" id="next-question-btn" onclick="nextQuestion()">
+                        Next Scenario <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scoreboard Screen -->
+        <div id="quiz-scoreboard" class="text-center fade-in" style="display: none;">
+            <h1 class="fw-bold mb-1">Assessment <span class="gradient-text">Complete</span></h1>
+            <p class="text-dim mb-5">Your security awareness report card has been processed.</p>
+
+            <div class="score-ring-container">
+                <svg class="score-svg" width="180" height="180">
+                    <circle class="score-circle-bg" cx="90" cy="90" r="80" />
+                    <circle class="score-circle-progress" id="score-circle-progress" cx="90" cy="90" r="80" />
+                </svg>
+                <div class="score-text">
+                    <span class="score-number" id="final-score-text">0/5</span>
+                    <span class="score-label">Correct</span>
+                </div>
+            </div>
+
+            <h3 class="fw-bold mb-2" id="score-grade-title">Security Guardian</h3>
+            <p class="text-secondary mb-5 mx-auto" style="max-width: 500px;" id="score-grade-description">
+                Awesome! You have excellent intuition. You successfully identified all malicious hooks.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-glow btn-lg px-4 py-3" onclick="startQuiz()">
+                    <i class="bi bi-arrow-clockwise"></i> Play Again
+                </button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg px-4 py-3 border">
+                    <i class="bi bi-house"></i> Dashboard
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let quizScenarios = [];
+    let currentQuestionIdx = 0;
+    let correctAnswersCount = 0;
+
+    function startQuiz() {
+        // Toggle view states
+        document.getElementById('quiz-welcome').style.display = 'none';
+        document.getElementById('quiz-scoreboard').style.display = 'none';
+        document.getElementById('quiz-loading').style.display = 'block';
+        document.getElementById('quiz-game').style.display = 'none';
+
+        fetch('/api/quiz/generate')
+            .then(r => {
+                if (!r.ok) throw new Error('API server returned error');
+                return r.json();
+            })
+            .then(data => {
+                if (!data.scenarios || data.scenarios.length === 0) {
+                    throw new Error('No scenarios received');
+                }
+                quizScenarios = data.scenarios;
+                currentQuestionIdx = 0;
+                correctAnswersCount = 0;
+
+                // Load first question
+                loadQuestion(0);
+
+                // Show game area
+                document.getElementById('quiz-loading').style.display = 'none';
+                document.getElementById('quiz-game').style.display = 'block';
+            })
+            .catch(err => {
+                console.error("Failed to load quiz scenarios:", err);
+                alert("Failed to generate quiz scenarios. Please try again.");
+                document.getElementById('quiz-loading').style.display = 'none';
+                document.getElementById('quiz-welcome').style.display = 'block';
+            });
+    }
+
+    function loadQuestion(index) {
+        const scenario = quizScenarios[index];
+
+        // Reset badges
+        document.getElementById('question-index-badge').innerText = `Scenario ${index + 1} of 5`;
+        document.getElementById('score-live-badge').innerText = `Score: ${correctAnswersCount}/${index}`;
+        document.getElementById('quiz-progress-bar').style.width = `${((index + 1) / 5) * 100}%`;
+
+        // Render card texts
+        document.getElementById('scenario-title').innerText = scenario.title || "Security Assessment";
+        document.getElementById('scenario-sender').innerText = scenario.sender || "unknown-sender@domain.com";
+        document.getElementById('scenario-subject').innerText = scenario.subject || "(No Subject)";
+        document.getElementById('scenario-content').innerText = scenario.content || "Empty content.";
+
+        // Handle URL box rendering
+        const urlBox = document.getElementById('scenario-url-box');
+        if (scenario.url) {
+            urlBox.style.display = 'flex';
+            document.getElementById('scenario-url').innerText = scenario.url;
+            if (scenario.is_phishing) {
+                urlBox.className = 'email-url-box phishing-url';
+            } else {
+                urlBox.className = 'email-url-box';
+            }
+        } else {
+            urlBox.style.display = 'none';
+        }
+
+        // Reset feedback box and actions
+        document.getElementById('feedback-box').style.display = 'none';
+        document.getElementById('quiz-actions-container').style.display = 'grid';
+
+        // Re-enable and reset action button styles
+        const buttons = document.querySelectorAll('.btn-action');
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        });
+    }
+
+    function submitAnswer(userSaysPhishing) {
+        const scenario = quizScenarios[currentQuestionIdx];
+        const isPhishing = scenario.is_phishing === true || scenario.is_phishing === 1;
+        const isCorrect = (userSaysPhishing === isPhishing);
+
+        if (isCorrect) {
+            correctAnswersCount++;
+        }
+
+        // Disable input buttons
+        const buttons = document.querySelectorAll('.btn-action');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        });
+
+        // Hide inputs container and show feedback
+        document.getElementById('quiz-actions-container').style.display = 'none';
+        
+        const feedbackBox = document.getElementById('feedback-box');
+        const verdictTitle = document.getElementById('feedback-verdict');
+        const explanationText = document.getElementById('feedback-explanation');
+
+        if (isCorrect) {
+            feedbackBox.className = 'feedback-box feedback-success';
+            verdictTitle.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i> Correct Response!`;
+        } else {
+            feedbackBox.className = 'feedback-box feedback-danger';
+            verdictTitle.innerHTML = `<i class="bi bi-x-circle-fill me-2"></i> Incorrect Response`;
+        }
+
+        const threatBadge = isPhishing ? '<span class="badge bg-danger mb-2">MALICIOUS PHISHING ATTEMPT</span>' : '<span class="badge bg-success mb-2">LEGITIMATE PORTAL</span>';
+        explanationText.innerHTML = `${threatBadge}<br><br>${scenario.explanation}`;
+        feedbackBox.style.display = 'block';
+
+        // Update live score badge
+        document.getElementById('score-live-badge').innerText = `Score: ${correctAnswersCount}/${currentQuestionIdx + 1}`;
+    }
+
+    function nextQuestion() {
+        currentQuestionIdx++;
+        if (currentQuestionIdx < 5) {
+            loadQuestion(currentQuestionIdx);
+        } else {
+            showScoreboard();
+        }
+    }
+
+    function showScoreboard() {
+        document.getElementById('quiz-game').style.display = 'none';
+        document.getElementById('quiz-scoreboard').style.display = 'block';
+
+        // Render final score text
+        document.getElementById('final-score-text').innerText = `${correctAnswersCount}/5`;
+
+        // Calculate progress ring circle metrics
+        const circleProgress = document.getElementById('score-circle-progress');
+        const radius = 80;
+        const circumference = 2 * Math.PI * radius; // 502.4
+        const offset = circumference - (correctAnswersCount / 5) * circumference;
+        
+        // Trigger SVG transition height
+        setTimeout(() => {
+            circleProgress.style.strokeDashoffset = offset;
+        }, 100);
+
+        // Grade Title & Description adjustments
+        const gradeTitle = document.getElementById('score-grade-title');
+        const gradeDesc = document.getElementById('score-grade-description');
+
+        if (correctAnswersCount === 5) {
+            gradeTitle.innerHTML = `<span class="text-success"><i class="bi bi-patch-check-fill me-2"></i>Cyber Security Elite</span>`;
+            gradeDesc.innerText = "Exceptional performance! You spotted all phishing hooks and safely bypassed threats. You are ready to shield your workspace.";
+        } else if (correctAnswersCount >= 3) {
+            gradeTitle.innerHTML = `<span class="text-warning"><i class="bi bi-shield-fill-check me-2"></i>Security Watchman</span>`;
+            gradeDesc.innerText = "Good job! You did well in catching standard phishing patterns but got caught by a few subtle tricks. Check the explanations to stay sharp.";
+        } else {
+            gradeTitle.innerHTML = `<span class="text-danger"><i class="bi bi-shield-fill-exclamation me-2"></i>High Risk Profile</span>`;
+            gradeDesc.innerText = "Be careful! You fell for several realistic social engineering hooks. Don't worry—practicing these scenarios will significantly improve your detection skills.";
+        }
+    }
+</script>
+{% endblock %}
