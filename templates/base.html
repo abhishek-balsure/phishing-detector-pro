@@ -1018,7 +1018,19 @@
             const messages = document.getElementById('sgChatMessages');
             
             fetch('/api/chat/history')
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) {
+                    return r.text().then(text => {
+                        try {
+                            const err = JSON.parse(text);
+                            throw new Error(err.error || 'Failed to load history');
+                        } catch(e) {
+                            throw new Error(`HTTP Error ${r.status}`);
+                        }
+                    });
+                }
+                return r.json();
+            })
             .then(data => {
                 if (data.messages && data.messages.length > 0) {
                     messages.innerHTML = '';
@@ -1124,7 +1136,14 @@
             })
             .then(r => {
                 if (!r.ok) {
-                    return r.json().then(err => { throw new Error(err.error || 'Failed to scan document') });
+                    return r.text().then(text => {
+                        try {
+                            const err = JSON.parse(text);
+                            throw new Error(err.error || 'Failed to scan document');
+                        } catch(e) {
+                            throw new Error(`HTTP Error ${r.status}: ${r.statusText || 'Internal Server Error'}`);
+                        }
+                    });
                 }
                 return r.json();
             })
@@ -1186,7 +1205,19 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: text })
             })
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) {
+                    return r.text().then(text => {
+                        try {
+                            const err = JSON.parse(text);
+                            throw new Error(err.error || 'Failed to send message');
+                        } catch(e) {
+                            throw new Error(`HTTP Error ${r.status}`);
+                        }
+                    });
+                }
+                return r.json();
+            })
             .then(data => {
                 // Remove typing indicator
                 const t = document.getElementById('sgTyping');
@@ -1218,7 +1249,7 @@
                 if (t) t.remove();
                 const errMsg = document.createElement('div');
                 errMsg.className = 'sg-chat-msg assistant';
-                errMsg.innerHTML = `<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Connection error. Please try again.</div>`;
+                errMsg.innerHTML = `<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Error: ${escapeHtml(err.message)}</div>`;
                 messages.appendChild(errMsg);
                 messages.scrollTop = messages.scrollHeight;
             });

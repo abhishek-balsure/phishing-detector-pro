@@ -3410,25 +3410,27 @@ def api_stats():
 
 @app.errorhandler(404)
 def not_found_error(error):
-    if request.is_json:
+    if request.is_json or request.path.startswith('/api/'):
         return jsonify({'error': 'Not found'}), 404
     return render_template('404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal server error: {error}")
-    if request.is_json:
+    if request.is_json or request.path.startswith('/api/'):
         return jsonify({'error': 'Internal server error'}), 500
     return render_template('500.html'), 500
 
 @app.errorhandler(503)
 def service_unavailable_error(error):
-    if request.is_json:
+    if request.is_json or request.path.startswith('/api/'):
         return jsonify({'error': 'Service unavailable'}), 503
     return render_template('503.html'), 503
 
 @app.errorhandler(413)
 def too_large(error):
+    if request.is_json or request.path.startswith('/api/'):
+        return jsonify({'error': 'File too large. Maximum size is 16MB.'}), 413
     flash('File too large. Maximum size is 16MB.', 'danger')
     return redirect(request.url)
 
