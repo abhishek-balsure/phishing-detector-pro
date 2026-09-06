@@ -1149,6 +1149,9 @@ def extract_urls_from_text(text):
             
     return formatted_urls
 
+from functools import lru_cache
+
+@lru_cache(maxsize=512)
 def get_whois_info(url):
     if not WHOIS_AVAILABLE:
         return {'available': False, 'error': 'Whois module not available'}
@@ -1160,7 +1163,13 @@ def get_whois_info(url):
         parts = domain.split('.')
         if len(parts) > 2:
             domain = '.'.join(parts[-2:])
-        w = whois.whois(domain)
+        import socket
+        orig_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(3.0)
+        try:
+            w = whois.whois(domain)
+        finally:
+            socket.setdefaulttimeout(orig_timeout)
         creation_date = w.creation_date
         if isinstance(creation_date, list):
             creation_date = creation_date[0]
@@ -1367,7 +1376,7 @@ def api_quick_check():
 
 # ===== SHIELDGUARD CO-PILOT (AI SECURITY ASSISTANT) =====
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
-GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent'
+GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent'
 
 COPILOT_SYSTEM_INSTRUCTION = """You are ShieldGuard Co-pilot, a professional cybersecurity AI assistant built into ShieldGuard Pro.
 
@@ -1466,18 +1475,15 @@ Please explain these scan results to the user in plain language. Highlight the k
                 }],
                 'generationConfig': {
                     'temperature': 0.7,
-                    'maxOutputTokens': 4096,
-                    'topP': 0.9,
-                    'thinkingConfig': {
-                        'thinkingBudget': 0
-                    }
+                    'maxOutputTokens': 1024,
+                    'topP': 0.9
                 }
             }
 
             gemini_response = requests.post(
                 f'{GEMINI_ENDPOINT}?key={GEMINI_API_KEY}',
                 json=gemini_payload,
-                timeout=30
+                timeout=10
             )
 
             if gemini_response.status_code == 200:

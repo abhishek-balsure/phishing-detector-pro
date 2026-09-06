@@ -1458,20 +1458,25 @@ For questions or to report suspicious links, reach out to your IT Security Helpd
             messages.appendChild(typing);
             messages.scrollTop = messages.scrollHeight;
 
-            // Call API
+            // Call API with timeout safeguard
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000);
+
             fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
+                body: JSON.stringify({ message: text }),
+                signal: controller.signal
             })
             .then(r => {
+                clearTimeout(timeoutId);
                 if (!r.ok) {
                     return r.text().then(text => {
                         try {
                             const err = JSON.parse(text);
                             throw new Error(err.error || 'Failed to send message');
                         } catch(e) {
-                            throw new Error(`HTTP Error ${r.status}`);
+                            throw new Error(e.message && e.message !== text ? e.message : `HTTP Error ${r.status}`);
                         }
                     });
                 }
@@ -1504,11 +1509,15 @@ For questions or to report suspicious links, reach out to your IT Security Helpd
                 messages.scrollTop = messages.scrollHeight;
             })
             .catch(err => {
+                clearTimeout(timeoutId);
                 const t = document.getElementById('sgTyping');
                 if (t) t.remove();
                 const errMsg = document.createElement('div');
                 errMsg.className = 'sg-chat-msg assistant';
-                errMsg.innerHTML = `<div class="sg-chat-msg-content" style="color: var(--danger);">⚠️ Error: ${escapeHtml(err.message)}</div>`;
+                const msgText = err.name === 'AbortError'
+                    ? "⏱️ Request timed out. The security assistant took too long to respond. Please try again."
+                    : `⚠️ Error: ${escapeHtml(err.message)}`;
+                errMsg.innerHTML = `<div class="sg-chat-msg-content" style="color: var(--danger);">${msgText}</div>`;
                 messages.appendChild(errMsg);
                 messages.scrollTop = messages.scrollHeight;
             });

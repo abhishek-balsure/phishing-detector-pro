@@ -161,7 +161,13 @@ def _get_domain_age(hostname):
         return 0, 0
     try:
         import whois
-        w = whois.whois(hostname)
+        import socket
+        orig_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(3.0)
+        try:
+            w = whois.whois(hostname)
+        finally:
+            socket.setdefaulttimeout(orig_timeout)
         creation_date = w.creation_date
         if not creation_date:
             return 0, 0
