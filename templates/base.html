@@ -993,7 +993,227 @@
     </div>
     {% endif %}
 
+    <!-- Security Advisory & Incident Report Modal -->
+    <div class="modal fade" id="sgAdvisoryModal" tabindex="-1" aria-labelledby="sgAdvisoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-card" style="background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)); box-shadow: var(--shadow-xl, 0 20px 40px rgba(0,0,0,0.5)); border-radius: 16px;">
+                <div class="modal-header border-bottom border-secondary border-opacity-10 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle p-2 d-flex align-items-center justify-content-center" style="background: rgba(239, 68, 68, 0.15); width: 38px; height: 38px;">
+                            <i class="bi bi-shield-exclamation text-danger fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0 text-primary" id="sgAdvisoryModalLabel">Incident Advisory Generator</h5>
+                            <span class="small text-muted" id="sgAdvisoryRefId">REF: SEC-ADV-2026-0000</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <!-- Format Selection Tabs -->
+                    <ul class="nav nav-pills mb-3 gap-2" id="sgAdvisoryTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active btn-sm rounded-pill px-3 fw-semibold" id="tab-employee-btn" data-bs-toggle="pill" data-bs-target="#tab-employee" type="button" role="tab">
+                                <i class="bi bi-envelope-exclamation me-1"></i> Employee Alert (Email)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link btn-sm rounded-pill px-3 fw-semibold" id="tab-soc-btn" data-bs-toggle="pill" data-bs-target="#tab-soc" type="button" role="tab">
+                                <i class="bi bi-terminal me-1"></i> SOC Technical Report
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Contents -->
+                    <div class="tab-content" id="sgAdvisoryTabContent">
+                        <!-- Employee Alert Tab -->
+                        <div class="tab-pane fade show active" id="tab-employee" role="tabpanel">
+                            <div class="mb-2">
+                                <label class="form-label small text-muted text-uppercase fw-bold">Subject Line</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control font-monospace" id="sgAdvEmailSubject" readonly>
+                                    <button class="btn btn-outline-secondary" onclick="sgCopyInput('sgAdvEmailSubject', this)" title="Copy Subject">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label small text-muted text-uppercase fw-bold">Advisory Message Body</label>
+                                <textarea class="form-control font-monospace text-sm p-3" id="sgAdvEmailBody" rows="11" readonly style="background: var(--bg-surface, rgba(0,0,0,0.2)); font-size: 0.88rem; line-height: 1.5; resize: none;"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- SOC Report Tab -->
+                        <div class="tab-pane fade" id="tab-soc" role="tabpanel">
+                            <label class="form-label small text-muted text-uppercase fw-bold">Incident Ticket / Markdown Payload</label>
+                            <textarea class="form-control font-monospace text-sm p-3" id="sgAdvSocBody" rows="13" readonly style="background: var(--bg-surface, rgba(0,0,0,0.2)); font-size: 0.85rem; line-height: 1.5; resize: none;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Defanged Indicator Notice -->
+                    <div class="d-flex align-items-center gap-2 mt-3 p-2 rounded" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <i class="bi bi-shield-check text-success fs-5"></i>
+                        <span class="small text-muted" style="font-size: 0.82rem;">
+                            <strong>SecOps Safety Active:</strong> Indicators of Compromise (URLs) have been automatically <strong>defanged</strong> (e.g. <code>hxxps://...[.]com</code>) to prevent accidental clicks by recipients.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top border-secondary border-opacity-10 py-3 justify-content-between">
+                    <div class="small text-muted">Generated by ShieldGuard Incident Response Engine</div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="sgDownloadAdvisory()">
+                            <i class="bi bi-download me-1"></i> Download .txt
+                        </button>
+                        <button type="button" class="btn btn-danger btn-glow btn-sm px-4 fw-semibold" id="sgAdvCopyBtn" onclick="sgCopyActiveAdvisory()">
+                            <i class="bi bi-clipboard-check me-1"></i> Copy Advisory
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // URL Defanger utility for SecOps safety
+        function sgDefang(url) {
+            if (!url) return '';
+            return url
+                .replace(/^https:\/\//i, 'hxxps://')
+                .replace(/^http:\/\//i, 'hxxp://')
+                .replace(/\./g, '[.]');
+        }
+
+        // Global opener for Advisory Modal
+        function openAdvisoryModal(url, confidence, scanType, dateStr) {
+            const defanged = sgDefang(url);
+            const date = dateStr || new Date().toISOString().replace('T', ' ').substring(0, 19);
+            const conf = confidence ? `${confidence}%` : '95%+';
+            const type = scanType || 'Web / URL';
+            const randId = Math.floor(1000 + Math.random() * 9000);
+            const refId = `SEC-ADV-${new Date().getFullYear()}-${randId}`;
+
+            document.getElementById('sgAdvisoryRefId').innerText = `REF: ${refId}`;
+
+            // 1. Employee Email Template
+            const emailSubject = `[SECURITY ALERT] Phishing Warning: Suspected Link Impersonation (${refId})`;
+            const emailBody = 
+`TEAM SECURITY ADVISORY - IMMEDIATE ATTENTION REQUIRED
+Reference ID: ${refId}
+Date / Time: ${date}
+Severity: HIGH THREAT - PHISHING DETECTED
+
+SUMMARY:
+The ShieldGuard Security Operations Center has flagged a malicious URL actively targeting users. This link has been verified as fraudulent with a threat confidence score of ${conf}.
+
+DEFANGED INDICATOR OF COMPROMISE:
+• Malicious Link: ${defanged}
+• Detection Vector: ${type} Scan Engine
+• Risk Profile: Credential Harvesting & Brand Impersonation
+
+EMPLOYEE SAFETY PROTOCOLS:
+1. DO NOT visit the link or click any links matching this pattern.
+2. If you have already accessed this site or entered enterprise credentials, IMMEDIATELY notify IT Security and reset your passwords.
+3. Delete any emails, instant messages, or documents directing you to this domain.
+
+For questions or to report suspicious links, reach out to your IT Security Helpdesk.
+
+— ShieldGuard Security Operations`;
+
+            // 2. SOC Technical Markdown Report
+            let host = url;
+            try {
+                const match = url.match(/^https?:\/\/([^/?#]+)/i);
+                if (match && match[1]) host = match[1];
+            } catch(e) {}
+
+            const socReport = 
+`# Incident Advisory Report: ${refId}
+- **Timestamp:** ${date}
+- **Verdict:** MALICIOUS (Phishing)
+- **Confidence:** ${conf}
+- **Scan Source:** ${type}
+- **Classifier:** ShieldGuard Pro Ensemble ML & Threat Intel
+
+## Indicators of Compromise (IOCs)
+- **Defanged URL:** \`${defanged}\`
+- **Defanged Host:** \`${sgDefang(host)}\`
+- **Classification:** Phishing / Credential Harvesting
+
+## Recommended Remediation Steps
+1. [ ] **Firewall / Web Proxy:** Add \`${defanged}\` to egress drop / block rules.
+2. [ ] **DNS Sinkhole:** Route malicious domain DNS queries to local sinkhole IP.
+3. [ ] **Mail Gateway (SEG):** Search and purge inbound emails containing \`${defanged}\`.
+4. [ ] **Identity & Access Management:** Audit SSO/SAML access logs for outbound connections to target within the past 48 hours.
+5. [ ] **User Awareness:** Broadcast employee warning notice to affected departments.
+
+*Generated automatically by ShieldGuard Pro Incident Response Engine.*`;
+
+            document.getElementById('sgAdvEmailSubject').value = emailSubject;
+            document.getElementById('sgAdvEmailBody').value = emailBody;
+            document.getElementById('sgAdvSocBody').value = socReport;
+
+            // Show modal via Bootstrap 5
+            const modalEl = document.getElementById('sgAdvisoryModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
+        }
+
+        // Copy active tab content
+        function sgCopyActiveAdvisory() {
+            const isEmployee = document.getElementById('tab-employee').classList.contains('active');
+            const textToCopy = isEmployee 
+                ? `Subject: ${document.getElementById('sgAdvEmailSubject').value}\n\n${document.getElementById('sgAdvEmailBody').value}`
+                : document.getElementById('sgAdvSocBody').value;
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const btn = document.getElementById('sgAdvCopyBtn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = `<i class="bi bi-check-lg me-1"></i> Copied!`;
+                btn.classList.replace('btn-danger', 'btn-success');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.replace('btn-success', 'btn-danger');
+                }, 2000);
+            });
+        }
+
+        // Copy single input
+        function sgCopyInput(id, btn) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            navigator.clipboard.writeText(el.value).then(() => {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'bi bi-check-lg text-success';
+                    setTimeout(() => icon.className = 'bi bi-clipboard', 1800);
+                }
+            });
+        }
+
+        // Download advisory as text file
+        function sgDownloadAdvisory() {
+            const isEmployee = document.getElementById('tab-employee').classList.contains('active');
+            const refId = document.getElementById('sgAdvisoryRefId').innerText.replace(/[^a-zA-Z0-9_-]/g, '_');
+            const content = isEmployee 
+                ? `Subject: ${document.getElementById('sgAdvEmailSubject').value}\n\n${document.getElementById('sgAdvEmailBody').value}`
+                : document.getElementById('sgAdvSocBody').value;
+            const filename = `${refId}_${isEmployee ? 'employee_alert' : 'soc_report'}.txt`;
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         // Toggle chat window visibility
         function sgChatToggle() {
             {% if session.user_id %}
@@ -1129,6 +1349,13 @@
                         ${sr.whois_info && sr.whois_info.domain_age_days ? `<div class="scan-card-detail">📅 Domain Age: <strong>${sr.whois_info.domain_age_days} days</strong></div>` : ''}
                         ${sr.threat_intel && sr.threat_intel.flagged_by > 0 ? `<div class="scan-card-detail">⚠️ Threat Sources: <strong class="text-danger">${sr.threat_intel.flagged_by} flagged</strong> (${sourcesStr})</div>` : ''}
                     </div>
+                    ${isPhishing ? `
+                    <div class="mt-2 pt-2 border-top border-secondary border-opacity-10">
+                        <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 fw-semibold w-100" 
+                                onclick="openAdvisoryModal('${escapeHtml(sr.url || '')}', '${sr.confidence || 95}', 'AI Co-pilot Scan')">
+                            <i class="bi bi-shield-exclamation me-1"></i>Generate Incident Advisory
+                        </button>
+                    </div>` : ''}
                 </div>
             `;
         }

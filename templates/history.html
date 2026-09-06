@@ -116,7 +116,8 @@
                         <th>Assessment</th>
                         <th>Confidence</th>
                         <th>Type</th>
-                        <th class="pe-4">Processed Date</th>
+                        <th>Processed Date</th>
+                        <th class="pe-4 text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -124,7 +125,7 @@
                     <tr>
                         <td class="ps-4 url-cell">
                             <code class="text-accent small text-truncate d-block"
-                                title="{{ scan.url }}">{{ scan.url }}</code>
+                                 title="{{ scan.url }}">{{ scan.url }}</code>
                         </td>
                         <td>
                             {% if scan.result == 'phishing' %}
@@ -137,14 +138,25 @@
                             <div class="d-flex align-items-center gap-2">
                                 <div class="progress w-100" style="height: 6px;">
                                     <div class="progress-bar-glow {{ 'bg-danger' if scan.result == 'phishing' else 'bg-success' }}"
-                                        style="width: {{ scan.confidence }}%"></div>
+                                         style="width: {{ scan.confidence }}%"></div>
                                 </div>
                                 <span class="small">{{ "%.0f"|format(scan.confidence) }}%</span>
                             </div>
                         </td>
                         <td><span class="badge badge-scan-type">{{ scan.scan_type or 'Web' }}</span>
                         </td>
-                        <td class="pe-4 text-dim small">{{ scan.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="text-dim small">{{ scan.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="pe-4 text-end">
+                            {% if scan.result == 'phishing' %}
+                            <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 fw-semibold" 
+                                    onclick="openAdvisoryModal('{{ scan.url|replace('\\', '\\\\')|replace('\'', '\\\'') }}', '{{ '%.0f'|format(scan.confidence) }}', '{{ scan.scan_type or 'Web' }}', '{{ scan.created_at.strftime('%Y-%m-%d %H:%M') }}')"
+                                    title="Generate Incident Advisory & Report">
+                                <i class="bi bi-shield-exclamation me-1"></i>Advisory
+                            </button>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

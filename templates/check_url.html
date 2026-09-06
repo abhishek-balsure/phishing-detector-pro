@@ -235,6 +235,12 @@
                     <i class="bi bi-bug-fill"></i> DETECTED: PHISHING THREAT
                 </div>
                 <h2 class="fw-bold text-danger">Malicious Content Found</h2>
+                <div class="my-3">
+                    <button type="button" class="btn btn-danger btn-glow px-4 py-2 fw-semibold"
+                            onclick="openAdvisoryModal('{{ url|replace('\\', '\\\\')|replace('\'', '\\\'') }}', '{{ "%.0f"|format(result.confidence) }}', 'URL Scanner')">
+                        <i class="bi bi-shield-exclamation me-2"></i>Generate Security Advisory
+                    </button>
+                </div>
                 {% else %}
                 <div class="status-badge-large status-safe">
                     <i class="bi bi-patch-check-fill"></i> VERIFIED: LEGITIMATE
